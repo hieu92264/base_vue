@@ -1,3 +1,4 @@
+import { env } from "@/common/utils/env";
 import axios, { HttpStatusCode, type AxiosInstance } from "axios";
 
 type PromiseExecutor<T = unknown> = {
@@ -22,7 +23,7 @@ export class AxiosClient {
   constructor(baseUrl: string, version: string = '1.0') {
     this.instance = axios.create({
       baseURL: baseUrl,
-      timeout
+      timeout: env('VITE_API_TIMEOUT', 5000)
     })
   }
 }
