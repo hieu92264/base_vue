@@ -1,0 +1,3 @@
+export function isPrimitive(value: any) {
+  return (typeof value !== 'object' && typeof value !== 'function') || value === null
+}

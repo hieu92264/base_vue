@@ -20,6 +20,13 @@ export default defineConfigWithVueTs(
   ...pluginVue.configs['flat/essential'],
   vueTsConfigs.recommended,
 
+  {
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      'vue/multi-word-component-names': 'off',
+    },
+  },
+
   skipFormatting,
 
   ...pluginOxlint.configs['flat/recommended'],
