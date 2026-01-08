@@ -2,6 +2,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import authRoutes from '@/router/auth.routes'
 
+const layouts = {
+  blank: () => import('@/components/layouts/BlankLayout.vue'),
+}
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [

@@ -1,3 +1,4 @@
+import type { IUser } from '@/common/types/entities'
 import axiosInstance from '@/configs/axios.config'
 import type { LoginFormValue } from '@/modules/(auth)/login/-schemas/login.schema'
 import type { IAuthState } from '@/stores/auth.store'
@@ -13,7 +14,10 @@ export class AuthService {
     return 'test'
   }
 
-  static getCredentials() {}
+  static async getCredentials(): Promise<ResponseBody<IUser>> {
+    const response = await axiosInstance.get('/auth/me')
+    return response.data
+  }
 
   static logout() {}
 }

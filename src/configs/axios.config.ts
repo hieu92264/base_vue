@@ -1,4 +1,5 @@
 import { RequestHeader } from '@/common/constants/enums'
+import type { IUser } from '@/common/types/entities'
 import { env } from '@/common/utils/env'
 import { AppConfigs } from '@/configs/app.config'
 import { AuthService, StorageService } from '@/services'
@@ -14,7 +15,8 @@ type PromiseExecutor<T = unknown> = {
 export class AxiosClient {
   public instance: AxiosInstance
   private isRefreshToken = false
-  private unAuthorizedRequestHandlers: Array<PromiseExecutor<string | null>> = []
+  private unAuthorizedRequestHandlers: Array<PromiseExecutor<string | null>> =
+    []
 
   private readonly NOTIFIABLE_ERROR_CODES = [
     HttpStatusCode.BadRequest,
@@ -57,27 +59,45 @@ export class AxiosClient {
     )
 
     this.instance.interceptors.response.use(
-      (response) => response.data,
+      (response) => {
+        console.log('Response:', response)
+        return response.data
+      },
       async (error: AxiosError<ResponseBody<unknown>>) => {
-        if (error.code === AxiosError.ETIMEDOUT || error.code === AxiosError.ECONNABORTED) {
+        const { config, response } = error
+        const errorStatus = response?.status
+        const originalRequest = config as any
+
+        if (
+          error.code === AxiosError.ETIMEDOUT ||
+          error.code === AxiosError.ECONNABORTED
+        ) {
           toast.error('Request timeout')
+          return Promise.reject(error)
         }
 
-        if (error.response?.status && this.NOTIFIABLE_ERROR_CODES.includes(error.response.status)) {
-          toast.error(error.response?.data?.message, {
-            id: error.response?.data?.path,
+        const isLoginPath = config?.url?.includes('/login')
+
+        if (errorStatus && this.NOTIFIABLE_ERROR_CODES.includes(errorStatus)) {
+          let message = response?.data?.message
+
+          if (isLoginPath && errorStatus === HttpStatusCode.Unauthorized) {
+            message = 'Invalid username or password'
+          }
+
+          toast.error(message || 'Đã có lỗi xảy ra', {
+            id: response?.data?.path || 'global-error',
             duration: 5000,
           })
         }
 
-        const originalRequest = error.config
-        const errorStatus = error.response?.status
-
         if (
+          errorStatus === HttpStatusCode.Unauthorized &&
+          !isLoginPath &&
           originalRequest &&
-          !originalRequest.retry &&
-          error.status === HttpStatusCode.Unauthorized
+          !originalRequest._retry
         ) {
+          originalRequest._retry = true
           const abortController = new AbortController()
 
           if (this.isRefreshToken) {
@@ -88,17 +108,29 @@ export class AxiosClient {
                 originalRequest.headers['Authorization'] = `Bearer ${token}`
                 return this.instance(originalRequest)
               })
-              .catch((err) => {
-                return Promise.reject(err)
-              })
+              .catch((err) => Promise.reject(err))
           }
-
           this.isRefreshToken = true
 
-          const credentials = AuthService.getCredentials()
-          // if (!credentials?.id) {
-          // }
+          const credential = await AuthService.getCredentials()
+          if (!credential.data?.id) {
+            AuthService.logout()
+            abortController.abort()
+            toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', {
+              id: 'unauthorized-error',
+            })
+            return Promise.reject(error)
+          }
+
+          try {
+            if (!credential?.data.id) throw new Error('No credential id found')
+              const 
+          } catch (error) {}
         }
+
+        console.log('Axios Error:', error)
+
+        return Promise.reject(error)
       },
     )
   }
