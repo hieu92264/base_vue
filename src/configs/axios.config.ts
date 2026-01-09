@@ -2,10 +2,13 @@ import { RequestHeader } from '@/common/constants/enums'
 import type { IUser } from '@/common/types/entities'
 import { env } from '@/common/utils/env'
 import { AppConfigs } from '@/configs/app.config'
+import router from '@/router'
 import { AuthService, StorageService } from '@/services'
+import { useAuthStore } from '@/stores/auth.store'
 import axios, { AxiosError, HttpStatusCode, type AxiosInstance } from 'axios'
 import qs from 'qs'
 import { toast } from 'vue-sonner'
+import { promise } from 'zod'
 
 type PromiseExecutor<T = unknown> = {
   resolve: (value: T) => void
@@ -45,11 +48,12 @@ export class AxiosClient {
 
     this.instance.interceptors.request.use(
       (config) => {
-        const accessToken = AuthService.getAccessToken()
+        const authStore = useAuthStore()
+        const accessToken = authStore.access_token
         const locale = StorageService.getLocale()
-        const user = AuthService.getCredentials()
         config.headers[RequestHeader.AUTHORIZATION] =
-          config.headers[RequestHeader.AUTHORIZATION] ?? (accessToken as string)
+          config.headers[RequestHeader.AUTHORIZATION] ??
+          (accessToken ? `Bearer ${accessToken}` : '')
         // config.headers[RequestHeader.USER_COMPANY] = user?.company_code
         config.headers[RequestHeader.ACCEPT_LANGUAGE] = locale
 
@@ -99,36 +103,70 @@ export class AxiosClient {
         ) {
           originalRequest._retry = true
           const abortController = new AbortController()
+          originalRequest.signal = abortController.signal
 
           if (this.isRefreshToken) {
             return new Promise((resolve, reject) => {
               this.unAuthorizedRequestHandlers.push({ resolve, reject })
             })
               .then((token) => {
-                originalRequest.headers['Authorization'] = `Bearer ${token}`
+                originalRequest.headers[RequestHeader.AUTHORIZATION] =
+                  `Bearer ${token}`
                 return this.instance(originalRequest)
               })
-              .catch((err) => Promise.reject(err))
+              .catch((err) => {
+                abortController.abort()
+                Promise.reject(err)
+                return Promise.reject(err)
+              })
           }
           this.isRefreshToken = true
 
-          const credential = await AuthService.getCredentials()
-          if (!credential.data?.id) {
-            AuthService.logout()
-            abortController.abort()
-            toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', {
-              id: 'unauthorized-error',
-            })
-            return Promise.reject(error)
-          }
-
           try {
-            if (!credential?.data.id) throw new Error('No credential id found')
-              const 
-          } catch (error) {}
-        }
+            const authStore = useAuthStore()
+            const currentRefreshToken = authStore.refresh_token
 
-        console.log('Axios Error:', error)
+            if (!currentRefreshToken) {
+              throw new Error('No refresh token available')
+            }
+
+            const res = await AuthService.getToken(currentRefreshToken)
+            if (res && res.data) {
+              const { access_token, refresh_token } = res.data
+              authStore.setTokens(access_token ?? '', refresh_token ?? '')
+
+              const newToken = authStore.access_token
+
+              this.unAuthorizedRequestHandlers.forEach((promise) =>
+                promise.resolve(newToken),
+              )
+              this.unAuthorizedRequestHandlers = []
+
+              originalRequest.headers[RequestHeader.AUTHORIZATION] =
+                `Bearer ${newToken}`
+              return this.instance(originalRequest)
+            } else {
+              throw new Error('Refresh failed')
+            }
+          } catch (error) {
+            this.unAuthorizedRequestHandlers.forEach((promise) =>
+              promise.reject(error),
+            )
+            this.unAuthorizedRequestHandlers = []
+            abortController.abort()
+
+            const authStore = useAuthStore()
+            authStore.resetCredentials()
+
+            toast.error('Session expired. Please log in again.')
+
+            router.push({ name: 'auth.login' })
+
+            return Promise.reject(error)
+          } finally {
+            this.isRefreshToken = false
+          }
+        }
 
         return Promise.reject(error)
       },

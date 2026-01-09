@@ -23,12 +23,15 @@ export const useDoLoginMutation = () => {
     },
 
     onSuccess: (response) => {
+      // const { access_token, refresh_token } = response
       console.log('Login response:', response)
+      // authStore.setTokens(access_token ?? '', refresh_token ?? '')
       toast.success('Login successfully!')
-      router.push('/')
+      // router.push('/')
     },
 
     onError: (error: any) => {
+      console.error('Login error:', error)
       toast.error(error?.response?.data?.message || 'Login failed')
     },
   })

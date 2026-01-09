@@ -3,13 +3,15 @@ import { defineStore } from 'pinia'
 
 export interface IAuthState {
   user: IUser | null
-  token: string | null
+  access_token: string | null
+  refresh_token: string | null
 }
 
 export const useAuthStore = defineStore('auth', {
   state: (): IAuthState => ({
     user: null,
-    token: null,
+    access_token: null,
+    refresh_token: null,
   }),
 
   actions: {
@@ -21,15 +23,17 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    setAccessToken(token: string) {
-      this.token = token
+    setTokens(access: string, refresh: string) {
+      this.access_token = access
+      this.refresh_token = refresh
     },
 
     // setUserCompanyCode(company_code: string) {}
 
     resetCredentials() {
       this.user = null
-      this.token = null
+      this.access_token = null
+      this.refresh_token = null
     },
   },
 
