@@ -1,6 +1,12 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {
+  createRouter,
+  createWebHistory,
+  type NavigationGuardWithThis,
+} from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import authRoutes from '@/router/auth.routes'
+import { useAuthStore } from '@/stores/auth.store'
+import { record } from 'zod'
 
 const layouts = {
   blank: () => import('@/components/layouts/BlankLayout.vue'),
@@ -24,6 +30,25 @@ const router = createRouter({
     },
     ...authRoutes,
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+
+  if (to.meta.guestOnly && authStore.isAuthenticated()) {
+    return next({ name: 'home' })
+  }
+
+  const accessDenied = to.matched.some((record) => {
+    const code = record.meta.permissionCodes as string
+    return code && !authStore.hasPermission(code)
+  })
+
+  if (accessDenied) {
+    return next({ name: '403' })
+  }
+
+  return next()
 })
 
 export default router

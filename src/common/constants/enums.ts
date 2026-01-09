@@ -1,7 +1,7 @@
 export enum Theme {
   LIGHT = 'light',
   DARK = 'dark',
-  SYSTEM = 'system'
+  SYSTEM = 'system',
 }
 
 export enum RequestMethod {
@@ -12,7 +12,7 @@ export enum RequestMethod {
   DELETE = 'DELETE',
   OPTIONS = 'OPTIONS',
   HEAD = 'HEAD',
-  CONNECT = 'CONNECT'
+  CONNECT = 'CONNECT',
 }
 
 export enum RequestHeader {
@@ -22,13 +22,13 @@ export enum RequestHeader {
   CONTENT_TYPE = 'Content-Type',
   TENANT_ID = 'X-Tenant-Id',
   USER_COMPANY = 'X-User-Company',
-  OTP = 'X-Otp'
+  OTP = 'X-Otp',
 }
 
 export enum Language {
   VIETNAMESE = 'vi',
   ENGLISH = 'en',
-  CHINESE = 'cn'
+  CHINESE = 'cn',
 }
 
 export enum CommonActions {
@@ -43,10 +43,18 @@ export enum CommonActions {
   SAVE = 'SAVE',
   SET_STATUS = 'SET_STATUS',
   IMPORT = 'IMPORT',
-  EXPORT = 'EXPORT'
+  EXPORT = 'EXPORT',
 }
 
 export enum RecordStatus {
   ACTIVE = 'Y',
-  INACTIVE = 'N'
+  INACTIVE = 'N',
+}
+
+export enum WorkStatus {
+  INTERN = 'INTERN',
+  PROBATION = 'PROBATION',
+  OFFICIAL = 'OFFICIAL',
+  PART_TIME = 'PART_TIME',
+  CONTRACT = 'CONTRACT',
 }
