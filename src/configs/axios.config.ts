@@ -1,14 +1,13 @@
 import { RequestHeader } from '@/common/constants/enums'
-import type { IUser } from '@/common/types/entities'
 import { env } from '@/common/utils/env'
 import { AppConfigs } from '@/configs/app.config'
 import router from '@/router'
 import { AuthService, StorageService } from '@/services'
 import { useAuthStore } from '@/stores/auth.store'
+import { useUserStore } from '@/stores/user.store'
 import axios, { AxiosError, HttpStatusCode, type AxiosInstance } from 'axios'
 import qs from 'qs'
 import { toast } from 'vue-sonner'
-import { promise } from 'zod'
 
 type PromiseExecutor<T = unknown> = {
   resolve: (value: T) => void
@@ -133,7 +132,7 @@ export class AxiosClient {
             const res = await AuthService.getToken(currentRefreshToken)
             if (res && res.data) {
               const { access_token, refresh_token } = res.data
-              authStore.setTokens(access_token ?? '', refresh_token ?? '')
+              authStore.saveSession(access_token ?? '', refresh_token ?? '')
 
               const newToken = authStore.access_token
 
@@ -156,7 +155,10 @@ export class AxiosClient {
             abortController.abort()
 
             const authStore = useAuthStore()
-            authStore.resetCredentials()
+            const userStore = useUserStore()
+
+            authStore.clearSession()
+            userStore.clearProfile()
 
             toast.error('Session expired. Please log in again.')
 

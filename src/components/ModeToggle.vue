@@ -9,7 +9,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useColorMode } from '@vueuse/core'
 
-const mode = useColorMode()
+const mode = useColorMode({
+  storageKey: 'theme',
+})
 </script>
 
 <template>

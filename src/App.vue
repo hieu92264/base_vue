@@ -1,22 +1,21 @@
 <script setup lang="ts">
 import { Toaster } from '@/components/ui/sonner'
 import { AppConfigs } from '@/configs/app.config'
-import { AuthService } from '@/services'
-import { useAuthStore } from '@/stores/auth.store'
-import { onMounted } from 'vue'
+import { useColorMode } from '@vueuse/core'
+import { watch } from 'vue'
 import { RouterView } from 'vue-router'
 
-const authStore = useAuthStore()
+const mode = useColorMode({
+  storageKey: 'theme',
+})
 
-onMounted(async () => {
-  if (authStore.access_token && !authStore.user) {
-    try {
-      const res = await AuthService.getCredentials()
-      authStore.setAuthData(res)
-    } catch (e) {
-      authStore.resetCredentials()
-    }
-  }
+watch(mode, () => {
+  const root = window.document.documentElement
+  root.classList.add('no-transition')
+
+  requestAnimationFrame(() => {
+    root.classList.remove('no-transition')
+  })
 })
 </script>
 

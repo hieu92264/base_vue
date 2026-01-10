@@ -11,6 +11,20 @@
       content="width=device-width, initial-scale=1.0"
     />
     <title>GreenLand-HRM</title>
+    <script>
+      ;(function () {
+        const theme = localStorage.getItem('theme') || 'auto'
+        const root = document.documentElement
+        let target = theme
+        if (theme === 'auto') {
+          target = window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark'
+            : 'light'
+        }
+        root.classList.add(target)
+        root.style.backgroundColor = target === 'dark' ? '#020817' : '#ffffff'
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>
