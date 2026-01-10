@@ -3,24 +3,16 @@ import { Toaster } from '@/components/ui/sonner'
 import { AppConfigs } from '@/configs/app.config'
 import { AuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth.store'
-import { onMounted, watch } from 'vue'
+import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 
 const authStore = useAuthStore()
-
-watch(
-  () => authStore.access_token,
-  (newVal) => {
-    console.log('Access Token changed:', newVal)
-    console.log('LocalStorage hiện tại:', localStorage.getItem('credentials'))
-  },
-)
 
 onMounted(async () => {
   if (authStore.access_token && !authStore.user) {
     try {
       const res = await AuthService.getCredentials()
-      authStore.setAuthData(res.data)
+      authStore.setAuthData(res)
     } catch (e) {
       authStore.resetCredentials()
     }

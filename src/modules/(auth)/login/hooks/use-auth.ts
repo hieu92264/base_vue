@@ -24,19 +24,26 @@ export const useDoLoginMutation = () => {
     },
 
     onSuccess: async (response) => {
-      const access_token = response.data?.access_token
-      const refresh_token = response.data?.refresh_token
-
-      authStore.setTokens(access_token ?? '', refresh_token ?? '')
+      const authData = response.data
+      if (authData) {
+        authStore.setTokens(
+          authData.access_token ?? '',
+          authData.refresh_token ?? '',
+        )
+      }
 
       const profileRes = await AuthService.getCredentials()
-      console.log('Profile response:', profileRes)
-      authStore.setAuthData(profileRes.data)
 
-      toast.success('Login successfully!')
+      if (profileRes && profileRes.data) {
+        authStore.setAuthData(profileRes.data)
+        toast.success('Login successfully!')
 
-      const redirectPath = route.query.redirect as string
-      router.replace(redirectPath || { name: 'home' })
+        const redirectPath = route.query.redirect as string
+        router.replace(redirectPath || { name: 'home' })
+      } else {
+        authStore.resetCredentials()
+        toast.error('Cannot get user profile')
+      }
     },
 
     onError: (error: any) => {

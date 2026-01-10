@@ -7,6 +7,7 @@ import HomeView from '../views/HomeView.vue'
 import authRoutes from '@/router/auth.routes'
 import { useAuthStore } from '@/stores/auth.store'
 import { record } from 'zod'
+import errorRoutes from '@/router/error.routes'
 
 const layouts = {
   blank: () => import('@/components/layouts/BlankLayout.vue'),
@@ -29,6 +30,7 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
     },
     ...authRoutes,
+    ...errorRoutes,
   ],
 })
 

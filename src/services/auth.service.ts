@@ -25,8 +25,7 @@ export class AuthService {
   }
 
   static async getCredentials(): Promise<ResponseBody<IAuthData>> {
-    const response = await axiosInstance.get('/auth/me')
-    return response.data
+    return await axiosInstance.get('/auth/me')
   }
 
   static logout() {}
