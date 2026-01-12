@@ -10,7 +10,7 @@ import { GalleryVerticalEnd } from 'lucide-vue-next'
 
 <template>
   <div class="grid min-h-svh lg:grid-cols-2">
-    <div class="flex flex-col gap-4 p-6 md:p-10">
+    <div class="dark:bg-black bg-white flex flex-col gap-4 p-6 md:p-10">
       <div class="flex justify-center gap-2 md:justify-start">
         <a
           href="#"
@@ -31,7 +31,7 @@ import { GalleryVerticalEnd } from 'lucide-vue-next'
       </div>
     </div>
     <div
-      class="bg-white relative hidden lg:flex items-center justify-center overflow-hidden"
+      class="dark:bg-white bg-black relative hidden lg:flex items-center justify-center overflow-hidden"
     >
       <div
         class="absolute h-80 w-80 rounded-full bg-emerald-500/10 blur-[120px]"

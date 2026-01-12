@@ -2,11 +2,16 @@
 import { Toaster } from '@/components/ui/sonner'
 import { AppConfigs } from '@/configs/app.config'
 import { useColorMode } from '@vueuse/core'
-import { watch } from 'vue'
-import { RouterView } from 'vue-router'
+import { computed, watch } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
 
+const route = useRoute()
 const mode = useColorMode({
   storageKey: 'theme',
+})
+
+const layout = computed(() => {
+  return route.meta.layouts || 'div'
 })
 
 watch(mode, () => {
@@ -25,5 +30,7 @@ watch(mode, () => {
     position="bottom-right"
     :duration="AppConfigs.TOAST_DURATION"
   />
-  <RouterView />
+  <component :is="layout">
+    <RouterView />
+  </component>
 </template>

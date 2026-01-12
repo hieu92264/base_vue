@@ -1,5 +1,9 @@
 <template>
-  <div :class="cn('flex items-center gap-3', props.class)">
+  <div
+    :class="
+      cn('flex items-center gap-3 transition-colors duration-300', props.class)
+    "
+  >
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="40"
@@ -10,7 +14,7 @@
       stroke-width="2"
       stroke-linecap="round"
       stroke-linejoin="round"
-      class="text-emerald-600 dark:text-emerald-400"
+      class="text-emerald-600 dark:text-emerald-400 shrink-0"
     >
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
       <circle
@@ -23,14 +27,15 @@
     </svg>
 
     <div class="flex flex-col font-bold leading-tight">
-      <span class="text-xl tracking-tighter text-foreground">
+      <span class="text-xl tracking-tighter dark:text-slate-900 text-slate-50">
         GreenLand<span
-          class="text-emerald-500 underline decoration-2 underline-offset-4"
+          class="text-emerald-600 dark:text-emerald-400 underline decoration-emerald-500/30 dark:decoration-emerald-400/50 decoration-2 underline-offset-4"
           >HRM</span
         >
       </span>
+
       <span
-        class="text-[9px] font-semibold uppercase tracking-[0.3em] text-muted-foreground/80"
+        class="text-[9px] font-semibold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400/80"
       >
         Professional People Management
       </span>

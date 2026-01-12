@@ -58,3 +58,27 @@ export const useDoLoginMutation = () => {
     },
   })
 }
+
+export const useDoLogoutMutation = () => {
+  const router = useRouter()
+  const authStore = useAuthStore()
+  const userStore = useUserStore()
+
+  return useMutation({
+    mutationFn: async () => {
+      return AuthService.logout()
+    },
+
+    onSuccess: async (response) => {
+      authStore.clearSession()
+      userStore.clearProfile()
+      toast.success('Logout successfully!')
+      router.replace({ name: 'auth.login' })
+    },
+
+    onError: (error: any) => {
+      console.error('Logout error:', error)
+      toast.error(error?.response?.data?.message || 'Logout failed')
+    },
+  })
+}

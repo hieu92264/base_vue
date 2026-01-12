@@ -1,19 +1,17 @@
-import {
-  createRouter,
-  createWebHistory,
-  type NavigationGuardWithThis,
-} from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import authRoutes from '@/router/auth.routes'
 import { useAuthStore } from '@/stores/auth.store'
-import { record } from 'zod'
 import errorRoutes from '@/router/error.routes'
 import { useUserStore } from '@/stores/user.store'
 import { AuthService } from '@/services'
+import BaseLayout from '@/components/layouts/BaseLayout.vue'
+import organizationRoutes from '@/router/organization.routes'
 
-const layouts = {
-  blank: () => import('@/components/layouts/BlankLayout.vue'),
-}
+// export const layouts = {
+//   blank: () => import('@/components/layouts/BlankLayout.vue'),
+//   base: () => import('@/components/layouts/BaseLayout.vue'),
+// }
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,6 +20,7 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: { layouts: BaseLayout },
     },
     {
       path: '/about',
@@ -32,6 +31,7 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
     },
     ...authRoutes,
+    ...organizationRoutes,
     ...errorRoutes,
   ],
 })
@@ -43,7 +43,8 @@ router.beforeEach(async (to, from, next) => {
   if (authStore.access_token && !userStore.user) {
     try {
       const res = await AuthService.getCredentials()
-      userStore.setProfile(res.data)
+      userStore.setProfile(res.data as any)
+      return next()
     } catch (e) {
       authStore.clearSession()
       userStore.clearProfile()
