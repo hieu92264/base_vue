@@ -42,7 +42,7 @@ export const useDoLoginMutation = () => {
         toast.success('Login successfully!')
 
         const redirectPath = route.query.redirect as string
-        router.replace(redirectPath || { name: 'home' })
+        router.replace(redirectPath || { name: 'dashboard' })
       } else {
         authStore.clearSession()
         userStore.clearProfile()

@@ -14,9 +14,14 @@ import {
 import { useDoLogoutMutation } from '@/modules/(auth)/hooks/use-auth'
 import { useUserStore } from '@/stores/user.store'
 import { LogOut, Settings, User } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const userStore = useUserStore()
 const { mutate, isPending } = useDoLogoutMutation()
+const labels = {
+  logout: t('common.logout'),
+}
 </script>
 
 <template>
@@ -73,7 +78,7 @@ const { mutate, isPending } = useDoLogoutMutation()
         class="flex cursor-pointer items-center transition-colors text-red-600 focus:bg-red-500 focus:text-white dark:text-red-400 dark:focus:bg-red-600 dark:focus:text-white"
       >
         <LogOut class="mr-2 h-4 w-4" />
-        <span>Đăng xuất</span>
+        <span>{{ labels.logout }}</span>
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>

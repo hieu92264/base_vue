@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import authRoutes from '@/router/auth.routes'
 import { useAuthStore } from '@/stores/auth.store'
 import errorRoutes from '@/router/error.routes'
@@ -7,6 +6,7 @@ import { useUserStore } from '@/stores/user.store'
 import { AuthService } from '@/services'
 import BaseLayout from '@/components/layouts/BaseLayout.vue'
 import organizationRoutes from '@/router/organization.routes'
+import Dashboard from '@/views/Dashboard.vue'
 
 // export const layouts = {
 //   blank: () => import('@/components/layouts/BlankLayout.vue'),
@@ -18,17 +18,9 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView,
+      name: 'dashboard',
+      component: Dashboard,
       meta: { layouts: BaseLayout },
-    },
-    {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
     },
     ...authRoutes,
     ...organizationRoutes,
@@ -52,7 +44,13 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  if (to.meta.guestOnly && authStore.access_token) {
+  const isGuestPage = to.meta.guestOnly
+
+  if (!authStore.access_token && !isGuestPage) {
+    return next({ name: 'auth.login' })
+  }
+
+  if (authStore.access_token && isGuestPage) {
     return next({ name: 'home' })
   }
 

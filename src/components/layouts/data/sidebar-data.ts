@@ -31,37 +31,20 @@ const ClerkLogoMock = () =>
   h('div', { class: 'size-4 rounded-full bg-blue-500' })
 
 export const sidebarData = {
-  user: {
-    name: 'Admin User',
-    email: 'admin@greenland.com',
-    avatar: 'https://github.com/shadcn.png',
-  },
-  teams: [
-    {
-      name: 'Greenland Corp',
-      logo: Command,
-      plan: 'Enterprise',
-    },
-    {
-      name: 'Development Team',
-      logo: AudioWaveform,
-      plan: 'Startup',
-    },
-    {
-      name: 'Design Studio',
-      logo: GalleryVerticalEnd,
-      plan: 'Free',
-    },
-  ],
   navGroups: [
     {
-      title: 'Tổng quan',
+      title: '',
       items: [
         {
           title: 'Bảng điều khiển',
-          url: '/dashboard',
+          url: '/',
           icon: LayoutDashboard,
         },
+      ],
+    },
+    {
+      title: 'Organization',
+      items: [
         {
           title: 'Lịch làm việc',
           url: '/calendar',
