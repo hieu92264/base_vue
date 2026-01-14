@@ -1,5 +1,7 @@
+import { Language } from '@/common/constants/enums'
 import { AuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth.store'
+import { useI18nStore } from '@/stores/i18n.store'
 import { useUserStore } from '@/stores/user.store'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { useRoute, useRouter } from 'vue-router'
@@ -19,6 +21,7 @@ export const useDoLoginMutation = () => {
   const route = useRoute()
   const authStore = useAuthStore()
   const userStore = useUserStore()
+  const i18nStore = useI18nStore()
 
   return useMutation({
     mutationFn: async (data: TLoginData) => {
@@ -38,6 +41,12 @@ export const useDoLoginMutation = () => {
 
       if (profileRes && profileRes.data) {
         userStore.setProfile(profileRes.data)
+
+        i18nStore.setLocale(
+          (profileRes.data.user?.locale || Language.ENGLISH) as Language,
+        )
+
+        console.log('locale: ', i18nStore.locale)
 
         toast.success('Login successfully!')
 

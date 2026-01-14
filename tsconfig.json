@@ -14,14 +14,6 @@
       "@/*": [
         "./src/*"
       ]
-    },
-    "types": [
-      "@intlify/unplugin-vue-i18n/messages"
-    ]
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.vue"
-  ]
+    }
+  }
 }

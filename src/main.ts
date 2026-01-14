@@ -9,6 +9,7 @@ import App from './App.vue'
 import router from './router'
 import { QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 import i18n from '@/configs/i18n.config'
+import { useI18nStore } from '@/stores/i18n.store'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -20,6 +21,9 @@ app.use(pinia)
 app.use(router)
 app.use(VueQueryPlugin, { queryClient })
 app.use(i18n)
+
+const i18nStore = useI18nStore()
+i18n.global.locale = i18nStore.locale
 
 router.getRoutes().forEach((route) => {
   console.log('Registered Path:', route.path)

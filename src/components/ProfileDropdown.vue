@@ -14,14 +14,15 @@ import {
 import { useDoLogoutMutation } from '@/modules/(auth)/hooks/use-auth'
 import { useUserStore } from '@/stores/user.store'
 import { LogOut, Settings, User } from 'lucide-vue-next'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 const userStore = useUserStore()
 const { mutate, isPending } = useDoLogoutMutation()
-const labels = {
+const labels = computed(() => ({
   logout: t('common.logout'),
-}
+}))
 </script>
 
 <template>

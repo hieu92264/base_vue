@@ -7,16 +7,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useI18nStore } from '@/stores/i18n.store'
 import { Globe } from 'lucide-vue-next'
 import { ref } from 'vue'
 
 export interface LanguageProps {
   className?: string
 }
-const currentLocale = ref<Language>(Language.ENGLISH)
+
+const i18nStore = useI18nStore()
 
 const handleLanguageChange = (locale: Language) => {
-  currentLocale.value = locale
+  i18nStore.setLocale(locale)
+  console.log('Language changed to: ', locale)
 }
 </script>
 
@@ -29,7 +32,7 @@ const handleLanguageChange = (locale: Language) => {
       >
         <div class="flex items-center gap-2">
           <Globe />
-          {{ currentLocale.toUpperCase() }}
+          {{ i18nStore.locale.toUpperCase() }}
         </div>
       </Button>
     </DropdownMenuTrigger>
