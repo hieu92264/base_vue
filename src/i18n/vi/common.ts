@@ -12,4 +12,10 @@ export default {
   search: 'tìm kiếm',
   reset: 'đặt lại',
   actions: 'hành động',
+
+  theme: {
+    light: 'Sáng',
+    dark: 'Tối',
+    system: 'Hệ thống',
+  },
 } as const

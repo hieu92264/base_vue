@@ -8,12 +8,17 @@ export const useI18nStore = defineStore('i18n', {
   }),
 
   actions: {
-    setLocale(locale: Language) {
-      this.locale = locale
-      i18n.global.locale = locale
-      console.log('i18n locale set to: ', i18n.global.locale)
+    setLocale(newLocale: Language) {
+      this.locale = newLocale
+
+      if (i18n.mode === 'legacy') {
+        ;(i18n.global.locale as any) = newLocale
+      } else {
+        ;(i18n.global.locale as any).value = newLocale
+      }
+
+      document.documentElement.lang = newLocale
     },
   },
-
   persist: true,
 })

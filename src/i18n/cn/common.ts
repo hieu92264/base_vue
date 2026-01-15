@@ -12,4 +12,10 @@ export default {
   search: '搜索',
   reset: '重置',
   actions: '操作',
+
+  theme: {
+    light: '浅色',
+    dark: '深色',
+    system: '跟随系统',
+  },
 } as const

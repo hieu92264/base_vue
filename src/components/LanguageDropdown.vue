@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useI18nStore } from '@/stores/i18n.store'
 import { Globe } from 'lucide-vue-next'
-import { ref } from 'vue'
 
 export interface LanguageProps {
   className?: string

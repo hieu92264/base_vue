@@ -12,4 +12,10 @@ export default {
   search: 'search',
   reset: 'reset',
   actions: 'actions',
+
+  theme: {
+    light: 'light',
+    dark: 'dark',
+    system: 'system',
+  },
 } as const

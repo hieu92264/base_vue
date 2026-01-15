@@ -23,7 +23,7 @@ app.use(VueQueryPlugin, { queryClient })
 app.use(i18n)
 
 const i18nStore = useI18nStore()
-i18n.global.locale = i18nStore.locale
+i18nStore.setLocale(i18nStore.locale)
 
 router.getRoutes().forEach((route) => {
   console.log('Registered Path:', route.path)

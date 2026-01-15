@@ -8,10 +8,20 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { useColorMode } from '@vueuse/core'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const mode = useColorMode({
   storageKey: 'theme',
 })
+
+const { t } = useI18n()
+
+const labels = computed(() => ({
+  light: t('common.theme.light'),
+  dark: t('common.theme.dark'),
+  system: t('common.theme.system'),
+}))
 </script>
 
 <template>
@@ -31,9 +41,15 @@ const mode = useColorMode({
     </DropdownMenuTrigger>
 
     <DropdownMenuContent>
-      <DropdownMenuItem @click="mode = 'light'"> Light </DropdownMenuItem>
-      <DropdownMenuItem @click="mode = 'dark'"> Dark </DropdownMenuItem>
-      <DropdownMenuItem @click="mode = 'auto'"> System </DropdownMenuItem>
+      <DropdownMenuItem @click="mode = 'light'">
+        {{ labels.light }}
+      </DropdownMenuItem>
+      <DropdownMenuItem @click="mode = 'dark'">
+        {{ labels.dark }}
+      </DropdownMenuItem>
+      <DropdownMenuItem @click="mode = 'auto'">
+        {{ labels.system }}
+      </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
 </template>
