@@ -1,42 +1,45 @@
+import { useUserStore } from '@/stores/user.store'
 import {
-  LayoutDashboard,
+  Calendar,
   CheckSquare,
-  Package,
-  MessageSquare,
-  Users,
-  ShieldCheck,
+  HelpCircle,
+  LayoutDashboard,
   Lock,
-  UserX,
-  FileX,
-  ServerOff,
-  Construction,
+  Package,
+  Palette,
+  PieChart,
   Settings,
   UserCog,
-  Wrench,
-  Palette,
-  Bell,
-  Monitor,
-  HelpCircle,
-  Command,
-  GalleryVerticalEnd,
-  AudioWaveform,
-  Calendar,
-  FileText,
-  PieChart,
 } from 'lucide-vue-next'
 
-// Mock dữ liệu Logo cho phần Secured by Clerk (nếu bạn chưa có component)
-import { h } from 'vue'
-const ClerkLogoMock = () =>
-  h('div', { class: 'size-4 rounded-full bg-blue-500' })
+export interface NavItem {
+  title: string
+  url?: string
+  icon: any
+  code?: string
+  badge?: string
+  children?: NavItem[]
+}
 
-export const sidebarData = {
-  navGroups: [
+interface NavGroup {
+  title: string
+  items: NavItem[]
+}
+
+export const getSidebarData = () => {
+  const userStore = useUserStore()
+
+  const check = (item: NavItem) => {
+    if (item.url === '/') return true
+    return userStore.can(item.code || '')
+  }
+
+  const masterNavGroup: NavGroup[] = [
     {
       title: '',
       items: [
         {
-          title: 'Bảng điều khiển',
+          title: 'Dashboard',
           url: '/',
           icon: LayoutDashboard,
         },
@@ -46,16 +49,18 @@ export const sidebarData = {
       title: 'Organization',
       items: [
         {
+          title: 'Permission',
+          url: '/organizations/permissions',
+          icon: Lock,
+          code: '/organizations/permissions',
+        },
+        {
           title: 'Lịch làm việc',
           url: '/calendar',
           icon: Calendar,
           badge: 'New',
         },
-        {
-          title: 'Phân tích dữ liệu',
-          url: '/analytics',
-          icon: PieChart,
-        },
+        { title: 'Phân tích dữ liệu', url: '/analytics', icon: PieChart },
       ],
     },
     {
@@ -65,55 +70,40 @@ export const sidebarData = {
           title: 'Danh sách Task',
           url: '/tasks',
           icon: CheckSquare,
+          code: 'tasks',
         },
-        {
-          title: 'Dự án',
-          url: '/projects',
-          icon: Package,
-        },
-        {
-          title: 'Tin nhắn',
-          url: '/chats',
-          badge: '5',
-          icon: MessageSquare,
-        },
-        {
-          title: 'Nhân sự',
-          url: '/users',
-          icon: Users,
-        },
+        { title: 'Dự án', url: '/projects', icon: Package, code: 'projects' },
       ],
     },
     {
       title: 'Hệ thống',
       items: [
         {
-          title: 'Bảo mật',
-          icon: ShieldCheck,
-          items: [
-            { title: 'Phân quyền', url: '/security/roles', icon: Lock },
-            {
-              title: 'Nhật ký hệ thống',
-              url: '/security/logs',
-              icon: FileText,
-            },
-          ],
-        },
-        {
           title: 'Cài đặt',
           icon: Settings,
-          items: [
+          children: [
             { title: 'Hồ sơ', url: '/settings/profile', icon: UserCog },
             { title: 'Giao diện', url: '/settings/appearance', icon: Palette },
-            { title: 'Thông báo', url: '/settings/notifications', icon: Bell },
           ],
         },
-        {
-          title: 'Trung tâm hỗ trợ',
-          url: '/help',
-          icon: HelpCircle,
-        },
+        { title: 'Trung tâm hỗ trợ', url: '/help', icon: HelpCircle },
       ],
     },
-  ],
+  ]
+
+  const filteredNavGroups: NavGroup[] = masterNavGroup
+    .map((group) => {
+      const filteredItems = group.items
+        .filter((item) => check(item))
+        .map((item) => ({
+          ...item,
+          children: item.children?.filter((child) => check(child)),
+        }))
+        .filter((item) => !item.children || item.children.length > 0)
+
+      return { ...group, items: filteredItems }
+    })
+    .filter((group) => group.items.length > 0)
+
+  return { navGroups: filteredNavGroups }
 }

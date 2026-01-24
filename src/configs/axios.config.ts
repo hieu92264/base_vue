@@ -1,5 +1,5 @@
 import { RequestHeader } from '@/common/constants/enums'
-import { env } from '@/common/utils/env'
+import { env } from '@/common/utils/env.util'
 import { AppConfigs } from '@/configs/app.config'
 import router from '@/router'
 import { AuthService, StorageService } from '@/services'

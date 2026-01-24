@@ -7,6 +7,7 @@ import { AuthService } from '@/services'
 import BaseLayout from '@/components/layouts/BaseLayout.vue'
 import organizationRoutes from '@/router/organization.routes'
 import Dashboard from '@/views/Dashboard.vue'
+import NProgress from '@/configs/nprogress.config'
 
 // export const layouts = {
 //   blank: () => import('@/components/layouts/BlankLayout.vue'),
@@ -29,6 +30,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  NProgress.start()
   const authStore = useAuthStore()
   const userStore = useUserStore()
 
@@ -64,6 +66,10 @@ router.beforeEach(async (to, from, next) => {
   }
 
   return next()
+})
+
+router.afterEach(() => {
+  NProgress.done()
 })
 
 export default router

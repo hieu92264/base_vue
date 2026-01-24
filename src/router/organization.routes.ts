@@ -3,7 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 
 const organizationRoutes: RouteRecordRaw[] = [
   {
-    path: '/organizations/permission',
+    path: '/organizations/permissions',
     name: 'organizations.permission',
     component: () => import('@/modules/(organization)/permission/index.vue'),
     meta: { layouts: BaseLayout },

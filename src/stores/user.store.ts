@@ -15,8 +15,13 @@ export const useUserStore = defineStore('user', {
   }),
 
   getters: {
-    permissionCodes: (state): Set<string> =>
-      new Set((state.permissions ?? []).map((p) => p.code)),
+    permissionCodes: (state): Set<string> => {
+      console.log(
+        'Calculating permission codes from permissions:',
+        state.permissions,
+      )
+      return new Set((state.permissions ?? []).map((p) => p.code))
+    },
   },
 
   actions: {
@@ -39,6 +44,7 @@ export const useUserStore = defineStore('user', {
 
     can(code: string): boolean {
       if (this.user?.username === 'admin') return true
+      if (!code) return false
       return this.permissionCodes.has(code)
     },
   },

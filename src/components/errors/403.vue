@@ -10,11 +10,11 @@ const router = useRouter()
     <div
       class="m-auto flex h-full w-full flex-col items-center justify-center gap-2"
     >
-      <h1 class="text-[7rem] leading-tight font-bold">404</h1>
-      <span class="font-medium">Oops! Page Not Found!</span>
+      <h1 class="text-[7rem] leading-tight font-bold">403</h1>
+      <span class="font-medium">Access Forbidden</span>
       <p class="text-center text-muted-foreground">
-        It seems like the page you're looking for <br />
-        does not exist or might have been removed.
+        You don't have necessary permission <br />
+        to view this resource.
       </p>
       <div class="mt-6 flex gap-4">
         <Button
@@ -23,9 +23,9 @@ const router = useRouter()
         >
           Go Back
         </Button>
-        <Button @click="router.push({ name: 'dashboard' })"
-          >Back to Home</Button
-        >
+        <Button @click="router.push({ name: 'dashboard' })">
+          Back to Home
+        </Button>
       </div>
     </div>
   </div>

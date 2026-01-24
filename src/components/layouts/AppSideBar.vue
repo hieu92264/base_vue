@@ -14,9 +14,15 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import GreenlandLogo from '@/components/GreenlandLogo.vue'
-import { sidebarData } from '@/components/layouts/data/sidebar-data'
+import { getSidebarData } from '@/components/layouts/data/sidebar-data'
+import { computed, ref } from 'vue'
+import { ChevronDown } from 'lucide-vue-next'
 
 const { state } = useSidebar()
+
+const sidebarData = computed(() => getSidebarData())
+
+const openMenus = ref<Record<string, boolean>>({})
 </script>
 
 <template>
@@ -26,56 +32,89 @@ const { state } = useSidebar()
     style="--sidebar-width-icon: 3.5rem"
     class="border-r"
   >
+    <!-- Header -->
     <SidebarHeader>
       <GreenlandLogo />
     </SidebarHeader>
 
-    <SidebarContent>
+    <!-- Content -->
+    <SidebarContent class="overflow-x-hidden">
       <SidebarGroup
         v-for="group in sidebarData.navGroups"
         :key="group.title"
       >
-        <SidebarGroupLabel v-if="state !== 'collapsed'">{{
-          group.title
-        }}</SidebarGroupLabel>
+        <SidebarGroupLabel v-if="state !== 'collapsed' && group.title">
+          {{ group.title }}
+        </SidebarGroupLabel>
 
         <SidebarGroupContent>
           <SidebarMenu>
-            <SidebarMenuItem
+            <template
               v-for="item in group.items"
               :key="item.title"
             >
-              <SidebarMenuButton
-                as-child
-                :tooltip="item.title"
-              >
-                <a
-                  :href="item.url"
-                  class="flex items-center"
+              <!-- ===== ITEM CÓ CHILDREN ===== -->
+              <SidebarMenuItem v-if="item.children && item.children.length">
+                <!-- Parent -->
+                <SidebarMenuButton
+                  :tooltip="item.title"
+                  @click="openMenus[item.title] = !openMenus[item.title]"
                 >
-                  <component
-                    :is="item.icon"
-                    class="shrink-0"
-                  />
+                  <component :is="item.icon" />
 
-                  <span
-                    :class="[
-                      'ml-2 transition-all duration-300 overflow-hidden whitespace-nowrap',
-                      state === 'collapsed'
-                        ? 'w-0 opacity-0'
-                        : 'w-auto opacity-100',
-                    ]"
-                  >
+                  <span v-if="state !== 'collapsed'">
                     {{ item.title }}
                   </span>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+
+                  <!-- Chevron -->
+                  <ChevronDown
+                    v-if="state !== 'collapsed'"
+                    class="ml-auto size-4 transition-transform"
+                    :class="openMenus[item.title] ? 'rotate-180' : ''"
+                  />
+                </SidebarMenuButton>
+
+                <!-- Children -->
+                <SidebarMenu
+                  v-if="openMenus[item.title]"
+                  :class="state === 'collapsed' ? 'hidden' : 'ml-6!'"
+                >
+                  <SidebarMenuItem
+                    v-for="child in item.children"
+                    :key="child.title"
+                  >
+                    <SidebarMenuButton
+                      as-child
+                      :tooltip="child.title"
+                    >
+                      <RouterLink :to="child.url || '#'">
+                        <component :is="child.icon" />
+                        <span>{{ child.title }}</span>
+                      </RouterLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarMenuItem>
+
+              <!-- ===== ITEM THƯỜNG ===== -->
+              <SidebarMenuItem v-else>
+                <SidebarMenuButton
+                  as-child
+                  :tooltip="item.title"
+                >
+                  <RouterLink :to="item.url || '#'">
+                    <component :is="item.icon" />
+                    <span>{{ item.title }}</span>
+                  </RouterLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </template>
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
     </SidebarContent>
 
+    <!-- Footer -->
     <SidebarFooter>
       <div
         :class="[

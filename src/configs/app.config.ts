@@ -1,4 +1,4 @@
-import { env } from '@/common/utils/env'
+import { env } from '@/common/utils/env.util'
 
 export class AppConfigs {
   public static readonly I18N_STORAGE_KEY = 'i18nextLng'
