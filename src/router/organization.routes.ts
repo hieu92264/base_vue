@@ -14,6 +14,12 @@ const organizationRoutes: RouteRecordRaw[] = [
     component: () => import('@/modules/(organization)/user/index.vue'),
     meta: { layouts: BaseLayout },
   },
+  {
+    path: '/organizations/employees',
+    name: 'organizations.employees',
+    component: () => import('@/modules/(organization)/employee/index.vue'),
+    meta: { layouts: BaseLayout },
+  },
 ]
 
 export default organizationRoutes
