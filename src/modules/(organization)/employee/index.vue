@@ -16,7 +16,7 @@ const employeeData = computed(() => {
 </script>
 
 <template>
-  <div class="container mx-auto">
+  <div class="w-full px-4 py-6 overflow-auto">
     <DataTable
       :columns="columns"
       :data="employeeData"

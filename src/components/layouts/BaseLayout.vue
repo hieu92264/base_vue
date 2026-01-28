@@ -14,7 +14,7 @@ const route = useRoute()
 <template>
   <SidebarProvider>
     <AppSideBar />
-    <SidebarInset>
+    <SidebarInset class="min-w-0 flex-1">
       <Header fixed>
         <div class="ms-auto flex-1 flex items-center justify-between space-x-4">
           <div>
@@ -28,7 +28,7 @@ const route = useRoute()
         </div>
       </Header>
 
-      <main class="flex-1 p-4">
+      <main class="flex-1 p-4 flex flex-col min-w-0 w-full">
         <slot />
       </main>
     </SidebarInset>
