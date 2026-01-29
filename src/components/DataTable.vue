@@ -1,5 +1,6 @@
 <script lang="ts" setup generic="TData = unknown, TValue = unknown">
-import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
   TableBody,
@@ -9,6 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import TablePagination from '@/components/ui/table/TablePagination.vue'
+import ColumnToggle from '@/components/ui/table/toolbars/ColumnToggle.vue'
 import {
   FlexRender,
   getCoreRowModel,
@@ -18,25 +20,34 @@ import {
   useVueTable,
   type ColumnDef,
   type ColumnFiltersState,
+  type ColumnSizingState,
   type SortingState,
 } from '@tanstack/vue-table'
 import {
   ArrowDownUp,
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
+  Plus,
+  RefreshCcw,
 } from 'lucide-vue-next'
 import { ref } from 'vue'
 
 const props = defineProps<{
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  loading?: boolean
+  showToolbar?: boolean
+  refetchData?: () => void
+  isFetching?: boolean
 }>()
 
 const sorting = ref<SortingState>([])
 
 const columnFilters = ref<ColumnFiltersState>([])
 
-const columnSizing = ref({})
+const columnSizing = ref<ColumnSizingState>({})
+
+const columnVisibility = ref({})
 
 const table = useVueTable({
   columnResizeMode: 'onChange',
@@ -61,6 +72,10 @@ const table = useVueTable({
     get columnSizing() {
       return columnSizing.value
     },
+
+    get columnVisibility() {
+      return columnVisibility.value
+    },
   },
 
   onSortingChange: (updaterOrValue) => {
@@ -84,6 +99,14 @@ const table = useVueTable({
         : updaterOrValue
   },
 
+  onColumnVisibilityChange: (updaterOrValue) => {
+    const nextState =
+      typeof updaterOrValue === 'function'
+        ? updaterOrValue(columnVisibility.value)
+        : updaterOrValue
+    columnVisibility.value = nextState
+  },
+
   getCoreRowModel: getCoreRowModel(),
 
   getPaginationRowModel: getPaginationRowModel(),
@@ -100,8 +123,75 @@ const { rows } = table.getRowModel()
   <div
     class="rounded-md border bg-card text-card-foreground shadow-sm overflow-hidden"
   >
+    <div
+      v-if="props.showToolbar"
+      class="p-3 border-b flex items-center justify-between gap-2 bg-background/50"
+    >
+      <!-- <slot
+        name="toolbar"
+        :table="table"
+      >
+      </slot> -->
+      <div class="flex items-center justify-between w-full gap-4">
+        <div class="relative w-full">
+          <!-- left -->
+          <slot
+            name="toolbar_left"
+            :table="table"
+          >
+          </slot>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- right -->
+          <ColumnToggle :table="table" />
+
+          <Button
+            variant="outline"
+            size="icon"
+            class="w-9 h-9"
+            title="Refresh Data"
+            :class="{ hidden: !props.refetchData }"
+            @click="props.refetchData ? props.refetchData() : null"
+          >
+            <RefreshCcw
+              class="w-4 h-4"
+              :class="{ 'animate-spin': isFetching }"
+            />
+          </Button>
+
+          <!-- <Button
+            variant="outline"
+            size="icon"
+            class="w-9 h-9"
+            title="Export Data"
+            :disabled="isFetching || employeeData.length === 0"
+          >
+            <Download class="w-4 h-4" />
+          </Button> -->
+
+          <div class="w-px h-6 bg-border mx-1"></div>
+
+          <Button
+            size="sm"
+            class="h-9 gap-1 px-3"
+            :disabled="isFetching"
+          >
+            <Plus class="w-4 h-4" />
+            Add Employee
+          </Button>
+
+          <slot
+            name="toolbar_right"
+            :table="table"
+          >
+          </slot>
+        </div>
+      </div>
+    </div>
+
     <Table
-      container-class="h-[80vh] overflow-x-auto overflow-y-auto border-collapse"
+      container-class="h-[75vh] overflow-x-auto overflow-y-auto border-collapse"
     >
       <TableHeader
         class="sticky top-0 z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-[0_1px_0_0_rgba(0,0,0,0.1)] dark:shadow-border"
@@ -193,7 +283,27 @@ const { rows } = table.getRowModel()
       </TableHeader>
 
       <TableBody>
-        <template v-if="table.getRowModel().rows?.length">
+        <template v-if="props.loading">
+          <TableRow
+            v-for="i in 10"
+            :key="'skeleton-row-' + i"
+            class="border-b last:border-b-0"
+          >
+            <TableCell
+              v-for="header in table.getFlatHeaders()"
+              :key="'skeleton-cell-' + header.id"
+              class="p-4 align-middle border-r last:border-r-0"
+              :style="{
+                width: `${header.getSize()}px`,
+                minWidth: `${header.getSize()}px`,
+              }"
+            >
+              <Skeleton class="h-5 w-full bg-muted-foreground/10" />
+            </TableCell>
+          </TableRow>
+        </template>
+
+        <template v-else-if="table.getRowModel().rows?.length">
           <TableRow
             v-for="row in table.getRowModel().rows"
             :key="row.id"

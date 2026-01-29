@@ -13,6 +13,7 @@ import { h, ref } from 'vue'
 
 export const columns: ColumnDef<IEmployee>[] = [
   {
+    id: 'no',
     accessorKey: 'no',
     header: 'No.',
     enableSorting: false,
@@ -23,6 +24,7 @@ export const columns: ColumnDef<IEmployee>[] = [
     cell: (info) => info.row.index + 1,
   },
   {
+    id: 'isactive',
     accessorKey: 'isactive',
     header: 'Active Status',
     size: 140,
@@ -37,23 +39,26 @@ export const columns: ColumnDef<IEmployee>[] = [
       info.getValue() === RecordStatus.ACTIVE ? 'Active' : 'Inactive',
   },
   {
+    id: 'employee_code',
     accessorKey: 'employee_code',
     header: 'Employee Code',
-    size: 150,
+    size: 160,
     minSize: 120,
     maxSize: 250,
     cell: (info) => info.getValue(),
   },
   {
+    id: 'user_id',
     accessorKey: 'user_id',
     header: 'User ID',
-    size: 100,
+    size: 120,
     minSize: 80,
     maxSize: 150,
     filterFn: 'includesString',
     cell: (info) => info.getValue(),
   },
   {
+    id: 'full_name',
     accessorKey: 'full_name',
     header: 'Full Name',
     size: 180,
@@ -62,14 +67,16 @@ export const columns: ColumnDef<IEmployee>[] = [
     cell: (info) => info.getValue(),
   },
   {
+    id: 'status',
     accessorKey: 'status',
     header: 'Work Status',
-    size: 130,
+    size: 150,
     minSize: 100,
     maxSize: 200,
     cell: (info) => info.getValue(),
   },
   {
+    id: 'join_date',
     accessorKey: 'join_date',
     header: 'Join Date',
     size: 130,
@@ -81,6 +88,7 @@ export const columns: ColumnDef<IEmployee>[] = [
     },
   },
   {
+    id: 'email',
     accessorKey: 'email',
     header: 'Email',
     size: 250,
@@ -89,9 +97,10 @@ export const columns: ColumnDef<IEmployee>[] = [
     cell: (info) => info.getValue(),
   },
   {
+    id: 'dob',
     accessorKey: 'dob',
     header: 'Date of Birth',
-    size: 130,
+    size: 150,
     minSize: 110,
     maxSize: 200,
     cell: (info) => {
@@ -100,17 +109,19 @@ export const columns: ColumnDef<IEmployee>[] = [
     },
   },
   {
+    id: 'phone',
     accessorKey: 'phone',
     header: 'Phone Number',
-    size: 150,
+    size: 160,
     minSize: 120,
     maxSize: 250,
     cell: (info) => info.getValue(),
   },
   {
+    id: 'terminate_date',
     accessorKey: 'terminate_date',
     header: 'Terminate Date',
-    size: 150,
+    size: 160,
     minSize: 120,
     maxSize: 250,
     cell: (info) => {
@@ -119,6 +130,7 @@ export const columns: ColumnDef<IEmployee>[] = [
     },
   },
   {
+    id: 'remark',
     accessorKey: 'remark',
     header: 'Remark',
     size: 250,

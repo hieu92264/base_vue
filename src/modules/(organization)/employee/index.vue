@@ -4,8 +4,10 @@ import { useGetEmployeesQuery } from '@/modules/(organization)/employee/hooks/us
 import { computed } from 'vue'
 import type { IEmployee } from '@/common/types/entities'
 import { columns } from '@/modules/(organization)/employee/data/columns'
+import { Button } from '@/components/ui/button'
+import { Download, Funnel, Plus, RefreshCcw } from 'lucide-vue-next'
 
-const { data, error } = useGetEmployeesQuery()
+const { data, error, isLoading, isFetching, refetch } = useGetEmployeesQuery()
 const employeeData = computed(() => {
   console.log('Employee data error:', data.value)
   if (!data.value) return []
@@ -16,10 +18,15 @@ const employeeData = computed(() => {
 </script>
 
 <template>
-  <div class="w-full px-4 py-6 overflow-auto">
+  <div class="w-full px-4 py-2 overflow-auto">
     <DataTable
       :columns="columns"
       :data="employeeData"
-    />
+      :loading="isLoading || isFetching"
+      show-toolbar
+      :refetch-data="refetch"
+      :is-fetching="isFetching"
+    >
+    </DataTable>
   </div>
 </template>
