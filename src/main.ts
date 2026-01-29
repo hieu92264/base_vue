@@ -13,7 +13,14 @@ import { useI18nStore } from '@/stores/i18n.store'
 
 const app = createApp(App)
 const pinia = createPinia()
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
 
 pinia.use(piniaPluginPersistedstate)
 
