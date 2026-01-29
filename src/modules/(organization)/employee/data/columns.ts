@@ -1,22 +1,38 @@
 import { RecordStatus } from '@/common/constants/enums'
 import type { IEmployee } from '@/common/types/entities'
+import Remark from '@/components/Remark.vue'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { format } from 'date-fns'
 import { h, ref } from 'vue'
 
 export const columns: ColumnDef<IEmployee>[] = [
   {
-    header: 'No.',
     accessorKey: 'no',
+    header: 'No.',
     enableSorting: false,
     enableColumnFilter: false,
-    size: 50,
+    size: 60,
+    minSize: 50,
+    maxSize: 100,
     cell: (info) => info.row.index + 1,
   },
   {
     accessorKey: 'isactive',
     header: 'Active Status',
-    size: 130,
+    size: 140,
+    minSize: 120,
+    maxSize: 200,
+    filterFn: (row, columnId, filterValue) => {
+      const value = row.getValue(columnId)
+      const statusText = value === RecordStatus.ACTIVE ? 'active' : 'inactive'
+      return statusText.includes(filterValue.toLowerCase())
+    },
     cell: (info) =>
       info.getValue() === RecordStatus.ACTIVE ? 'Active' : 'Inactive',
   },
@@ -24,64 +40,96 @@ export const columns: ColumnDef<IEmployee>[] = [
     accessorKey: 'employee_code',
     header: 'Employee Code',
     size: 150,
+    minSize: 120,
+    maxSize: 250,
     cell: (info) => info.getValue(),
   },
   {
     accessorKey: 'user_id',
     header: 'User ID',
     size: 100,
+    minSize: 80,
+    maxSize: 150,
     filterFn: 'includesString',
     cell: (info) => info.getValue(),
   },
   {
     accessorKey: 'full_name',
     header: 'Full Name',
-    size: 150,
+    size: 180,
+    minSize: 150,
+    maxSize: 400,
     cell: (info) => info.getValue(),
   },
   {
     accessorKey: 'status',
     header: 'Work Status',
     size: 130,
+    minSize: 100,
+    maxSize: 200,
     cell: (info) => info.getValue(),
   },
   {
     accessorKey: 'join_date',
     header: 'Join Date',
-    size: 120,
-    cell: (info) => format(new Date(info.getValue() as string), 'dd/MM/yyyy'),
+    size: 130,
+    minSize: 110,
+    maxSize: 200,
+    cell: (info) => {
+      const val = info.getValue()
+      return val ? format(new Date(val as string), 'dd/MM/yyyy') : '-'
+    },
   },
   {
     accessorKey: 'email',
     header: 'Email',
-    size: 240,
+    size: 250,
+    minSize: 200,
+    maxSize: 500,
     cell: (info) => info.getValue(),
   },
   {
     accessorKey: 'dob',
     header: 'Date of Birth',
     size: 130,
-    cell: (info) => format(new Date(info.getValue() as string), 'dd/MM/yyyy'),
+    minSize: 110,
+    maxSize: 200,
+    cell: (info) => {
+      const val = info.getValue()
+      return val ? format(new Date(val as string), 'dd/MM/yyyy') : '-'
+    },
   },
   {
     accessorKey: 'phone',
     header: 'Phone Number',
     size: 150,
+    minSize: 120,
+    maxSize: 250,
     cell: (info) => info.getValue(),
   },
   {
     accessorKey: 'terminate_date',
     header: 'Terminate Date',
     size: 150,
-    cell: (info) =>
-      info.getValue()
-        ? format(new Date(info.getValue() as string), 'dd/MM/yyyy')
-        : 'N/A',
+    minSize: 120,
+    maxSize: 250,
+    cell: (info) => {
+      const val = info.getValue()
+      return val ? format(new Date(val as string), 'dd/MM/yyyy') : 'N/A'
+    },
   },
   {
     accessorKey: 'remark',
     header: 'Remark',
-    size: 300,
-    cell: (info) => info.getValue(),
+    size: 250,
+    minSize: 150,
+    maxSize: 1000,
+    cell: ({ row }) => {
+      const remark = row.getValue('remark')
+      if (!remark) return ''
+      return h(Remark, {
+        remark: remark as string,
+      })
+    },
   },
 ]

@@ -36,7 +36,11 @@ const sorting = ref<SortingState>([])
 
 const columnFilters = ref<ColumnFiltersState>([])
 
+const columnSizing = ref({})
+
 const table = useVueTable({
+  columnResizeMode: 'onChange',
+
   get data() {
     return props.data
   },
@@ -53,6 +57,10 @@ const table = useVueTable({
     get columnFilters() {
       return columnFilters.value
     },
+
+    get columnSizing() {
+      return columnSizing.value
+    },
   },
 
   onSortingChange: (updaterOrValue) => {
@@ -66,6 +74,13 @@ const table = useVueTable({
     columnFilters.value =
       typeof updaterOrValue === 'function'
         ? updaterOrValue(columnFilters.value)
+        : updaterOrValue
+  },
+
+  onColumnSizingChange: (updaterOrValue) => {
+    columnSizing.value =
+      typeof updaterOrValue === 'function'
+        ? updaterOrValue(columnSizing.value)
         : updaterOrValue
   },
 
@@ -103,7 +118,7 @@ const { rows } = table.getRowModel()
               width: `${header.getSize()}px`,
               minWidth: `${header.getSize()}px`,
             }"
-            class="h-10 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap border-r last:border-r-0 cursor-pointer select-none"
+            class="h-10 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap border-r last:border-r-0 cursor-pointer select-none relative"
             @click="header.column.getToggleSortingHandler()?.($event)"
           >
             <div class="flex items-center justify-between gap-2">
@@ -117,7 +132,7 @@ const { rows } = table.getRowModel()
 
               <span
                 v-if="header.column.getCanSort()"
-                class="flex-shrink-0"
+                class="shrink-0"
               >
                 <template v-if="header.column.getIsSorted() === 'asc'">
                   <ArrowUpNarrowWide class="w-4 h-4" />
@@ -130,6 +145,18 @@ const { rows } = table.getRowModel()
                 </template>
               </span>
             </div>
+
+            <div
+              v-if="header.column.getCanResize()"
+              :class="[
+                'absolute right-0 top-0 h-full w-1 cursor-col-resize select-none touch-none hover:bg-primary/50 transition-colors',
+                header.column.getIsResizing()
+                  ? 'bg-primary w-0.5'
+                  : 'bg-transparent',
+              ]"
+              @mousedown.stop="header.getResizeHandler()($event)"
+              @touchstart.stop="header.getResizeHandler()($event)"
+            ></div>
           </TableHead>
         </TableRow>
 
@@ -145,6 +172,7 @@ const { rows } = table.getRowModel()
             :style="{
               width: `${header.getSize()}px`,
               minWidth: `${header.getSize()}px`,
+              position: 'relative',
             }"
           >
             <div v-if="header.column.getCanFilter()">
@@ -181,7 +209,7 @@ const { rows } = table.getRowModel()
                 minWidth: `${cell.column.getSize()}px`,
               }"
             >
-              <div class="truncate">
+              <div>
                 <FlexRender
                   :render="cell.column.columnDef.cell"
                   :props="cell.getContext()"
