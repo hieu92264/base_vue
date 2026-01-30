@@ -1,12 +1,7 @@
 import { RecordStatus } from '@/common/constants/enums'
 import type { IEmployee } from '@/common/types/entities'
 import Remark from '@/components/Remark.vue'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import DataTableRowActions from '@/components/ui/table/DataTableRowActions.vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import { format } from 'date-fns'
 import { h, ref } from 'vue'
@@ -16,12 +11,27 @@ export const columns: ColumnDef<IEmployee>[] = [
     id: 'no',
     accessorKey: 'no',
     header: 'No.',
+    meta: {
+      sticky: 'left',
+    },
     enableSorting: false,
     enableColumnFilter: false,
     size: 60,
     minSize: 50,
     maxSize: 100,
     cell: (info) => info.row.index + 1,
+  },
+  {
+    id: 'employee_code',
+    accessorKey: 'employee_code',
+    header: 'Employee Code',
+    meta: {
+      sticky: 'left',
+    },
+    size: 160,
+    minSize: 120,
+    maxSize: 250,
+    cell: (info) => info.getValue(),
   },
   {
     id: 'isactive',
@@ -37,15 +47,6 @@ export const columns: ColumnDef<IEmployee>[] = [
     },
     cell: (info) =>
       info.getValue() === RecordStatus.ACTIVE ? 'Active' : 'Inactive',
-  },
-  {
-    id: 'employee_code',
-    accessorKey: 'employee_code',
-    header: 'Employee Code',
-    size: 160,
-    minSize: 120,
-    maxSize: 250,
-    cell: (info) => info.getValue(),
   },
   {
     id: 'user_id',
@@ -141,6 +142,26 @@ export const columns: ColumnDef<IEmployee>[] = [
       if (!remark) return ''
       return h(Remark, {
         remark: remark as string,
+      })
+    },
+  },
+  {
+    id: 'action',
+    accessorKey: 'action',
+    header: 'Actions',
+    meta: {
+      sticky: 'right',
+    },
+    size: 80,
+    minSize: 80,
+    maxSize: 150,
+    enableSorting: false,
+    enableColumnFilter: false,
+    cell: ({ row, table }) => {
+      return h(DataTableRowActions, {
+        row: row.original,
+        onUpdate: (data) => table.options.meta?.updateRow?.(data),
+        onDelete: (data) => table.options.meta?.deleteRow?.(data),
       })
     },
   },

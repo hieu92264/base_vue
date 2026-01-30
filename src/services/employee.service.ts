@@ -7,4 +7,12 @@ export class EmployeeService {
     console.log('Employees response:', response)
     return response.data
   }
+
+  static async deleteEmployee(employeeId: number): Promise<any> {
+    const response = await axiosInstance.delete(
+      `organizations/employees/delete/${employeeId}`,
+    )
+
+    console.log('Delete employee response:', response)
+  }
 }

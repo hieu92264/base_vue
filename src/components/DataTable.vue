@@ -20,6 +20,7 @@ import {
   useVueTable,
   type ColumnDef,
   type ColumnFiltersState,
+  type ColumnPinningState,
   type ColumnSizingState,
   type SortingState,
 } from '@tanstack/vue-table'
@@ -27,7 +28,6 @@ import {
   ArrowDownUp,
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
-  Plus,
   RefreshCcw,
 } from 'lucide-vue-next'
 import { ref } from 'vue'
@@ -39,6 +39,8 @@ const props = defineProps<{
   showToolbar?: boolean
   refetchData?: () => void
   isFetching?: boolean
+  updateRow?: (row: TData) => void
+  deleteRow?: (row: TData) => void
 }>()
 
 const sorting = ref<SortingState>([])
@@ -49,7 +51,23 @@ const columnSizing = ref<ColumnSizingState>({})
 
 const columnVisibility = ref({})
 
+const columnPinning = ref<ColumnPinningState>({
+  left:
+    props.columns
+      .filter((col: any) => col.meta?.sticky === 'left')
+      .map((col: any) => col.id || col.accessorKey) || [],
+  right:
+    props.columns
+      .filter((col: any) => col.meta?.sticky === 'right')
+      .map((col: any) => col.id || col.accessorKey) || [],
+})
+
 const table = useVueTable({
+  meta: {
+    updateRow: props.updateRow || undefined,
+    deleteRow: props.deleteRow || undefined,
+  },
+
   columnResizeMode: 'onChange',
 
   get data() {
@@ -75,6 +93,10 @@ const table = useVueTable({
 
     get columnVisibility() {
       return columnVisibility.value
+    },
+
+    get columnPinning() {
+      return columnPinning.value
     },
   },
 
@@ -107,6 +129,13 @@ const table = useVueTable({
     columnVisibility.value = nextState
   },
 
+  onColumnPinningChange: (updaterOrValue) => {
+    columnPinning.value =
+      typeof updaterOrValue === 'function'
+        ? updaterOrValue(columnPinning.value)
+        : updaterOrValue
+  },
+
   getCoreRowModel: getCoreRowModel(),
 
   getPaginationRowModel: getPaginationRowModel(),
@@ -116,7 +145,23 @@ const table = useVueTable({
   getFilteredRowModel: getFilteredRowModel(),
 })
 
-const { rows } = table.getRowModel()
+const getStickyClass = (column: any) => {
+  const isPinned = column.getIsPinned()
+  if (!isPinned) return ''
+
+  const baseClass = 'sticky z-20 transition-colors bg-background'
+
+  if (isPinned === 'left') {
+    const isLastPinned = column.getIsLastColumn('left')
+    return `${baseClass} ${isLastPinned ? 'sticky-last-left' : ''}`
+  }
+
+  if (isPinned === 'right') {
+    const isFirstPinned = column.getIsFirstColumn('right')
+    return `${baseClass} ${isFirstPinned ? 'sticky-first-right' : ''}`
+  }
+  return ''
+}
 </script>
 
 <template>
@@ -172,15 +217,6 @@ const { rows } = table.getRowModel()
 
           <div class="w-px h-6 bg-border mx-1"></div>
 
-          <Button
-            size="sm"
-            class="h-9 gap-1 px-3"
-            :disabled="isFetching"
-          >
-            <Plus class="w-4 h-4" />
-            Add Employee
-          </Button>
-
           <slot
             name="toolbar_right"
             :table="table"
@@ -191,10 +227,10 @@ const { rows } = table.getRowModel()
     </div>
 
     <Table
-      container-class="h-[75vh] overflow-x-auto overflow-y-auto border-collapse"
+      container-class="h-[75vh] overflow-auto border-separate border-spacing-0"
     >
       <TableHeader
-        class="sticky top-0 z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-[0_1px_0_0_rgba(0,0,0,0.1)] dark:shadow-border"
+        class="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-[0_1px_0_0_rgba(0,0,0,0.1)] dark:shadow-border"
       >
         <TableRow
           v-for="headerGroup in table.getHeaderGroups()"
@@ -207,8 +243,20 @@ const { rows } = table.getRowModel()
             :style="{
               width: `${header.getSize()}px`,
               minWidth: `${header.getSize()}px`,
+              left:
+                header.column.getIsPinned() === 'left'
+                  ? `${header.column.getStart('left')}px`
+                  : undefined,
+              right:
+                header.column.getIsPinned() === 'right'
+                  ? `${header.column.getAfter('right')}px`
+                  : undefined,
             }"
             class="h-10 px-4 text-left align-middle font-medium text-muted-foreground whitespace-nowrap border-r last:border-r-0 cursor-pointer select-none relative"
+            :class="[
+              getStickyClass(header.column),
+              'h-12 px-4 text-left align-middle font-semibold border-b border-r last:border-r-0',
+            ]"
             @click="header.column.getToggleSortingHandler()?.($event)"
           >
             <div class="flex items-center justify-between gap-2">
@@ -262,8 +310,19 @@ const { rows } = table.getRowModel()
             :style="{
               width: `${header.getSize()}px`,
               minWidth: `${header.getSize()}px`,
-              position: 'relative',
+              left:
+                header.column.getIsPinned() === 'left'
+                  ? `${header.column.getStart('left')}px`
+                  : undefined,
+              right:
+                header.column.getIsPinned() === 'right'
+                  ? `${header.column.getAfter('right')}px`
+                  : undefined,
             }"
+            :class="[
+              getStickyClass(header.column),
+              'h-12 px-4 text-left align-middle font-semibold border-b border-r last:border-r-0',
+            ]"
           >
             <div v-if="header.column.getCanFilter()">
               <input
@@ -317,7 +376,19 @@ const { rows } = table.getRowModel()
               :style="{
                 width: `${cell.column.getSize()}px`,
                 minWidth: `${cell.column.getSize()}px`,
+                left:
+                  cell.column.columnDef.meta?.sticky === 'left'
+                    ? `${cell.column.getStart('left')}px`
+                    : undefined,
+                right:
+                  cell.column.columnDef.meta?.sticky === 'right'
+                    ? `${cell.column.getAfter('right')}px`
+                    : undefined,
               }"
+              :class="[
+                getStickyClass(cell.column),
+                'p-4 border-b border-r last:border-r-0 whitespace-nowrap',
+              ]"
             >
               <div>
                 <FlexRender
@@ -349,3 +420,24 @@ const { rows } = table.getRowModel()
     <TablePagination :table="table" />
   </div>
 </template>
+
+<style scoped>
+:deep(.sticky) {
+  box-shadow: inset -1px 0 0 0 hsl(var(--border));
+  background-clip: padding-box;
+}
+
+:deep(.sticky-last-left) {
+  box-shadow:
+    inset -1px 0 0 0 hsl(var(--border)),
+    4px 0 8px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+:deep(.group:hover td.sticky) {
+  background-color: hsl(var(--muted) / 0.5) !important;
+}
+
+:deep(thead th.sticky) {
+  z-index: 40;
+}
+</style>
