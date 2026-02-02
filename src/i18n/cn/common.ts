@@ -1,0 +1,21 @@
+export default {
+  welcome: '欢迎',
+  logout: '登出',
+  login: '登录',
+  register: '注册',
+  submit: '提交',
+  cancel: '取消',
+  save: '保存',
+  edit: '编辑',
+  delete: '删除',
+  update: '更新',
+  search: '搜索',
+  reset: '重置',
+  actions: '操作',
+
+  theme: {
+    light: '浅色',
+    dark: '深色',
+    system: '跟随系统',
+  },
+} as const

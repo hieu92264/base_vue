@@ -1,0 +1,1 @@
+<template>hello user</template>
