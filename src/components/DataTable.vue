@@ -70,6 +70,8 @@ const table = useVueTable({
 
   columnResizeMode: 'onChange',
 
+  autoResetPageIndex: false,
+
   get data() {
     return props.data
   },

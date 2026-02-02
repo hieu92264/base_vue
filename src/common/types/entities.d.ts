@@ -23,7 +23,7 @@ export interface IUser extends IBaseEntity {
 }
 
 export interface IEmployee extends IBaseEntity {
-  user_id: number
+  user_id: number | null
   employee_code: string
   full_name: string | null
   phone: string | null

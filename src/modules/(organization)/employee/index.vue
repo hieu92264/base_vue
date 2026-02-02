@@ -4,28 +4,41 @@ import {
   useDeleteEmployeeMutation,
   useGetEmployeesQuery,
 } from '@/modules/(organization)/employee/hooks/use-employee'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { IEmployee } from '@/common/types/entities'
 import { columns } from '@/modules/(organization)/employee/data/columns'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
+import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
+import EmployeeModal from '@/modules/(organization)/employee/components/EmployeeModal.vue'
 
 const { data, error, isLoading, isFetching, refetch } = useGetEmployeesQuery()
+const isConfirmDelete = ref(false)
+const selectedEmployee = ref<IEmployee | null>(null)
 
 const { mutate: deleteEmployee, isPending: isDeletingEmployee } =
   useDeleteEmployeeMutation()
 
 const employeeData = computed(() => {
-  console.log('Employee data error:', data.value)
   if (!data.value) return []
   const newData = Object.values(data.value) as IEmployee[]
-  console.log('Employee data:', newData)
   return newData
 })
 
-const handleDeleteEmployee = async (row: IEmployee) => {
-  console.log('Delete employee:', row)
-  await deleteEmployee(row.id)
+const openDeleteDialog = (row: IEmployee) => {
+  selectedEmployee.value = row
+  isConfirmDelete.value = true
+}
+
+const handleConfirmDelete = () => {
+  if (selectedEmployee.value) {
+    deleteEmployee(selectedEmployee.value.id, {
+      onSuccess: () => {
+        isConfirmDelete.value = false
+        selectedEmployee.value = null
+      },
+    })
+  }
 }
 </script>
 
@@ -38,7 +51,7 @@ const handleDeleteEmployee = async (row: IEmployee) => {
       :refetch-data="refetch"
       :is-fetching="isFetching || isDeletingEmployee"
       show-toolbar
-      :delete-row="handleDeleteEmployee"
+      :delete-row="openDeleteDialog"
     >
       <template #toolbar_right>
         <Button
@@ -51,5 +64,16 @@ const handleDeleteEmployee = async (row: IEmployee) => {
         </Button>
       </template>
     </DataTable>
+
+    <EmployeeModal
+      :open="false"
+      :is-pending="false"
+      :initial-data="null"
+    />
+
+    <DeleteConfirmDialog
+      v-model:is-open-confirm="isConfirmDelete"
+      v-on:confirm-delete="handleConfirmDelete"
+    />
   </div>
 </template>
