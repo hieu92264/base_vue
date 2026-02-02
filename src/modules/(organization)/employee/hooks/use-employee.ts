@@ -4,6 +4,7 @@ import { toast } from 'vue-sonner'
 
 export enum EmployeeQueryKey {
   GET_EMPLOYEES = 'get_employees',
+  GET_USER_OPTIONS = 'get_user_options',
 }
 
 export const useGetEmployeesQuery = () => {
@@ -50,5 +51,12 @@ export const useDeleteEmployeeMutation = () => {
       console.error('Error deleting employee:', error)
       toast.error('Failed to delete employee')
     },
+  })
+}
+
+export const useGetUserOptionsQuery = (userId?: number) => {
+  return useQuery({
+    queryKey: [EmployeeQueryKey.GET_USER_OPTIONS],
+    queryFn: () => EmployeeService.getUserOptions(userId),
   })
 }

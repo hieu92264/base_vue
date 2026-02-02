@@ -3,6 +3,7 @@ import DataTable from '@/components/DataTable.vue'
 import {
   useDeleteEmployeeMutation,
   useGetEmployeesQuery,
+  useGetUserOptionsQuery,
 } from '@/modules/(organization)/employee/hooks/use-employee'
 import { computed, ref } from 'vue'
 import type { IEmployee } from '@/common/types/entities'
@@ -16,6 +17,15 @@ const { data, error, isLoading, isFetching, refetch } = useGetEmployeesQuery()
 const isConfirmDelete = ref(false)
 const selectedEmployee = ref<IEmployee | null>(null)
 
+const { data: userOptionsResponse } = useGetUserOptionsQuery(1)
+
+const userOptions = computed(() => {
+  console.log(
+    'userOptionsResponse',
+    Object.values(userOptionsResponse.value ?? {}),
+  )
+  return userOptionsResponse.value || []
+})
 const { mutate: deleteEmployee, isPending: isDeletingEmployee } =
   useDeleteEmployeeMutation()
 
@@ -66,9 +76,17 @@ const handleConfirmDelete = () => {
     </DataTable>
 
     <EmployeeModal
-      :open="false"
+      :open="true"
       :is-pending="false"
       :initial-data="null"
+      :handle-submit="() => {}"
+      :user-options="
+        userOptions as Array<{
+          text: string
+          value: number
+          selected?: boolean
+        }>
+      "
     />
 
     <DeleteConfirmDialog

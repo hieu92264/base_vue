@@ -15,4 +15,23 @@ export class EmployeeService {
 
     console.log('Delete employee response:', response)
   }
+
+  static async getUserOptions(userId?: number): Promise<
+    ResponseBody<{
+      label: string
+      value: number
+      selected?: boolean
+    }>
+  > {
+    const response = await axiosInstance.get(
+      '/organizations/employees/user-options',
+      {
+        params: {
+          user_id: userId,
+        },
+      },
+    )
+    console.log('User options response:', response)
+    return response.data
+  }
 }
