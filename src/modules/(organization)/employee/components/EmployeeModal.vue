@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { WorkStatus } from '@/common/constants/enums'
 import type { IEmployee } from '@/common/types/entities'
-import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -11,23 +10,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CalendarRangeIcon } from 'lucide-vue-next'
-import { ref, toRef, watch } from 'vue'
-import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date'
-import type { DateValue } from '@internationalized/date'
-import { Calendar } from '@/components/ui/calendar'
-import { useDateSync } from '@/common/utils/useDateSync'
+import { ref, watch } from 'vue'
 import DatePicker from '@/components/DatePicker.vue'
 
 export type EmployeeFormValues = Pick<
@@ -162,7 +151,7 @@ const workStatusOptions = Object.entries(WorkStatus).map(([key, value]) => {
           <div class="grid gap-3">
             <Label for="join_date">Join date</Label>
             <DatePicker
-              :model-value="formData.join_date"
+              v-model="formData.join_date"
               placeholder="Pick a join date"
               name="join_date"
             />
@@ -170,6 +159,11 @@ const workStatusOptions = Object.entries(WorkStatus).map(([key, value]) => {
 
           <div class="grid gap-3">
             <Label for="dob">date of birth</Label>
+            <DatePicker
+              v-model="formData.dob"
+              placeholder="Pick a date of birth"
+              name="dob"
+            />
           </div>
         </div>
       </div>

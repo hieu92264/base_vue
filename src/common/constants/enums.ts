@@ -58,3 +58,9 @@ export enum WorkStatus {
   PART_TIME = 'PART_TIME',
   CONTRACT = 'CONTRACT',
 }
+
+export const DateFormatterLocale: Record<Language, string> = {
+  [Language.VIETNAMESE]: 'vi-VN',
+  [Language.ENGLISH]: 'en-US',
+  [Language.CHINESE]: 'zh-CN',
+}

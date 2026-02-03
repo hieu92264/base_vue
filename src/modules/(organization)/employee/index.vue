@@ -76,7 +76,7 @@ const handleConfirmDelete = () => {
     </DataTable>
 
     <EmployeeModal
-      :open="true"
+      :open="false"
       :is-pending="false"
       :initial-data="null"
       :handle-submit="() => {}"
