@@ -112,7 +112,7 @@ import Overview from '@/components/examples/Overview.vue'
           </Card>
         </div>
 
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7 mt-8!">
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-7 mt-5!">
           <Card class="col-span-4 border-slate-800 bg-slate-900/50">
             <CardHeader>
               <CardTitle class="text-white">Biểu đồ doanh thu</CardTitle>
