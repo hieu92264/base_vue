@@ -3,7 +3,10 @@ import { WorkStatus } from '@/common/constants/enums'
 import type { IEmployee } from '@/common/types/entities'
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -16,8 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import DatePicker from '@/components/DatePicker.vue'
+import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
+import { useForm } from 'vee-validate'
+import { formSchema } from '@/modules/(organization)/employee/-schemas/employee.schema'
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from '@/components/ui/form'
 
 export type EmployeeFormValues = Pick<
   IEmployee,
@@ -50,16 +63,19 @@ watch(
 
 const emit = defineEmits(['update:open', 'submit'])
 
-const formData = ref<EmployeeFormValues>({
-  user_id: null,
-  full_name: '' as string,
-  status: WorkStatus.OFFICIAL,
-  join_date: '',
-  email: '',
-  dob: '',
-  phone: '',
-  terminate_date: '',
-  remark: '',
+const form = useForm({
+  validationSchema: formSchema,
+  initialValues: {
+    user_id: undefined,
+    full_name: '',
+    status: WorkStatus.OFFICIAL,
+    email: '',
+    join_date: '',
+    dob: '',
+    phone: '',
+    terminate_date: '',
+    remark: '',
+  },
 })
 
 const workStatusOptions = Object.entries(WorkStatus).map(([key, value]) => {
@@ -68,105 +84,246 @@ const workStatusOptions = Object.entries(WorkStatus).map(([key, value]) => {
     value: value,
   }
 })
+
+const onSubmit = form.handleSubmit((values) => {
+  console.log('Form submitted with values:', values)
+})
+
+watch(
+  () => props.initialData,
+  (newData) => {
+    if (newData) {
+      form.setValues({
+        user_id: newData.user_id ? String(newData.user_id) : undefined,
+
+        full_name: newData.full_name ?? '',
+        status: newData.status ?? WorkStatus.OFFICIAL,
+        email: newData.email ?? '',
+        join_date: newData.join_date ?? '',
+        dob: newData.dob ?? '',
+        phone: newData.phone ?? '',
+        terminate_date: newData.terminate_date ?? '',
+        remark: newData.remark ?? '',
+      })
+    } else {
+      form.resetForm()
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
   <Dialog
-    :open="open"
+    :open="false"
     @update:open="$emit('update:open', $event)"
   >
-    <!-- <form></form> -->
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle>
           {{ initialData ? 'Edit Employee' : 'Add New Employee' }}
         </DialogTitle>
+
+        <DialogDescription>
+          Fill in employee information, then click Submit to save.
+        </DialogDescription>
       </DialogHeader>
 
-      <div class="grid gap-4">
-        <!-- user account -->
+      <form
+        class="space-y-6"
+        @submit="onSubmit"
+      >
         <div class="grid gap-4">
-          <div class="grid gap-3">
-            <Label for="user_id">User account</Label>
-            <Select v-model="formData.user_id">
-              <SelectTrigger class="w-full">
-                <SelectValue placeholder="Select a user" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="option in userOptions"
-                  :key="option.value"
-                  :value="option.value.toString()"
-                >
-                  {{ option.text }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+          <FormField
+            v-slot="{ componentField }"
+            name="user_id"
+          >
+            <!-- user account -->
+            <FormItem>
+              <FormLabel>User Account</FormLabel>
+              <FormControl>
+                <Select v-bind="componentField">
+                  <SelectTrigger class="w-full">
+                    <SelectValue placeholder="Select a user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="option in userOptions"
+                      :key="option.value"
+                      :value="option.value.toString()"
+                    >
+                      {{ option.text }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+            </FormItem>
+          </FormField>
 
-        <!-- full name and work status -->
-        <div class="grid grid-cols-2 gap-4">
-          <div class="grid gap-3">
-            <Label for="full_name">Full name</Label>
-            <Input
-              id="full_name"
+          <!-- full name and work status -->
+          <div class="grid grid-cols-2 gap-4">
+            <FormField
+              v-slot="{ componentField }"
               name="full_name"
-              :model-value="formData.full_name || ''"
-            />
+            >
+              <FormItem>
+                <FormLabel>Full Name</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    v-bind="componentField"
+                    placeholder="Enter full name"
+                  />
+                </FormControl>
+              </FormItem>
+            </FormField>
+
+            <FormField
+              v-slot="{ componentField }"
+              name="status"
+            >
+              <FormItem>
+                <FormLabel>Work Status</FormLabel>
+                <FormControl>
+                  <Select v-bind="componentField">
+                    <SelectTrigger class="w-full">
+                      <SelectValue placeholder="Select a status work" />
+                    </SelectTrigger>
+
+                    <SelectContent>
+                      <SelectItem
+                        v-for="option in workStatusOptions"
+                        :key="option.value"
+                        :value="option.value.toString()"
+                      >
+                        {{ option.text }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+              </FormItem>
+            </FormField>
           </div>
 
-          <div class="grid gap-3">
-            <Label for="status">Work status</Label>
-            <Select v-model="formData.status">
-              <SelectTrigger class="w-full">
-                <SelectValue placeholder="Select a status work" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="option in workStatusOptions"
-                  :key="option.value"
-                  :value="option.value.toString()"
-                >
-                  {{ option.text }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
+          <!-- email -->
+          <div class="grid grid-cols-1 gap-4">
+            <FormField
+              v-slot="{ componentField }"
+              name="email"
+            >
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input
+                    v-bind="componentField"
+                    type="email"
+                    placeholder="Enter email"
+                  />
+                </FormControl>
+              </FormItem>
+            </FormField>
           </div>
-        </div>
 
-        <!-- email -->
-        <div class="grid gap-3">
-          <Label for="email">Email</Label>
-          <Input
-            id="email"
-            name="email"
-            type="text"
-            :model-value="formData.email || ''"
-          />
-        </div>
-
-        <!-- join_date and dob -->
-        <div class="grid grid-cols-2 gap-4">
-          <div class="grid gap-3">
-            <Label for="join_date">Join date</Label>
-            <DatePicker
-              v-model="formData.join_date"
-              placeholder="Pick a join date"
+          <!-- join_date and dob -->
+          <div class="grid grid-cols-2 gap-4">
+            <FormField
+              v-slot="{ componentField }"
               name="join_date"
-            />
+            >
+              <FormItem>
+                <FormLabel>Join Date</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    v-bind="componentField"
+                    placeholder="Pick join date"
+                  />
+                </FormControl>
+              </FormItem>
+            </FormField>
+
+            <FormField
+              v-slot="{ componentField }"
+              name="dob"
+            >
+              <FormItem>
+                <FormLabel>Date Of Birth</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    v-bind="componentField"
+                    placeholder="Pick date of birth"
+                  />
+                </FormControl>
+              </FormItem>
+            </FormField>
           </div>
 
-          <div class="grid gap-3">
-            <Label for="dob">date of birth</Label>
-            <DatePicker
-              v-model="formData.dob"
-              placeholder="Pick a date of birth"
-              name="dob"
-            />
+          <!-- phone and terminate date -->
+          <div class="grid grid-cols-2 gap-4">
+            <FormField
+              v-slot="{ componentField }"
+              name="phone"
+            >
+              <FormItem>
+                <FormLabel>Phone</FormLabel>
+                <FormControl>
+                  <Input
+                    v-bind="componentField"
+                    placeholder="Enter phone number"
+                  />
+                </FormControl>
+              </FormItem>
+            </FormField>
+
+            <FormField
+              v-slot="{ componentField }"
+              name="terminate_date"
+            >
+              <FormItem>
+                <FormLabel>Terminate Date</FormLabel>
+                <FormControl>
+                  <DatePicker
+                    v-bind="componentField"
+                    placeholder="Pick terminate date"
+                  />
+                </FormControl>
+              </FormItem>
+            </FormField>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4">
+            <FormField
+              v-slot="{ componentField }"
+              name="remark"
+            >
+              <FormItem>
+                <FormLabel>Remark</FormLabel>
+                <FormControl>
+                  <Textarea
+                    v-bind="componentField"
+                    placeholder="Enter remark"
+                  />
+                </FormControl>
+              </FormItem>
+            </FormField>
           </div>
         </div>
-      </div>
+
+        <DialogFooter class="mt-4!">
+          <DialogClose as-child>
+            <Button
+              type="button"
+              variant="outline"
+              >Cancel</Button
+            >
+          </DialogClose>
+          <Button
+            type="submit"
+            :disabled="isPending"
+          >
+            {{ isPending ? 'Saving...' : 'Submit' }}
+          </Button>
+        </DialogFooter>
+      </form>
     </DialogContent>
   </Dialog>
 </template>

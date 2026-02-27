@@ -20,10 +20,6 @@ const selectedEmployee = ref<IEmployee | null>(null)
 const { data: userOptionsResponse } = useGetUserOptionsQuery(1)
 
 const userOptions = computed(() => {
-  console.log(
-    'userOptionsResponse',
-    Object.values(userOptionsResponse.value ?? {}),
-  )
   return userOptionsResponse.value || []
 })
 const { mutate: deleteEmployee, isPending: isDeletingEmployee } =
@@ -76,7 +72,7 @@ const handleConfirmDelete = () => {
     </DataTable>
 
     <EmployeeModal
-      :open="false"
+      :open="true"
       :is-pending="false"
       :initial-data="null"
       :handle-submit="() => {}"

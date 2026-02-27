@@ -1,69 +1,149 @@
 <script setup lang="ts">
-import { DateFormatterLocale, Language } from '@/common/constants/enums'
-import { useDateSync } from '@/common/utils/useDateSync'
-import { Input } from '@/components/ui/input' // Giả định bạn có component Input
-import { Calendar } from '@/components/ui/calendar'
+import { format, isValid, parse } from 'date-fns'
+import { computed, ref, watch } from 'vue'
+import { CalendarDate, type DateValue } from '@internationalized/date'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { useI18nStore } from '@/stores/i18n.store'
-import { CalendarRangeIcon } from 'lucide-vue-next'
-import { computed, ref, watch } from 'vue'
-import { format, parse, isValid } from 'date-fns' // Nên dùng date-fns để parse format dd/MM/yyyy
+import { Input } from '@/components/ui/input'
+import { CalendarRangeIcon, XIcon } from 'lucide-vue-next'
+import { Calendar } from '@/components/ui/calendar'
 
 const props = defineProps<{
-  modelValue: string | null | undefined
+  modelValue?: string | null | undefined
   placeholder?: string
   name?: string
+  onBlur?: (e: FocusEvent) => void
+  disabled?: boolean
 }>()
 
-const emit = defineEmits(['update:modelValue'])
-const i18nStore = useI18nStore()
+const emit = defineEmits<{
+  (e: 'update:modelValue', v: string | null): void
+}>()
+
 const isOpen = ref(false)
-
-// 1. Quản lý giá trị hiển thị ở ô Input (VD: 01/01/2003)
 const inputValue = ref('')
+const isTyping = ref(false)
 
-// Đồng bộ từ modelValue (ISO String) ra ô Input khi có dữ liệu từ server
 watch(
   () => props.modelValue,
   (newVal) => {
-    if (newVal) {
-      inputValue.value = format(new Date(newVal), 'dd/MM/yyyy')
-    } else {
-      inputValue.value = ''
+    if (isTyping.value) {
+      if (newVal) {
+        const d = parse(newVal, 'yyyy-MM-dd', new Date())
+        if (isValid(d)) {
+          inputValue.value = format(d, 'dd/MM/yyyy')
+          isTyping.value = false
+        }
+      }
+      return
     }
+
+    if (!newVal) {
+      inputValue.value = ''
+      return
+    }
+
+    const d = parse(newVal, 'yyyy-MM-dd', new Date())
+    inputValue.value = isValid(d) ? format(d, 'dd/MM/yyyy') : ''
   },
   { immediate: true },
 )
 
-// 2. Xử lý khi người dùng gõ tay
-const handleInputChange = (e: Event) => {
-  const target = e.target as HTMLInputElement
-  const value = target.value
-  inputValue.value = value
+function onlyDigits(s: string) {
+  return s.replace(/\D/g, '')
+}
 
-  // Nếu nhập đủ 10 ký tự (dd/mm/yyyy), thử parse xem có đúng ngày không
-  if (value.length === 10) {
-    const parsedDate = parse(value, 'dd/MM/yyyy', new Date())
-    if (isValid(parsedDate)) {
-      emit('update:modelValue', parsedDate.toISOString())
+function formatAsDDMMYYYY(raw: string) {
+  const digits = onlyDigits(raw).slice(0, 8)
+  const dd = digits.slice(0, 2)
+  const mm = digits.slice(2, 4)
+  const yyyy = digits.slice(4, 8)
+
+  let out = dd
+  if (mm.length) out += '/' + mm
+  if (yyyy.length) out += '/' + yyyy
+  return out
+}
+
+function commitIfValid(masked: string) {
+  if (masked.length !== 10) return false
+  const parsed = parse(masked, 'dd/MM/yyyy', new Date())
+  if (!isValid(parsed)) return false
+
+  emit('update:modelValue', format(parsed, 'yyyy-MM-dd'))
+  return true
+}
+
+const handleModelUpdate = (payload: string | number) => {
+  isTyping.value = true
+  const raw = String(payload)
+  const masked = formatAsDDMMYYYY(raw)
+  inputValue.value = masked
+
+  if (masked.length === 10) {
+    const ok = commitIfValid(masked)
+    if (ok) {
+      inputValue.value = masked
     }
   }
 }
 
-const dateValue = useDateSync(
-  computed({
-    get: () => props.modelValue,
-    set: (val) => {
-      const newValue = val ? new Date(val.toString()).toISOString() : null
-      emit('update:modelValue', newValue)
-      isOpen.value = false // Đóng popover sau khi chọn từ lịch
-    },
-  }),
-)
+const handleBlur = (e: FocusEvent) => {
+  if (inputValue.value === '') emit('update:modelValue', null)
+  else commitIfValid(inputValue.value)
+
+  isTyping.value = false
+  props.onBlur?.(e)
+}
+
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    if (inputValue.value === '') emit('update:modelValue', null)
+    else commitIfValid(inputValue.value)
+    isTyping.value = false
+  }
+  if (e.key === 'Escape') {
+    isOpen.value = false
+  }
+}
+
+const clearValue = () => {
+  inputValue.value = ''
+  emit('update:modelValue', null)
+  isOpen.value = false
+  isTyping.value = false
+}
+
+const dateValue = computed<DateValue | undefined>({
+  get: () => {
+    if (!props.modelValue) return undefined
+    const d = parse(props.modelValue, 'yyyy-MM-dd', new Date())
+    if (!isValid(d)) return undefined
+    return new CalendarDate(d.getFullYear(), d.getMonth() + 1, d.getDate())
+  },
+  set: (val) => {
+    if (!val) {
+      emit('update:modelValue', null)
+      isOpen.value = false
+      return
+    }
+
+    const y = val.year
+    const m = String(val.month).padStart(2, '0')
+    const day = String(val.day).padStart(2, '0')
+
+    emit('update:modelValue', `${y}-${m}-${day}`)
+    inputValue.value = `${day}/${m}/${y}`
+    isTyping.value = false
+    isOpen.value = false
+  },
+})
+
+const showClear = computed(() => !!props.modelValue && !props.disabled)
 </script>
 
 <template>
@@ -76,31 +156,54 @@ const dateValue = useDateSync(
 
     <Popover v-model:open="isOpen">
       <PopoverTrigger as-child>
-        <div class="relative">
+        <!-- click vào input/wrapper sẽ mở popover -->
+        <div
+          class="relative"
+          @click="!disabled && (isOpen = true)"
+        >
           <Input
-            :value="inputValue"
+            :model-value="inputValue"
             :placeholder="placeholder || 'DD/MM/YYYY'"
-            class="pl-10"
-            @input="handleInputChange"
+            class="pl-10 pr-10"
+            :disabled="disabled"
+            inputmode="numeric"
+            autocomplete="off"
+            @update:modelValue="handleModelUpdate"
+            @keydown="handleKeydown"
+            @blur="handleBlur"
           />
-          <CalendarRangeIcon
-            class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer"
-            @click="isOpen = true"
-          />
+
+          <button
+            type="button"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            :disabled="disabled"
+            @click.stop="isOpen = true"
+            aria-label="Open calendar"
+          >
+            <CalendarRangeIcon class="h-4 w-4" />
+          </button>
+
+          <button
+            v-if="showClear"
+            type="button"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            @click.stop="clearValue"
+            aria-label="Clear date"
+          >
+            <XIcon class="h-4 w-4" />
+          </button>
         </div>
       </PopoverTrigger>
 
+      <!-- quan trọng: ngăn click trong popover làm đóng ngay -->
       <PopoverContent
-        class="w-auto p-0"
+        class="w-auto p-2"
         align="start"
+        @mousedown.prevent
       >
         <Calendar
           v-model="dateValue"
           initial-focus
-          caption-layout="dropdown-buttons"
-          :from-year="1900"
-          :to-year="new Date().getFullYear()"
-          @update:model-value="isOpen = false"
         />
       </PopoverContent>
     </Popover>
