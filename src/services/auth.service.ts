@@ -2,6 +2,7 @@ import type { IUser } from '@/common/types/entities'
 import { AppConfigs } from '@/configs/app.config'
 import axiosInstance from '@/configs/axios.config'
 import type { LoginFormValue } from '@/modules/(auth)/login/-schemas/login.schema'
+import type { RegisterFormValue } from '@/modules/(auth)/register/-schemas/register.schema'
 import { useAuthStore, type IAuthState } from '@/stores/auth.store'
 import type { IUserStore } from '@/stores/user.store'
 import axios from 'axios'
@@ -32,5 +33,22 @@ export class AuthService {
     return await axiosInstance.post('/auth/logout', {
       refresh_token: authStore.refresh_token,
     })
+  }
+
+  static async register(data: RegisterFormValue): Promise<ResponseBody<any>> {
+    return await axiosInstance.post('/auth/register', data)
+  }
+
+  static async forgotPassword(email: string) {
+    return await axiosInstance.post('/auth/forgot-password', { email })
+  }
+
+  static async resetPassword(payload: {
+    token: string
+    email: string
+    password: string
+    password_confirmation: string
+  }) {
+    return await axiosInstance.post('/auth/reset-password', payload)
   }
 }
