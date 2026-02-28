@@ -64,3 +64,15 @@ export const DateFormatterLocale: Record<Language, string> = {
   [Language.ENGLISH]: 'en-US',
   [Language.CHINESE]: 'zh-CN',
 }
+
+export enum BookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELLED = 'cancelled',
+  COMPLETED = 'completed',
+}
+
+export enum UserType {
+  TENANT = 'tenant',
+  LANDLORD = 'landlord',
+}
