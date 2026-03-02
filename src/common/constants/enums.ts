@@ -68,8 +68,8 @@ export const DateFormatterLocale: Record<Language, string> = {
 export enum BookingStatus {
   PENDING = 'pending',
   CONFIRMED = 'confirmed',
-  CANCELLED = 'cancelled',
-  COMPLETED = 'completed',
+  AVAILABLE = 'available',
+  OCCUPIED = 'occupied',
 }
 
 export enum UserType {

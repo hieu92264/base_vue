@@ -6,6 +6,7 @@ import type {
   IWard,
 } from '@/common/types/entities'
 import axiosInstance from '@/configs/axios.config'
+import type { ContactFormValues } from '@/modules/(general)/home/-schemas/contact.schema'
 
 export class HomeService {
   static async sliders(): Promise<ISlider[]> {
@@ -31,5 +32,15 @@ export class HomeService {
   static async wards(): Promise<IWard[]> {
     const response = await axiosInstance.get('/locations/wards')
     return response.data
+  }
+
+  static async roomDetails(roomId: number): Promise<any> {
+    const response = await axiosInstance.get(`/rooms/detail/${roomId}`)
+    console.log('Room details response:', response.data) // Debug log
+    return response.data
+  }
+
+  static async contact(formData: ContactFormValues, id: string): Promise<void> {
+    await axiosInstance.post(`/contact/${id}`, formData)
   }
 }

@@ -1,5 +1,6 @@
+import type { ContactFormValues } from '@/modules/(general)/home/-schemas/contact.schema'
 import { HomeService } from '@/services'
-import { useQuery } from '@tanstack/vue-query'
+import { useMutation, useQuery } from '@tanstack/vue-query'
 
 export enum HomeQueryKeys {
   GET_SLIDERS = 'get_sliders',
@@ -43,5 +44,30 @@ export const useWardsQuery = () => {
   return useQuery({
     queryKey: [HomeQueryKeys.GET_WARDS],
     queryFn: HomeService.wards,
+  })
+}
+
+export const useRoomDetailsQuery = (roomId: number) => {
+  return useQuery({
+    queryKey: ['room_details', roomId],
+    queryFn: () => HomeService.roomDetails(roomId),
+  })
+}
+
+export const useContactMutaion = () => {
+  return useMutation({
+    mutationFn: ({
+      formData,
+      id,
+    }: {
+      formData: ContactFormValues
+      id: string
+    }) => HomeService.contact(formData, id),
+    onSuccess: () => {
+      console.log('Contact sent success')
+    },
+    onError: (err) => {
+      console.error('Contact sent error', err)
+    },
   })
 }

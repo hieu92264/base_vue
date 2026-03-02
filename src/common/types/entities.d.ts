@@ -25,6 +25,7 @@ export interface IUser extends IBaseEntity {
   remark: string | null
   employee?: IEmployee | null
   permissions?: IPermission[] | null
+  profile?: IUserProfile | null
 }
 
 export interface IEmployee extends IBaseEntity {
@@ -150,8 +151,6 @@ export interface IRoomPhoto {
   photo_url: string | null
   is_cover: boolean
   sort_order: number
-  created_at: string | null
-  updated_at: string | null
 }
 
 export type CommentVisibilityStatus = 'visible' | 'hidden'
