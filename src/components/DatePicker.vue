@@ -12,7 +12,7 @@ import { CalendarRangeIcon, XIcon } from 'lucide-vue-next'
 import { Calendar } from '@/components/ui/calendar'
 
 const props = defineProps<{
-  modelValue?: string | null | undefined
+  modelValue?: string | undefined // yyyy-MM-dd | ''
   placeholder?: string
   name?: string
   onBlur?: (e: FocusEvent) => void
@@ -20,37 +20,12 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', v: string | null): void
+  (e: 'update:modelValue', v: string): void // luôn string
 }>()
 
 const isOpen = ref(false)
 const inputValue = ref('')
 const isTyping = ref(false)
-
-watch(
-  () => props.modelValue,
-  (newVal) => {
-    if (isTyping.value) {
-      if (newVal) {
-        const d = parse(newVal, 'yyyy-MM-dd', new Date())
-        if (isValid(d)) {
-          inputValue.value = format(d, 'dd/MM/yyyy')
-          isTyping.value = false
-        }
-      }
-      return
-    }
-
-    if (!newVal) {
-      inputValue.value = ''
-      return
-    }
-
-    const d = parse(newVal, 'yyyy-MM-dd', new Date())
-    inputValue.value = isValid(d) ? format(d, 'dd/MM/yyyy') : ''
-  },
-  { immediate: true },
-)
 
 function onlyDigits(s: string) {
   return s.replace(/\D/g, '')
@@ -68,7 +43,7 @@ function formatAsDDMMYYYY(raw: string) {
   return out
 }
 
-function commitIfValid(masked: string) {
+function commitDDMMYYYY(masked: string) {
   if (masked.length !== 10) return false
   const parsed = parse(masked, 'dd/MM/yyyy', new Date())
   if (!isValid(parsed)) return false
@@ -77,23 +52,65 @@ function commitIfValid(masked: string) {
   return true
 }
 
+function commitYYYYMMDD(raw: string) {
+  // accept: 2026-03-02
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return false
+  const parsed = parse(raw, 'yyyy-MM-dd', new Date())
+  if (!isValid(parsed)) return false
+
+  emit('update:modelValue', raw)
+  return true
+}
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (isTyping.value) return
+
+    if (!newVal) {
+      inputValue.value = ''
+      return
+    }
+
+    const d = parse(newVal, 'yyyy-MM-dd', new Date())
+    inputValue.value = isValid(d) ? format(d, 'dd/MM/yyyy') : ''
+  },
+  { immediate: true },
+)
+
 const handleModelUpdate = (payload: string | number) => {
   isTyping.value = true
-  const raw = String(payload)
+  const raw = String(payload).trim()
+
+  // ✅ cho phép paste yyyy-MM-dd
+  if (commitYYYYMMDD(raw)) {
+    const d = parse(raw, 'yyyy-MM-dd', new Date())
+    inputValue.value = isValid(d) ? format(d, 'dd/MM/yyyy') : ''
+    isTyping.value = false
+    return
+  }
+
   const masked = formatAsDDMMYYYY(raw)
   inputValue.value = masked
 
   if (masked.length === 10) {
-    const ok = commitIfValid(masked)
+    const ok = commitDDMMYYYY(masked)
     if (ok) {
       inputValue.value = masked
+      isTyping.value = false
     }
   }
 }
 
 const handleBlur = (e: FocusEvent) => {
-  if (inputValue.value === '') emit('update:modelValue', null)
-  else commitIfValid(inputValue.value)
+  if (inputValue.value === '') {
+    emit('update:modelValue', '')
+    isTyping.value = false
+    props.onBlur?.(e)
+    return
+  }
+
+  commitDDMMYYYY(inputValue.value)
 
   isTyping.value = false
   props.onBlur?.(e)
@@ -102,8 +119,8 @@ const handleBlur = (e: FocusEvent) => {
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Enter') {
     e.preventDefault()
-    if (inputValue.value === '') emit('update:modelValue', null)
-    else commitIfValid(inputValue.value)
+    if (inputValue.value === '') emit('update:modelValue', '')
+    else commitDDMMYYYY(inputValue.value)
     isTyping.value = false
   }
   if (e.key === 'Escape') {
@@ -113,7 +130,7 @@ const handleKeydown = (e: KeyboardEvent) => {
 
 const clearValue = () => {
   inputValue.value = ''
-  emit('update:modelValue', null)
+  emit('update:modelValue', '') // like input type=date
   isOpen.value = false
   isTyping.value = false
 }
@@ -127,7 +144,7 @@ const dateValue = computed<DateValue | undefined>({
   },
   set: (val) => {
     if (!val) {
-      emit('update:modelValue', null)
+      emit('update:modelValue', '')
       isOpen.value = false
       return
     }
@@ -136,7 +153,9 @@ const dateValue = computed<DateValue | undefined>({
     const m = String(val.month).padStart(2, '0')
     const day = String(val.day).padStart(2, '0')
 
-    emit('update:modelValue', `${y}-${m}-${day}`)
+    const iso = `${y}-${m}-${day}`
+    emit('update:modelValue', iso)
+
     inputValue.value = `${day}/${m}/${y}`
     isTyping.value = false
     isOpen.value = false
@@ -148,6 +167,7 @@ const showClear = computed(() => !!props.modelValue && !props.disabled)
 
 <template>
   <div class="relative w-full">
+    <!-- giống input type=date: submit sẽ là yyyy-MM-dd hoặc '' -->
     <input
       type="hidden"
       :name="name"
@@ -156,7 +176,6 @@ const showClear = computed(() => !!props.modelValue && !props.disabled)
 
     <Popover v-model:open="isOpen">
       <PopoverTrigger as-child>
-        <!-- click vào input/wrapper sẽ mở popover -->
         <div
           class="relative"
           @click="!disabled && (isOpen = true)"
@@ -195,7 +214,6 @@ const showClear = computed(() => !!props.modelValue && !props.disabled)
         </div>
       </PopoverTrigger>
 
-      <!-- quan trọng: ngăn click trong popover làm đóng ngay -->
       <PopoverContent
         class="w-auto p-2"
         align="start"

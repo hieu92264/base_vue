@@ -115,7 +115,7 @@ watch(
 
 <template>
   <Dialog
-    :open="false"
+    :open="open"
     @update:open="$emit('update:open', $event)"
   >
     <DialogContent class="sm:max-w-md">
@@ -131,7 +131,7 @@ watch(
 
       <form
         class="space-y-6"
-        @submit="onSubmit"
+        @submit.prevent="onSubmit"
       >
         <div class="grid gap-4">
           <FormField
