@@ -1,6 +1,7 @@
 import { EmployeeService } from '@/services/employee.service'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { toast } from 'vue-sonner'
+import type { EmployeeFormValues } from '../-schemas/employee.schema'
 
 export enum EmployeeQueryKey {
   GET_EMPLOYEES = 'get_employees',
@@ -58,5 +59,47 @@ export const useGetUserOptionsQuery = (userId?: number) => {
   return useQuery({
     queryKey: [EmployeeQueryKey.GET_USER_OPTIONS],
     queryFn: () => EmployeeService.getUserOptions(userId),
+  })
+}
+
+export const useCreateEmployeeMutation = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: EmployeeService.createEmployee,
+    onSuccess: (res) => {
+      console.log('Create employee response: ', res)
+      queryClient.invalidateQueries({
+        queryKey: [EmployeeQueryKey.GET_EMPLOYEES],
+      })
+      toast.success('Employee created successfully')
+    },
+    onError: (error) => {
+      console.error('Error creating employee:', error)
+      toast.error('Failed to create employee')
+    },
+  })
+}
+
+export const useUpdateEmployeeMutation = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      employeeId,
+      employeeData,
+    }: {
+      employeeId: number
+      employeeData: EmployeeFormValues
+    }) => EmployeeService.updateEmployee(employeeId, employeeData),
+    onSuccess: (res) => {
+      console.log('Update employee response: ', res)
+      queryClient.invalidateQueries({
+        queryKey: [EmployeeQueryKey.GET_EMPLOYEES],
+      })
+      toast.success('Employee updated successfully')
+    },
+    onError: (error) => {
+      console.error('Error updating employee:', error)
+      toast.error('Failed to update employee')
+    },
   })
 }

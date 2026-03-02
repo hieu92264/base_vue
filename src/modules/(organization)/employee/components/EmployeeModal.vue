@@ -3,7 +3,6 @@ import { WorkStatus } from '@/common/constants/enums'
 import type { IEmployee } from '@/common/types/entities'
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -11,7 +10,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -19,31 +17,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { watch } from 'vue'
-import DatePicker from '@/components/DatePicker.vue'
+import { computed, ref, watch } from 'vue'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { useForm } from 'vee-validate'
-import { formSchema } from '@/modules/(organization)/employee/-schemas/employee.schema'
+import {
+  employeeFormSchema,
+  type EmployeeFormValues,
+} from '@/modules/(organization)/employee/-schemas/employee.schema'
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
 } from '@/components/ui/form'
+import { toTypedSchema } from '@vee-validate/zod'
 
-export type EmployeeFormValues = Pick<
-  IEmployee,
-  | 'user_id'
-  | 'full_name'
-  | 'status'
-  | 'join_date'
-  | 'email'
-  | 'dob'
-  | 'phone'
-  | 'terminate_date'
-  | 'remark'
->
+// export type EmployeeFormValues = Pick<
+//   IEmployee,
+//   | 'user_id'
+//   | 'full_name'
+//   | 'status'
+//   | 'join_date'
+//   | 'email'
+//   | 'dob'
+//   | 'phone'
+//   | 'terminate_date'
+//   | 'remark'
+// >
 
 const props = defineProps<{
   open: boolean
@@ -52,6 +53,17 @@ const props = defineProps<{
   userOptions?: Array<{ text: string; value: number; selected?: boolean }>
   handleSubmit: (data: EmployeeFormValues) => void
 }>()
+
+const userSearch = ref('')
+
+const filteredUserOptions = computed(() => {
+  const q = userSearch.value.trim().toLowerCase()
+  if (!q) return props.userOptions ?? []
+
+  return (props.userOptions ?? []).filter((o) =>
+    o.text.toLowerCase().includes(q),
+  )
+})
 
 watch(
   () => props.userOptions,
@@ -64,8 +76,9 @@ watch(
 const emit = defineEmits(['update:open', 'submit'])
 
 const form = useForm({
-  validationSchema: formSchema,
+  validationSchema: toTypedSchema(employeeFormSchema),
   initialValues: {
+    id: undefined,
     user_id: undefined,
     full_name: '',
     status: WorkStatus.OFFICIAL,
@@ -85,8 +98,21 @@ const workStatusOptions = Object.entries(WorkStatus).map(([key, value]) => {
   }
 })
 
+const toDateInputValue = (v?: string | null) => {
+  if (!v) return ''
+  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v
+
+  const d = new Date(v)
+  if (Number.isNaN(d.getTime())) return ''
+
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 const onSubmit = form.handleSubmit((values) => {
-  console.log('Form submitted with values:', values)
+  props.handleSubmit(values)
 })
 
 watch(
@@ -94,15 +120,15 @@ watch(
   (newData) => {
     if (newData) {
       form.setValues({
+        id: newData.id,
         user_id: newData.user_id ? String(newData.user_id) : undefined,
-
         full_name: newData.full_name ?? '',
         status: newData.status ?? WorkStatus.OFFICIAL,
         email: newData.email ?? '',
-        join_date: newData.join_date ?? '',
-        dob: newData.dob ?? '',
+        join_date: toDateInputValue(newData.join_date) ?? '',
+        dob: toDateInputValue(newData.dob) ?? '',
         phone: newData.phone ?? '',
-        terminate_date: newData.terminate_date ?? '',
+        terminate_date: toDateInputValue(newData.terminate_date) ?? '',
         remark: newData.remark ?? '',
       })
     } else {
@@ -138,7 +164,6 @@ watch(
             v-slot="{ componentField }"
             name="user_id"
           >
-            <!-- user account -->
             <FormItem>
               <FormLabel>User Account</FormLabel>
               <FormControl>
@@ -146,14 +171,31 @@ watch(
                   <SelectTrigger class="w-full">
                     <SelectValue placeholder="Select a user" />
                   </SelectTrigger>
-                  <SelectContent>
+
+                  <SelectContent class="max-h-60 overflow-y-auto">
+                    <!-- Search box -->
+                    <div class="sticky top-0 z-10 bg-background p-2">
+                      <Input
+                        v-model="userSearch"
+                        placeholder="Search user..."
+                        @keydown.stop
+                      />
+                    </div>
+
                     <SelectItem
-                      v-for="option in userOptions"
+                      v-for="option in filteredUserOptions"
                       :key="option.value"
                       :value="option.value.toString()"
                     >
                       {{ option.text }}
                     </SelectItem>
+
+                    <div
+                      v-if="filteredUserOptions.length === 0"
+                      class="px-3 py-2 text-sm text-muted-foreground"
+                    >
+                      No results
+                    </div>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -233,9 +275,9 @@ watch(
               <FormItem>
                 <FormLabel>Join Date</FormLabel>
                 <FormControl>
-                  <DatePicker
+                  <Input
                     v-bind="componentField"
-                    placeholder="Pick join date"
+                    type="date"
                   />
                 </FormControl>
               </FormItem>
@@ -248,9 +290,9 @@ watch(
               <FormItem>
                 <FormLabel>Date Of Birth</FormLabel>
                 <FormControl>
-                  <DatePicker
+                  <Input
                     v-bind="componentField"
-                    placeholder="Pick date of birth"
+                    type="date"
                   />
                 </FormControl>
               </FormItem>
@@ -281,9 +323,9 @@ watch(
               <FormItem>
                 <FormLabel>Terminate Date</FormLabel>
                 <FormControl>
-                  <DatePicker
+                  <Input
                     v-bind="componentField"
-                    placeholder="Pick terminate date"
+                    type="date"
                   />
                 </FormControl>
               </FormItem>
@@ -309,13 +351,13 @@ watch(
         </div>
 
         <DialogFooter class="mt-4!">
-          <DialogClose as-child>
-            <Button
-              type="button"
-              variant="outline"
-              >Cancel</Button
-            >
-          </DialogClose>
+          <Button
+            type="button"
+            variant="outline"
+            @click="$emit('update:open', false)"
+          >
+            Cancel
+          </Button>
           <Button
             type="submit"
             :disabled="isPending"

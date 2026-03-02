@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import DataTable from '@/components/DataTable.vue'
 import {
+  useCreateEmployeeMutation,
   useDeleteEmployeeMutation,
   useGetEmployeesQuery,
   useGetUserOptionsQuery,
+  useUpdateEmployeeMutation,
 } from '@/modules/(organization)/employee/hooks/use-employee'
 import { computed, ref } from 'vue'
 import type { IEmployee } from '@/common/types/entities'
@@ -12,10 +14,17 @@ import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
 import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 import EmployeeModal from '@/modules/(organization)/employee/components/EmployeeModal.vue'
+import type { EmployeeFormValues } from './-schemas/employee.schema'
 
 const { data, error, isLoading, isFetching, refetch } = useGetEmployeesQuery()
 const isConfirmDelete = ref(false)
 const selectedEmployee = ref<IEmployee | null>(null)
+const isOpenModal = ref(false)
+
+const { mutate: createEmployee, isPending: isCreating } =
+  useCreateEmployeeMutation()
+const { mutate: updateEmployee, isPending: isUpdating } =
+  useUpdateEmployeeMutation()
 
 const { data: userOptionsResponse } = useGetUserOptionsQuery(1)
 
@@ -30,6 +39,16 @@ const employeeData = computed(() => {
   const newData = Object.values(data.value) as IEmployee[]
   return newData
 })
+
+const openCreateModal = () => {
+  isOpenModal.value = true
+  selectedEmployee.value = null
+}
+
+const openEditModal = (row: IEmployee) => {
+  selectedEmployee.value = { ...row }
+  isOpenModal.value = true
+}
 
 const openDeleteDialog = (row: IEmployee) => {
   selectedEmployee.value = row
@@ -46,6 +65,24 @@ const handleConfirmDelete = () => {
     })
   }
 }
+
+const handleSubmitEmployee = (data: EmployeeFormValues) => {
+  const onSuccess = () => {
+    isOpenModal.value = false
+    selectedEmployee.value = null
+  }
+  if (selectedEmployee.value) {
+    updateEmployee(
+      {
+        employeeId: selectedEmployee.value.id,
+        employeeData: data,
+      },
+      { onSuccess },
+    )
+  } else {
+    createEmployee(data, { onSuccess })
+  }
+}
 </script>
 
 <template>
@@ -57,6 +94,7 @@ const handleConfirmDelete = () => {
       :refetch-data="refetch"
       :is-fetching="isFetching || isDeletingEmployee"
       show-toolbar
+      :update-row="openEditModal"
       :delete-row="openDeleteDialog"
     >
       <template #toolbar_right>
@@ -64,6 +102,7 @@ const handleConfirmDelete = () => {
           size="sm"
           class="h-9 gap-1 px-3"
           :disabled="isFetching"
+          @click="openCreateModal"
         >
           <Plus class="w-4 h-4" />
           Add Employee
@@ -72,10 +111,16 @@ const handleConfirmDelete = () => {
     </DataTable>
 
     <EmployeeModal
-      :open="true"
+      :open="isOpenModal"
+      @update:open="
+        (v) => {
+          isOpenModal = v
+          if (!v) selectedEmployee = null
+        }
+      "
       :is-pending="false"
-      :initial-data="null"
-      :handle-submit="() => {}"
+      :initial-data="selectedEmployee"
+      :handle-submit="handleSubmitEmployee"
       :user-options="
         userOptions as Array<{
           text: string
