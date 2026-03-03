@@ -73,6 +73,7 @@ export enum BookingStatus {
 }
 
 export enum UserType {
+  ADMIN = 'admin',
   TENANT = 'tenant',
   LANDLORD = 'landlord',
 }

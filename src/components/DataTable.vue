@@ -232,7 +232,7 @@ const getStickyClass = (column: any) => {
       container-class="h-[75vh] overflow-auto border-separate border-spacing-0"
     >
       <TableHeader
-        class="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-[0_1px_0_0_rgba(0,0,0,0.1)] dark:shadow-border"
+        class="sticky h-10 px-3 top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-[0_1px_0_0_rgba(0,0,0,0.1)] dark:shadow-border"
       >
         <TableRow
           v-for="headerGroup in table.getHeaderGroups()"
@@ -258,8 +258,15 @@ const getStickyClass = (column: any) => {
             :class="[
               getStickyClass(header.column),
               'h-12 px-4 text-left align-middle font-semibold border-b border-r last:border-r-0',
+              header.column.getCanSort()
+                ? 'cursor-pointer select-none'
+                : 'cursor-default',
             ]"
-            @click="header.column.getToggleSortingHandler()?.($event)"
+            @click="
+              header.column.getCanSort()
+                ? header.column.getToggleSortingHandler()?.($event)
+                : null
+            "
           >
             <div class="flex items-center justify-between gap-2">
               <span class="truncate">
@@ -296,6 +303,8 @@ const getStickyClass = (column: any) => {
               ]"
               @mousedown.stop="header.getResizeHandler()($event)"
               @touchstart.stop="header.getResizeHandler()($event)"
+              @click.stop
+              @pointerdown.stop
             ></div>
           </TableHead>
         </TableRow>
@@ -303,7 +312,7 @@ const getStickyClass = (column: any) => {
         <TableRow
           v-for="headerGroup in table.getHeaderGroups()"
           :key="'filter-' + headerGroup.id"
-          class="border-b"
+          class="border-b h-8"
         >
           <TableHead
             v-for="header in headerGroup.headers"
@@ -353,7 +362,7 @@ const getStickyClass = (column: any) => {
             <TableCell
               v-for="header in table.getFlatHeaders()"
               :key="'skeleton-cell-' + header.id"
-              class="p-4 align-middle border-r last:border-r-0"
+              class="p-3 align-middle border-r last:border-r-0"
               :style="{
                 width: `${header.getSize()}px`,
                 minWidth: `${header.getSize()}px`,
@@ -389,10 +398,21 @@ const getStickyClass = (column: any) => {
               }"
               :class="[
                 getStickyClass(cell.column),
-                'p-4 border-b border-r last:border-r-0 whitespace-nowrap',
+                'p-3 border-b border-r last:border-r-0 align-middle',
+                cell.column.columnDef.meta?.wrap
+                  ? 'whitespace-normal break-words'
+                  : 'truncate whitespace-nowrap',
               ]"
             >
-              <div>
+              <div
+                class="max-w-full"
+                :class="[cell.column.columnDef.meta?.wrap ? '' : 'truncate']"
+                :title="
+                  cell.column.columnDef.meta?.wrap
+                    ? ''
+                    : String(cell.getValue?.() ?? cell.renderValue?.() ?? '')
+                "
+              >
                 <FlexRender
                   :render="cell.column.columnDef.cell"
                   :props="cell.getContext()"

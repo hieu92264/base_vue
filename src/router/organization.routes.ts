@@ -6,19 +6,19 @@ const organizationRoutes: RouteRecordRaw[] = [
     path: '/organizations/permissions',
     name: 'organizations.permission',
     component: () => import('@/modules/(organization)/permission/index.vue'),
-    meta: { layouts: BaseLayout },
+    meta: { layouts: BaseLayout, permissionCodes: 'org.permissions' },
   },
   {
     path: '/organizations/user',
     name: 'organizations.user',
     component: () => import('@/modules/(organization)/user/index.vue'),
-    meta: { layouts: BaseLayout },
+    meta: { layouts: BaseLayout, permissionCodes: 'org.users' },
   },
   {
     path: '/organizations/employees',
     name: 'organizations.employees',
     component: () => import('@/modules/(organization)/employee/index.vue'),
-    meta: { layouts: BaseLayout },
+    meta: { layouts: BaseLayout, permissionCodes: 'org.employees' },
   },
 ]
 

@@ -33,14 +33,17 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   NProgress.start()
+
   const authStore = useAuthStore()
   const userStore = useUserStore()
+
+  const isGuestOnly = to.matched.some((r) => r.meta.guestOnly === true)
+  const isPublic = to.matched.some((r) => r.meta.public === true)
 
   if (authStore.access_token && !userStore.user) {
     try {
       const res = await AuthService.getCredentials()
       userStore.setProfile(res.data as any)
-      return next()
     } catch (e) {
       authStore.clearSession()
       userStore.clearProfile()
@@ -48,24 +51,26 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  const isGuestPage = to.meta.guestOnly
-
-  if (!authStore.access_token && !isGuestPage) {
+  if (!authStore.access_token && !isGuestOnly && !isPublic) {
     return next({ name: 'auth.login' })
   }
 
-  if (authStore.access_token && isGuestPage) {
-    return next({ name: 'home' })
+  if (authStore.access_token && isGuestOnly) {
+    return next({ name: 'dashboard' })
   }
 
-  const accessDenied = to.matched.some((record) => {
-    const code = record.meta.permissionCodes as string
-    return code && !userStore.can(code)
-  })
+  const requiredCodes = to.matched
+    .map((r) => r.meta.permissionCodes as string | string[] | undefined)
+    .flat()
+    .filter(Boolean) as string[]
 
-  if (accessDenied) {
-    return next({ name: '403' })
+  if (requiredCodes.length > 0) {
+    const denied = requiredCodes.some((code) => !userStore.can(code))
+    if (denied) return next({ name: '403' })
   }
+
+  const needsAuth = to.matched.some((r) => r.meta.authOnly === true)
+  if (needsAuth && !authStore.access_token) return next({ name: 'auth.login' })
 
   return next()
 })

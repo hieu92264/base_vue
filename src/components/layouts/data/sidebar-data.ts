@@ -1,15 +1,12 @@
 import { useUserStore } from '@/stores/user.store'
 import {
   Calendar,
-  CheckSquare,
-  HelpCircle,
   LayoutDashboard,
   Lock,
-  Package,
-  Palette,
-  PieChart,
-  Settings,
   UserCog,
+  Settings,
+  Palette,
+  HelpCircle,
 } from 'lucide-vue-next'
 
 export interface NavItem {
@@ -29,9 +26,28 @@ interface NavGroup {
 export const getSidebarData = () => {
   const userStore = useUserStore()
 
-  const check = (item: NavItem) => {
-    if (item.url === '/') return true
-    return userStore.can(item.code || '')
+  const canSee = (code?: string) => {
+    if (!code) return true
+    return userStore.can(code)
+  }
+
+  // lọc đệ quy: parent hiện nếu nó tự có quyền HOẶC còn child nào sau lọc
+  const filterItem = (item: NavItem): NavItem | null => {
+    const children = item.children?.map(filterItem).filter(Boolean) as
+      | NavItem[]
+      | undefined
+    const selfOk = canSee(item.code)
+    const childOk = !!children && children.length > 0
+
+    // item có url: cần selfOk
+    // item chỉ là group (không url): hiện nếu childOk
+    if (item.url) {
+      if (!selfOk) return null
+      return { ...item, children }
+    }
+
+    if (!childOk) return null
+    return { ...item, children }
   }
 
   const masterNavGroup: NavGroup[] = [
@@ -46,33 +62,30 @@ export const getSidebarData = () => {
       ],
     },
     {
-      title: 'Organization',
+      title: 'Quản lý tổ chức',
       items: [
         {
           title: 'Permission',
           url: '/organizations/permissions',
           icon: Lock,
-          code: '/organizations/permissions',
+          code: 'org.permissions',
         },
         {
-          title: 'Lịch làm việc',
-          url: '/calendar',
-          icon: Calendar,
-          badge: 'New',
+          title: 'Users',
+          url: '/organizations/user',
+          icon: UserCog,
+          code: 'org.users',
         },
-        { title: 'Phân tích dữ liệu', url: '/analytics', icon: PieChart },
       ],
     },
     {
-      title: 'Quản lý công việc',
+      title: 'Quản lý chung',
       items: [
         {
-          title: 'Danh sách Task',
-          url: '/tasks',
-          icon: CheckSquare,
-          code: 'tasks',
+          title: 'Home',
+          url: '/home',
+          icon: Calendar,
         },
-        { title: 'Dự án', url: '/projects', icon: Package, code: 'projects' },
       ],
     },
     {
@@ -82,7 +95,7 @@ export const getSidebarData = () => {
           title: 'Cài đặt',
           icon: Settings,
           children: [
-            { title: 'Hồ sơ', url: '/settings/profile', icon: UserCog },
+            { title: 'Hồ sơ', url: '/settings/profile', icon: UserCog }, // nếu cần thì thêm code
             { title: 'Giao diện', url: '/settings/appearance', icon: Palette },
           ],
         },
@@ -92,17 +105,10 @@ export const getSidebarData = () => {
   ]
 
   const filteredNavGroups: NavGroup[] = masterNavGroup
-    .map((group) => {
-      const filteredItems = group.items
-        .filter((item) => check(item))
-        .map((item) => ({
-          ...item,
-          children: item.children?.filter((child) => check(child)),
-        }))
-        .filter((item) => !item.children || item.children.length > 0)
-
-      return { ...group, items: filteredItems }
-    })
+    .map((group) => ({
+      ...group,
+      items: group.items.map(filterItem).filter(Boolean) as NavItem[],
+    }))
     .filter((group) => group.items.length > 0)
 
   return { navGroups: filteredNavGroups }
