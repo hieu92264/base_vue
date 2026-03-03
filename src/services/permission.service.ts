@@ -11,7 +11,7 @@ export class PermissionService {
 
   static async deletePermission(permissionId: number): Promise<any> {
     const response = await axiosInstance.delete(
-      `/organizations/permissions/${permissionId}`,
+      `/organizations/permissions/delete/${permissionId}`,
     )
   }
 

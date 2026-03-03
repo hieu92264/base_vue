@@ -1,4 +1,4 @@
-import type { IUser } from '@/common/types/entities'
+import type { IPermissionUser, IUser } from '@/common/types/entities'
 import axiosInstance from '@/configs/axios.config'
 import type { UserFormValues } from '@/modules/(organization)/user/-schemas/user.schema'
 
@@ -28,5 +28,35 @@ export class UserService {
 
   static async deleteUser(id: number): Promise<any> {
     await axiosInstance.delete(`/organizations/users/delete/${id}`)
+  }
+
+  static async getUserPermissions(userId: number): Promise<
+    ResponseBody<{
+      user_id: number
+      permission_ids: number[]
+      permissions: IPermissionUser[]
+    }>
+  > {
+    const res = await axiosInstance.get(
+      `/organizations/users/${userId}/permissions`,
+    )
+    return res.data
+  }
+
+  static async syncUserPermissions(
+    userId: number,
+    permission_ids: number[],
+  ): Promise<
+    ResponseBody<{
+      user_id: number
+      permission_ids: number[]
+    }>
+  > {
+    const res = await axiosInstance.put(
+      `/organizations/users/${userId}/permissions`,
+      { permission_ids },
+    )
+
+    return res.data
   }
 }

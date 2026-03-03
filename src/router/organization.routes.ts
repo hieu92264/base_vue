@@ -20,6 +20,13 @@ const organizationRoutes: RouteRecordRaw[] = [
     component: () => import('@/modules/(organization)/employee/index.vue'),
     meta: { layouts: BaseLayout, permissionCodes: 'org.employees' },
   },
+  {
+    path: '/organizations/user-permissions',
+    name: 'organizations.user-permissions',
+    component: () =>
+      import('@/modules/(organization)/user_permissions/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.user-permissions' },
+  },
 ]
 
 export default organizationRoutes

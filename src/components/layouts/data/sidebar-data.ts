@@ -7,6 +7,7 @@ import {
   Settings,
   Palette,
   HelpCircle,
+  ShieldCheck,
 } from 'lucide-vue-next'
 
 export interface NavItem {
@@ -65,16 +66,22 @@ export const getSidebarData = () => {
       title: 'Quản lý tổ chức',
       items: [
         {
-          title: 'Permission',
+          title: 'Quyền hạn',
           url: '/organizations/permissions',
           icon: Lock,
           code: 'org.permissions',
         },
         {
-          title: 'Users',
+          title: 'Người dùng',
           url: '/organizations/user',
           icon: UserCog,
           code: 'org.users',
+        },
+        {
+          title: 'Gán quyền user',
+          url: '/organizations/user-permissions',
+          icon: ShieldCheck,
+          code: 'org.user-permissions',
         },
       ],
     },
