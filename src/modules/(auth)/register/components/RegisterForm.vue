@@ -11,6 +11,13 @@ import { cn } from '@/lib/utils'
 
 // Bạn tạo hook này tương tự useDoLoginMutation
 import { useDoRegisterMutation } from '@/modules/(auth)/hooks/use-auth'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
@@ -23,6 +30,7 @@ const form = reactive({
   email: '',
   password: '',
   verify_password: '',
+  user_type: 'tenant',
 })
 
 const passwordMismatch = computed(() => {
@@ -44,6 +52,7 @@ const handleSubmit = (event: Event) => {
     email: form.email,
     password: form.password,
     verify_password: form.verify_password,
+    user_type: form.user_type as any,
   })
 }
 </script>
@@ -136,6 +145,32 @@ const handleSubmit = (event: Event) => {
         >
           Mật khẩu xác nhận không khớp.
         </p>
+      </Field>
+
+      <Field>
+        <FieldLabel
+          for="user_type"
+          class="dark:text-zinc-300"
+        >
+          Bạn đăng ký với vai trò
+        </FieldLabel>
+
+        <Select
+          v-model="form.user_type"
+          :disabled="isPending"
+        >
+          <SelectTrigger
+            id="user_type"
+            class="w-full"
+          >
+            <SelectValue placeholder="Chọn vai trò" />
+          </SelectTrigger>
+
+          <SelectContent>
+            <SelectItem value="tenant">Tenant (Người thuê)</SelectItem>
+            <SelectItem value="landlord">Landlord (Chủ nhà)</SelectItem>
+          </SelectContent>
+        </Select>
       </Field>
 
       <Button
