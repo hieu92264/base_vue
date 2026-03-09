@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import FeaturedRoomGrid from '@/modules/(general)/home/components/FeaturedRoomGrid.vue'
 import HomeSlider from '@/modules/(general)/home/components/HomeSlider.vue'
 import QuickSearchCard from '@/modules/(general)/home/components/QuickSearchCard.vue'
@@ -9,22 +10,41 @@ import {
   useSlidersQuery,
   useWardsQuery,
 } from '@/modules/(general)/home/hooks/use-home'
-import { watchEffect } from 'vue'
 
 const { data: sliders, isLoading: isLoadingSliders } = useSlidersQuery()
 const { data: featuredRooms, isLoading: isLoadingFeaturedRooms } =
   useFeatureRoomsQuery()
+
 const { data: cities, isLoading: isLoadingCities } = useCitiesQuery()
 const { data: districts, isLoading: isLoadingDistricts } = useDistrictsQuery()
 const { data: wards, isLoading: isLoadingWards } = useWardsQuery()
 
-watchEffect(() => {
-  console.log('Sliders:', sliders.value)
-  console.log('Featured Rooms:', featuredRooms.value)
-  console.log('Cities:', cities.value)
-  console.log('Districts:', districts.value)
-  console.log('Wards:', wards.value)
-})
+const sliderItems = computed(() => sliders.value ?? [])
+const featuredItems = computed(() => featuredRooms.value ?? [])
+const cityItems = computed(() => cities.value ?? [])
+const districtItems = computed(() => districts.value ?? [])
+const wardItems = computed(() => wards.value ?? [])
+
+const isLoadingLocations = computed(
+  () =>
+    isLoadingCities.value || isLoadingDistricts.value || isLoadingWards.value,
+)
+
+function handleSearch(payload: {
+  keyword: string
+  city_id: number | ''
+  district_id: number | ''
+  ward_id: number | ''
+  min_price?: number
+  max_price?: number
+  min_area?: number
+  max_area?: number
+}) {
+  console.log('Search payload:', payload)
+
+  // TODO:
+  // router.push({ name: 'search', query: ...payload })
+}
 </script>
 
 <template>
@@ -39,7 +59,7 @@ watchEffect(() => {
           class="relative overflow-hidden rounded-3xl border border-border/60 bg-muted/40 shadow-2xl"
         >
           <HomeSlider
-            :items="sliders || []"
+            :items="sliderItems"
             :is-loading="isLoadingSliders"
           />
         </div>
@@ -52,10 +72,11 @@ watchEffect(() => {
       >
         <div class="rounded-[1.35rem] bg-card/80 ring-1 ring-border/50">
           <QuickSearchCard
-            :cities="cities || []"
-            :districts="districts || []"
-            :wards="wards || []"
-            :loading="isLoadingCities || isLoadingDistricts || isLoadingWards"
+            :cities="cityItems"
+            :districts="districtItems"
+            :wards="wardItems"
+            :loading="isLoadingLocations"
+            @search="handleSearch"
           />
         </div>
       </div>
@@ -74,7 +95,7 @@ watchEffect(() => {
       </div>
 
       <FeaturedRoomGrid
-        :items="featuredRooms || []"
+        :items="featuredItems"
         :is-loading="isLoadingFeaturedRooms"
       />
     </section>
