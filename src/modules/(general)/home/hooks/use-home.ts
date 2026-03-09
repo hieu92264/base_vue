@@ -1,6 +1,7 @@
 import type { ContactFormValues } from '@/modules/(general)/home/-schemas/contact.schema'
-import { HomeService } from '@/services'
+import { HomeService, type RoomSearchParams } from '@/services/home.service'
 import { useMutation, useQuery } from '@tanstack/vue-query'
+import { computed, type ComputedRef, type Ref } from 'vue'
 
 export enum HomeQueryKeys {
   GET_SLIDERS = 'get_sliders',
@@ -8,9 +9,9 @@ export enum HomeQueryKeys {
   GET_CITIES = 'get_cities',
   GET_DISTRICTS = 'get_districts',
   GET_WARDS = 'get_wards',
+  GET_ROOMS = 'get_rooms',
+  GET_ROOM_DETAIL = 'get_room_detail',
 }
-
-type TQueryKey = readonly [typeof HomeQueryKeys, ...any[]]
 
 export const useSlidersQuery = () => {
   return useQuery({
@@ -23,6 +24,15 @@ export const useFeatureRoomsQuery = () => {
   return useQuery({
     queryKey: [HomeQueryKeys.GET_FEATURE_ROOMS],
     queryFn: HomeService.featureRooms,
+  })
+}
+
+export const useRoomsQuery = (
+  params: Ref<RoomSearchParams> | ComputedRef<RoomSearchParams>,
+) => {
+  return useQuery({
+    queryKey: computed(() => [HomeQueryKeys.GET_ROOMS, params.value]),
+    queryFn: () => HomeService.searchRooms(params.value),
   })
 }
 
@@ -47,10 +57,13 @@ export const useWardsQuery = () => {
   })
 }
 
-export const useRoomDetailsQuery = (roomId: number) => {
+export const useRoomDetailsQuery = (
+  slugOrId: Ref<string> | ComputedRef<string>,
+) => {
   return useQuery({
-    queryKey: ['room_details', roomId],
-    queryFn: () => HomeService.roomDetails(roomId),
+    queryKey: computed(() => [HomeQueryKeys.GET_ROOM_DETAIL, slugOrId.value]),
+    queryFn: () => HomeService.roomDetails(slugOrId.value),
+    enabled: computed(() => !!slugOrId.value),
   })
 }
 
@@ -63,11 +76,5 @@ export const useContactMutaion = () => {
       formData: ContactFormValues
       id: string
     }) => HomeService.contact(formData, id),
-    onSuccess: () => {
-      console.log('Contact sent success')
-    },
-    onError: (err) => {
-      console.error('Contact sent error', err)
-    },
   })
 }

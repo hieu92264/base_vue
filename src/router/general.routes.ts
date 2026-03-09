@@ -6,14 +6,21 @@ const generalRoutes: RouteRecordRaw[] = [
     path: '/home',
     name: 'general.home',
     component: () => import('@/modules/(general)/home/index.vue'),
-    meta: { layouts: BaseLayout, authOnly: true },
+    meta: { layouts: BaseLayout, public: true, fullWidth: true },
   },
   {
-    path: '/rooms/:id',
+    path: '/rooms',
+    name: 'general.rooms',
+    component: () =>
+      import('@/modules/(general)/home/components/RoomListPage.vue'),
+    meta: { layouts: BaseLayout, public: true, fullWidth: true },
+  },
+  {
+    path: '/rooms/:slugOrId',
     name: 'general.home.room-detail',
     component: () =>
       import('@/modules/(general)/home/components/RoomDetailPage.vue'),
-    meta: { layouts: BaseLayout, authOnly: true },
+    meta: { layouts: BaseLayout, public: true, fullWidth: true },
   },
 ]
 

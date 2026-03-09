@@ -50,8 +50,9 @@ export interface IPermission extends IBaseEntity {
 }
 
 export interface ISlider extends IBaseEntity {
-  title?: string
-  image_url: string | undefined
+  title?: string | null
+  image_url: string | null
+  image_path?: string | null
   link_url?: string | null
   sort_order: number
   remark?: string | null

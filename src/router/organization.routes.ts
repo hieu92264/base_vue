@@ -33,6 +33,12 @@ const organizationRoutes: RouteRecordRaw[] = [
     component: () => import('@/modules/(organization)/categories/index.vue'),
     meta: { layouts: BaseLayout, permissionCodes: 'org.categories' },
   },
+  {
+    path: '/organizations/sliders',
+    name: 'organizations.sliders',
+    component: () => import('@/modules/(organization)/slider/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.sliders' },
+  },
 ]
 
 export default organizationRoutes

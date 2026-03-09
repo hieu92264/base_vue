@@ -45,7 +45,7 @@ function formatArea(v: unknown) {
 
 <template>
   <RouterLink
-    :to="`/rooms/${room.id}`"
+    :to="`/rooms/${room.slug || room.id}`"
     class="group block"
   >
     <Card

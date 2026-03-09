@@ -89,11 +89,14 @@ const roomIdNum = computed(() => {
   return Number.isFinite(n) ? n : 0
 })
 
-const roomQuery = useRoomDetailsQuery(roomIdNum.value)
+const roomKey = computed(() => String(route.params.slugOrId ?? ''))
+
+const roomQuery = useRoomDetailsQuery(roomKey)
 
 const roomDetails = computed(
   () => roomQuery.data.value as RoomDetail | undefined,
 )
+
 const isLoading = computed(() => roomQuery.isLoading.value)
 const isError = computed(() => roomQuery.isError.value)
 
@@ -248,7 +251,7 @@ watch(
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-6xl px-4 py-8">
+  <div class="mx-auto! w-full max-w-6xl! px-4 py-8">
     <!-- Header bar -->
     <div
       class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"

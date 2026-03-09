@@ -90,6 +90,12 @@ export const getSidebarData = () => {
           icon: ShieldCheck,
           code: 'org.user-permissions',
         },
+        {
+          title: 'Slider',
+          url: '/organizations/sliders',
+          icon: Calendar,
+          code: 'org.sliders',
+        },
       ],
     },
     {

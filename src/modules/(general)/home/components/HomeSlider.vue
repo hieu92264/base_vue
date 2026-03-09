@@ -15,16 +15,24 @@
         @error="handleImageError"
       />
 
-      <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
-      <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_10%,rgba(255,255,255,0.18),transparent_45%)]" />
+      <div
+        class="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"
+      />
+      <div
+        class="absolute inset-0 bg-[radial-gradient(circle_at_30%_10%,rgba(255,255,255,0.18),transparent_45%)]"
+      />
 
       <div class="absolute inset-x-0 bottom-0">
         <div class="mx-auto max-w-7xl p-6 text-white md:p-10">
           <p class="mb-3 text-xs uppercase tracking-[0.24em] text-white/70">
             Greenland rental
           </p>
-          <h1 class="max-w-3xl text-3xl leading-tight font-semibold md:text-5xl">
-            {{ activeItem?.title || 'Tim phong de dang, dat nhanh trong vai phut' }}
+          <h1
+            class="max-w-3xl text-3xl leading-tight font-semibold md:text-5xl"
+          >
+            {{
+              activeItem?.title || 'Tim phong de dang, dat nhanh trong vai phut'
+            }}
           </h1>
         </div>
       </div>
@@ -57,7 +65,9 @@
           type="button"
           :class="[
             'h-2.5 rounded-full transition-all',
-            i === index ? 'w-8 bg-white' : 'w-2.5 bg-white/40 hover:bg-white/70',
+            i === index
+              ? 'w-8 bg-white'
+              : 'w-2.5 bg-white/40 hover:bg-white/70',
           ]"
           @click="goTo(i)"
         />
@@ -86,11 +96,11 @@ const activeItem = computed(() => sortedItems.value[index.value] ?? null)
 let timer: ReturnType<typeof setInterval> | null = null
 
 function displayImage(item: ISlider) {
-  return (
-    item.image_url ||
-    item.link_url ||
-    'https://placehold.co/1600x800?text=No+Image'
-  )
+  if (item.image_url) {
+    return item.image_url
+  }
+
+  return 'https://placehold.co/1600x800?text=No+Image'
 }
 
 function handleImageError(e: Event) {
