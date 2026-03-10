@@ -25,9 +25,8 @@ export type RoomSearchParams = {
 
 export class HomeService {
   static async sliders(): Promise<ISlider[]> {
-    const response: ResponseBody<ISlider[]> = await axiosInstance.get(
-      '/organizations/sliders',
-    )
+    const response: ResponseBody<ISlider[]> =
+      await axiosInstance.get('/sliders')
     return response?.data ?? []
   }
 
@@ -48,13 +47,25 @@ export class HomeService {
     return response?.data ?? response
   }
 
-  static async districts(): Promise<IDistrict[]> {
-    const response: any = await axiosInstance.get('/locations/districts')
+  static async districts(city_id?: number | ''): Promise<IDistrict[]> {
+    const response: any = await axiosInstance.get('/locations/districts', {
+      params: {
+        ...(city_id ? { city_id } : {}),
+      },
+    })
     return response?.data ?? response
   }
 
-  static async wards(): Promise<IWard[]> {
-    const response: any = await axiosInstance.get('/locations/wards')
+  static async wards(params?: {
+    district_id?: number | ''
+    city_id?: number | ''
+  }): Promise<IWard[]> {
+    const response: any = await axiosInstance.get('/locations/wards', {
+      params: {
+        ...(params?.district_id ? { district_id: params.district_id } : {}),
+        ...(params?.city_id ? { city_id: params.city_id } : {}),
+      },
+    })
     return response?.data ?? response
   }
 
