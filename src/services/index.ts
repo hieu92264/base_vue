@@ -1,3 +1,4 @@
 export * from './auth.service'
 export * from './storage.service'
 export * from './home.service'
+export * from './landlord.service'

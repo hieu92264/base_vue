@@ -9,6 +9,8 @@ import {
   HelpCircle,
   ShieldCheck,
   Tag,
+  House,
+  ClipboardList,
 } from 'lucide-vue-next'
 
 export interface NavItem {
@@ -33,7 +35,10 @@ export const getSidebarData = () => {
     return userStore.can(code)
   }
 
-  // lọc đệ quy: parent hiện nếu nó tự có quyền HOẶC còn child nào sau lọc
+  const isLandlord =
+    userStore.user?.profile?.user_type === 'landlord' ||
+    userStore.user?.username === 'admin'
+
   const filterItem = (item: NavItem): NavItem | null => {
     const children = item.children?.map(filterItem).filter(Boolean) as
       | NavItem[]
@@ -41,8 +46,6 @@ export const getSidebarData = () => {
     const selfOk = canSee(item.code)
     const childOk = !!children && children.length > 0
 
-    // item có url: cần selfOk
-    // item chỉ là group (không url): hiện nếu childOk
     if (item.url) {
       if (!selfOk) return null
       return { ...item, children }
@@ -51,6 +54,26 @@ export const getSidebarData = () => {
     if (!childOk) return null
     return { ...item, children }
   }
+
+  const landlordGroup: NavGroup[] = isLandlord
+    ? [
+        {
+          title: 'Chủ nhà',
+          items: [
+            {
+              title: 'Dashboard chủ nhà',
+              url: '/landlord/dashboard',
+              icon: House,
+            },
+            {
+              title: 'Danh sách tin của tôi',
+              url: '/landlord/my-rooms',
+              icon: ClipboardList,
+            },
+          ],
+        },
+      ]
+    : []
 
   const masterNavGroup: NavGroup[] = [
     {
@@ -63,6 +86,7 @@ export const getSidebarData = () => {
         },
       ],
     },
+    ...landlordGroup,
     {
       title: 'Quản lý tổ chức',
       items: [
@@ -115,7 +139,7 @@ export const getSidebarData = () => {
           title: 'Cài đặt',
           icon: Settings,
           children: [
-            { title: 'Hồ sơ', url: '/settings/profile', icon: UserCog }, // nếu cần thì thêm code
+            { title: 'Hồ sơ', url: '/settings/profile', icon: UserCog },
             { title: 'Giao diện', url: '/settings/appearance', icon: Palette },
           ],
         },

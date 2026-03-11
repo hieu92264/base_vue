@@ -9,6 +9,7 @@ import organizationRoutes from '@/router/organization.routes'
 import Dashboard from '@/views/Dashboard.vue'
 import NProgress from '@/configs/nprogress.config'
 import generalRoutes from '@/router/general.routes'
+import landlordRoutes from './landlord.routes'
 
 // export const layouts = {
 //   blank: () => import('@/components/layouts/BlankLayout.vue'),
@@ -26,6 +27,7 @@ const router = createRouter({
     },
     ...authRoutes,
     ...organizationRoutes,
+    ...landlordRoutes,
     ...generalRoutes,
     ...errorRoutes,
   ],
