@@ -39,6 +39,13 @@ const organizationRoutes: RouteRecordRaw[] = [
     component: () => import('@/modules/(organization)/slider/index.vue'),
     meta: { layouts: BaseLayout, permissionCodes: 'org.sliders' },
   },
+  {
+    path: '/organizations/room-moderation',
+    name: 'organizations.room-moderation',
+    component: () =>
+      import('@/modules/(organization)/room-moderation/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.room-moderation' },
+  },
 ]
 
 export default organizationRoutes

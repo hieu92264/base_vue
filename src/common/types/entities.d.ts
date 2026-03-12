@@ -144,14 +144,24 @@ export interface IRoom extends IBaseEntity {
   ward?: IWard | null
 
   photos?: IRoomPhoto[] | null
+
+  post_status?: 'pending' | 'approved' | 'rejected' | 'hidden'
+  moderated_by?: number | null
+  moderated_at?: string | null
+  moderation_note?: string | null
 }
 
 export interface IRoomPhoto {
   id: number
   room_id: number
   photo_url: string | null
+  photo_path?: string | null
+  photo_version?: number | string | null
+  preview_url?: string | null
   is_cover: boolean
   sort_order: number
+  created_at?: string | null
+  updated_at?: string | null
 }
 
 export type CommentVisibilityStatus = 'visible' | 'hidden'

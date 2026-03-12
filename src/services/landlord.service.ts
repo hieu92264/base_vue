@@ -194,4 +194,29 @@ export class LandlordService {
       `/organizations/landlord/rooms/${roomId}/photos/delete/${photoId}`,
     )
   }
+
+  static async getModerationRooms(params?: {
+    keyword?: string
+    post_status?: string
+    page?: number
+    per_page?: number
+  }): Promise<PaginatedResponse<IRoom>> {
+    return await axiosInstance.get('/organizations/rooms/moderation', {
+      params,
+    })
+  }
+
+  static async updateModerationStatus(
+    roomId: number,
+    payload: {
+      post_status: 'pending' | 'approved' | 'rejected' | 'hidden'
+      moderation_note?: string | null
+    },
+  ): Promise<IRoom> {
+    const response: any = await axiosInstance.patch(
+      `/organizations/rooms/moderation/update-status/${roomId}`,
+      payload,
+    )
+    return response?.data ?? response
+  }
 }

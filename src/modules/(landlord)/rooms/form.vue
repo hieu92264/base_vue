@@ -24,6 +24,7 @@ import {
   type RoomFormValues,
 } from './-schemas/room-form.schema'
 import RoomPhotoManager from './components/RoomPhotoManager.vue'
+import { normalizePhoto, normalizePhotos } from '@/common/utils/photo.util'
 
 const route = useRoute()
 const router = useRouter()
@@ -103,6 +104,30 @@ const wardsQuery = useQuery({
 const photos = ref<IRoomPhoto[]>([])
 const isSaving = ref(false)
 const isUploading = ref(false)
+const isMutatingPhotos = ref(false)
+
+const revokePreviewUrl = (url?: string | null) => {
+  if (url && String(url).startsWith('blob:')) {
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+  }
+}
+
+const setPhotos = (items: IRoomPhoto[] = []) => {
+  photos.value = normalizePhotos(items)
+}
+
+const replaceTempPhoto = (tempId: number, nextPhoto: IRoomPhoto) => {
+  const index = photos.value.findIndex((p) => p.id === tempId)
+  if (index >= 0) {
+    photos.value[index] = normalizePhoto(nextPhoto)
+  }
+}
+
+const getSortedPhotos = (items: IRoomPhoto[] = photos.value) =>
+  [...items].sort((a, b) => {
+    if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order
+    return a.id - b.id
+  })
 
 watch(
   () => roomDetailQuery.data.value,
@@ -130,7 +155,7 @@ watch(
           | 'occupied') ?? 'pending',
     })
 
-    photos.value = room.photos ?? []
+    setPhotos(room.photos ?? [])
   },
   { immediate: true },
 )
@@ -194,7 +219,8 @@ const saveRoom = form.handleSubmit(async (values: RoomFormValues) => {
 
 const reloadPhotos = async () => {
   if (!roomId.value) return
-  photos.value = await LandlordService.getRoomPhotos(roomId.value)
+  const serverPhotos = await LandlordService.getRoomPhotos(roomId.value)
+  setPhotos(serverPhotos)
 }
 
 const handleUploadPhotos = async (files: FileList) => {
@@ -203,19 +229,55 @@ const handleUploadPhotos = async (files: FileList) => {
     return
   }
 
+  if (!files.length) return
+
   isUploading.value = true
 
   try {
-    const currentLength = photos.value.length
+    let currentLength = photos.value.length
 
     for (let i = 0; i < files.length; i++) {
       const file = files.item(i)
       if (!file) continue
 
-      await LandlordService.uploadRoomPhoto(roomId.value, file, {
+      const previewUrl = URL.createObjectURL(file)
+      const tempId = -(Date.now() + i)
+
+      const tempPhoto: IRoomPhoto = normalizePhoto({
+        id: tempId,
+        room_id: roomId.value,
+        photo_url: previewUrl,
+        preview_url: previewUrl,
+        photo_path: null,
+        photo_version: Date.now(),
         is_cover: currentLength === 0 && i === 0,
         sort_order: currentLength + i,
       })
+
+      photos.value = [...photos.value, tempPhoto]
+
+      try {
+        const uploaded = await LandlordService.uploadRoomPhoto(
+          roomId.value,
+          file,
+          {
+            is_cover: currentLength === 0 && i === 0,
+            sort_order: currentLength + i,
+          },
+        )
+
+        replaceTempPhoto(tempId, {
+          ...uploaded,
+          preview_url: null,
+        })
+
+        currentLength += 1
+      } catch (error) {
+        console.error(error)
+        photos.value = photos.value.filter((p) => p.id !== tempId)
+        revokePreviewUrl(previewUrl)
+        throw error
+      }
     }
 
     await reloadPhotos()
@@ -229,69 +291,120 @@ const handleUploadPhotos = async (files: FileList) => {
 }
 
 const handleSetCover = async (photo: IRoomPhoto) => {
-  if (!roomId.value || !photo.id) return
+  if (!roomId.value || photo.id <= 0) return
+  if (isMutatingPhotos.value) return
+
+  const previousPhotos = structuredClone(photos.value)
+  isMutatingPhotos.value = true
 
   try {
+    setPhotos(
+      photos.value.map((p) => ({
+        ...p,
+        is_cover: p.id === photo.id,
+      })),
+    )
+
     await LandlordService.updateRoomPhoto(roomId.value, photo.id, {
       is_cover: true,
     })
+
     await reloadPhotos()
     toast.success('Đã cập nhật ảnh cover')
   } catch (error) {
     console.error(error)
+    photos.value = previousPhotos
     toast.error('Cập nhật ảnh cover thất bại')
+  } finally {
+    isMutatingPhotos.value = false
   }
 }
 
 const handleDeletePhoto = async (photo: IRoomPhoto) => {
-  if (!roomId.value || !photo.id) return
+  if (!roomId.value || photo.id <= 0) return
+  if (isMutatingPhotos.value) return
+
+  const previousPhotos = structuredClone(photos.value)
+  isMutatingPhotos.value = true
 
   try {
+    photos.value = photos.value.filter((p) => p.id !== photo.id)
+
+    if (photo.preview_url) {
+      revokePreviewUrl(photo.preview_url)
+    }
+
     await LandlordService.deleteRoomPhoto(roomId.value, photo.id)
     await reloadPhotos()
     toast.success('Đã xóa ảnh')
   } catch (error) {
     console.error(error)
+    photos.value = previousPhotos
     toast.error('Xóa ảnh thất bại')
+  } finally {
+    isMutatingPhotos.value = false
   }
 }
 
 const handleMovePhoto = async (photo: IRoomPhoto, direction: 'up' | 'down') => {
-  if (!roomId.value || !photo.id) return
+  if (!roomId.value || photo.id <= 0) return
+  if (isMutatingPhotos.value) return
 
-  const sorted = [...photos.value].sort(
-    (a, b) => Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0),
-  )
-
-  const index = sorted.findIndex((p) => p.id === photo.id)
-  if (index < 0) return
-
-  const targetIndex = direction === 'up' ? index - 1 : index + 1
-  if (targetIndex < 0 || targetIndex >= sorted.length) return
-
-  const temp = sorted[index]!
-  sorted[index] = sorted[targetIndex]!
-  sorted[targetIndex] = temp
-
-  const items = sorted
-    .filter((item) => item.id != null)
-    .map((item, idx) => ({
-      id: Number(item.id),
-      sort_order: idx,
-    }))
+  const previousPhotos = structuredClone(photos.value)
+  isMutatingPhotos.value = true
 
   try {
-    await LandlordService.sortRoomPhotos(roomId.value, items)
+    const sorted = getSortedPhotos()
+    const currentIndex = sorted.findIndex((p) => p.id === photo.id)
+
+    if (currentIndex < 0) return
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
+
+    if (targetIndex < 0 || targetIndex >= sorted.length) return
+
+    const currentPhoto = sorted[currentIndex]
+    const targetPhoto = sorted[targetIndex]
+
+    if (!currentPhoto || !targetPhoto) return
+
+    sorted[currentIndex] = targetPhoto
+    sorted[targetIndex] = currentPhoto
+
+    const reordered: IRoomPhoto[] = sorted.map((item, index) => ({
+      ...item,
+      sort_order: index,
+    }))
+
+    setPhotos(reordered)
+
+    await LandlordService.sortRoomPhotos(
+      roomId.value,
+      reordered
+        .filter((item) => item.id > 0)
+        .map((item) => ({
+          id: item.id,
+          sort_order: item.sort_order,
+        })),
+    )
+
     await reloadPhotos()
     toast.success('Đã cập nhật thứ tự ảnh')
   } catch (error) {
     console.error(error)
+    photos.value = previousPhotos
     toast.error('Cập nhật thứ tự ảnh thất bại')
+  } finally {
+    isMutatingPhotos.value = false
   }
 }
 
 const pageTitle = computed(() =>
   isEdit.value ? 'Cập nhật tin đăng' : 'Tạo tin đăng mới',
+)
+
+const isPhotoActionDisabled = computed(
+  () => isUploading.value || isMutatingPhotos.value,
 )
 </script>
 
@@ -406,7 +519,7 @@ const pageTitle = computed(() =>
                 <FormLabel>Danh mục</FormLabel>
                 <FormControl>
                   <select
-                    class="w-full rounded-md border px-3 py-2 bg-background"
+                    class="w-full rounded-md border bg-background px-3 py-2"
                     :value="form.values.category_id ?? ''"
                     @change="
                       form.setFieldValue(
@@ -436,7 +549,7 @@ const pageTitle = computed(() =>
                 <FormLabel>Loại bài đăng</FormLabel>
                 <FormControl>
                   <select
-                    class="w-full rounded-md border px-3 py-2 bg-background"
+                    class="w-full rounded-md border bg-background px-3 py-2"
                     :value="form.values.post_type_id ?? ''"
                     @change="
                       form.setFieldValue(
@@ -466,7 +579,7 @@ const pageTitle = computed(() =>
                 <FormLabel>Trạng thái thuê</FormLabel>
                 <FormControl>
                   <select
-                    class="w-full rounded-md border px-3 py-2 bg-background"
+                    class="w-full rounded-md border bg-background px-3 py-2"
                     :value="form.values.booking_status ?? 'pending'"
                     @change="
                       form.setFieldValue(
@@ -496,7 +609,7 @@ const pageTitle = computed(() =>
                 <FormLabel>Tỉnh/Thành phố</FormLabel>
                 <FormControl>
                   <select
-                    class="w-full rounded-md border px-3 py-2 bg-background"
+                    class="w-full rounded-md border bg-background px-3 py-2"
                     :value="form.values.city_id ?? ''"
                     @change="
                       form.setFieldValue(
@@ -526,7 +639,7 @@ const pageTitle = computed(() =>
                 <FormLabel>Quận/Huyện</FormLabel>
                 <FormControl>
                   <select
-                    class="w-full rounded-md border px-3 py-2 bg-background"
+                    class="w-full rounded-md border bg-background px-3 py-2"
                     :value="form.values.district_id ?? ''"
                     @change="
                       form.setFieldValue(
@@ -556,7 +669,7 @@ const pageTitle = computed(() =>
                 <FormLabel>Phường/Xã</FormLabel>
                 <FormControl>
                   <select
-                    class="w-full rounded-md border px-3 py-2 bg-background"
+                    class="w-full rounded-md border bg-background px-3 py-2"
                     :value="form.values.ward_id ?? ''"
                     @change="
                       form.setFieldValue(
@@ -604,7 +717,7 @@ const pageTitle = computed(() =>
                 <FormLabel>Trạng thái hiển thị</FormLabel>
                 <FormControl>
                   <select
-                    class="w-full rounded-md border px-3 py-2 bg-background"
+                    class="w-full rounded-md border bg-background px-3 py-2"
                     :value="form.values.isactive ?? 'Y'"
                     @change="
                       form.setFieldValue(
@@ -649,7 +762,7 @@ const pageTitle = computed(() =>
       <CardContent>
         <RoomPhotoManager
           :photos="photos"
-          :disabled="isUploading"
+          :disabled="isPhotoActionDisabled"
           @upload="handleUploadPhotos"
           @set-cover="handleSetCover"
           @delete="handleDeletePhoto"
