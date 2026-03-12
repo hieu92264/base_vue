@@ -1,5 +1,13 @@
 import type { PaginatedResponse } from '@/common/types/api'
-import type { ICategory, IPostType, IRoom } from '@/common/types/entities'
+import type {
+  ICategory,
+  ICity,
+  IDistrict,
+  IPostType,
+  IRoom,
+  IRoomPhoto,
+  IWard,
+} from '@/common/types/entities'
 import axiosInstance from '@/configs/axios.config'
 
 export type LandlordRoomPayload = {
@@ -16,12 +24,6 @@ export type LandlordRoomPayload = {
   area?: number | null
   description?: string | null
   booking_status?: 'pending' | 'confirmed' | 'available' | 'occupied'
-  photos?: Array<{
-    id?: number
-    photo_url: string
-    is_cover?: boolean
-    sort_order?: number
-  }>
 }
 
 export type LandlordRoomSearchParams = {
@@ -100,12 +102,96 @@ export class LandlordService {
   }
 
   static async getCategories(): Promise<ICategory[]> {
-    const response: any = await axiosInstance.get('/organizations/categories')
-    return Object.values(response?.data ?? response ?? {}) as ICategory[]
+    const response: any = await axiosInstance.get('/categories/options')
+    return response?.data ?? response ?? []
   }
 
   static async getPostTypes(): Promise<IPostType[]> {
     const response: any = await axiosInstance.get('/post-types/options')
     return response?.data ?? response ?? []
+  }
+
+  static async getCities(): Promise<ICity[]> {
+    const response: any = await axiosInstance.get('/locations/cities')
+    return response?.data ?? response ?? []
+  }
+
+  static async getDistricts(city_id?: number | ''): Promise<IDistrict[]> {
+    const response: any = await axiosInstance.get('/locations/districts', {
+      params: {
+        ...(city_id ? { city_id } : {}),
+      },
+    })
+    return response?.data ?? response ?? []
+  }
+
+  static async getWards(params?: {
+    city_id?: number | ''
+    district_id?: number | ''
+  }): Promise<IWard[]> {
+    const response: any = await axiosInstance.get('/locations/wards', {
+      params: {
+        ...(params?.city_id ? { city_id: params.city_id } : {}),
+        ...(params?.district_id ? { district_id: params.district_id } : {}),
+      },
+    })
+    return response?.data ?? response ?? []
+  }
+
+  static async getRoomPhotos(roomId: number): Promise<IRoomPhoto[]> {
+    const response: any = await axiosInstance.get(
+      `/organizations/landlord/rooms/${roomId}/photos`,
+    )
+    return response?.data ?? response ?? []
+  }
+
+  static async uploadRoomPhoto(
+    roomId: number,
+    file: File,
+    payload?: { is_cover?: boolean; sort_order?: number },
+  ): Promise<IRoomPhoto> {
+    const formData = new FormData()
+    formData.append('image', file)
+    formData.append('is_cover', String(payload?.is_cover ? 1 : 0))
+    formData.append('sort_order', String(payload?.sort_order ?? 0))
+
+    const response: any = await axiosInstance.post(
+      `/organizations/landlord/rooms/${roomId}/photos/upload`,
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      },
+    )
+
+    return response?.data ?? response
+  }
+
+  static async updateRoomPhoto(
+    roomId: number,
+    photoId: number,
+    payload: { is_cover?: boolean; sort_order?: number },
+  ): Promise<IRoomPhoto> {
+    const response: any = await axiosInstance.patch(
+      `/organizations/landlord/rooms/${roomId}/photos/update/${photoId}`,
+      payload,
+    )
+    return response?.data ?? response
+  }
+
+  static async sortRoomPhotos(
+    roomId: number,
+    items: Array<{ id: number; sort_order: number }>,
+  ): Promise<IRoomPhoto[]> {
+    const response: any = await axiosInstance.patch(
+      `/organizations/landlord/rooms/${roomId}/photos/sort`,
+      { items },
+    )
+    return response?.data ?? response ?? []
+  }
+
+  static async deleteRoomPhoto(roomId: number, photoId: number): Promise<void> {
+    await axiosInstance.delete(
+      `/organizations/landlord/rooms/${roomId}/photos/delete/${photoId}`,
+    )
   }
 }

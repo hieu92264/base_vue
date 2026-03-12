@@ -39,6 +39,9 @@ import {
   useLandlordRoomsQuery,
   useUpdateLandlordRoomMutation,
 } from './hooks/use-landlord-rooms'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const filters = ref({
   keyword: '',
@@ -181,7 +184,7 @@ const applyFilters = () => {
         </p>
       </div>
 
-      <Button @click="openCreateModal">
+      <Button @click="router.push({ name: 'landlord.my-rooms.create' })">
         <Plus class="mr-2 h-4 w-4" />
         Tạo tin mới
       </Button>
@@ -347,10 +350,16 @@ const applyFilters = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    @click="openEditModal(room)"
+                    @click="
+                      router.push({
+                        name: 'landlord.my-rooms.edit',
+                        params: { id: room.id },
+                      })
+                    "
                   >
                     <Pencil class="h-4 w-4" />
                   </Button>
+
                   <Button
                     variant="destructive"
                     size="sm"
