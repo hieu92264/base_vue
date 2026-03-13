@@ -11,6 +11,7 @@ import {
   Tag,
   House,
   ClipboardList,
+  FileCheck,
 } from 'lucide-vue-next'
 
 export interface NavItem {
@@ -119,6 +120,12 @@ export const getSidebarData = () => {
           url: '/organizations/sliders',
           icon: Calendar,
           code: 'org.sliders',
+        },
+        {
+          title: 'Duyệt tin đăng',
+          url: '/organizations/room-moderation',
+          icon: FileCheck,
+          code: 'org.room-moderation',
         },
       ],
     },
