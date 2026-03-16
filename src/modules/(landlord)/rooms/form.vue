@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, toRaw, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useForm } from 'vee-validate'
@@ -123,6 +123,16 @@ const replaceTempPhoto = (tempId: number, nextPhoto: IRoomPhoto) => {
   }
 }
 
+const clonePhotosSnapshot = (
+  items: IRoomPhoto[] = photos.value,
+): IRoomPhoto[] => items.map((item) => ({ ...toRaw(item) }))
+
+const getNextSortOrder = (items: IRoomPhoto[] = photos.value) =>
+  items.reduce(
+    (max, item) => Math.max(max, Number(item.sort_order ?? -1)),
+    -1,
+  ) + 1
+
 const getSortedPhotos = (items: IRoomPhoto[] = photos.value) =>
   [...items].sort((a, b) => {
     if (a.sort_order !== b.sort_order) return a.sort_order - b.sort_order
@@ -234,7 +244,8 @@ const handleUploadPhotos = async (files: FileList) => {
   isUploading.value = true
 
   try {
-    let currentLength = photos.value.length
+    const initialSortOrder = getNextSortOrder()
+    const hasCoverAlready = photos.value.some((photo) => photo.is_cover)
 
     for (let i = 0; i < files.length; i++) {
       const file = files.item(i)
@@ -242,6 +253,8 @@ const handleUploadPhotos = async (files: FileList) => {
 
       const previewUrl = URL.createObjectURL(file)
       const tempId = -(Date.now() + i)
+      const sortOrder = initialSortOrder + i
+      const isCover = !hasCoverAlready && i === 0
 
       const tempPhoto: IRoomPhoto = normalizePhoto({
         id: tempId,
@@ -250,8 +263,8 @@ const handleUploadPhotos = async (files: FileList) => {
         preview_url: previewUrl,
         photo_path: null,
         photo_version: Date.now(),
-        is_cover: currentLength === 0 && i === 0,
-        sort_order: currentLength + i,
+        is_cover: isCover,
+        sort_order: sortOrder,
       })
 
       photos.value = [...photos.value, tempPhoto]
@@ -261,8 +274,8 @@ const handleUploadPhotos = async (files: FileList) => {
           roomId.value,
           file,
           {
-            is_cover: currentLength === 0 && i === 0,
-            sort_order: currentLength + i,
+            is_cover: isCover,
+            sort_order: sortOrder,
           },
         )
 
@@ -270,8 +283,7 @@ const handleUploadPhotos = async (files: FileList) => {
           ...uploaded,
           preview_url: null,
         })
-
-        currentLength += 1
+        revokePreviewUrl(previewUrl)
       } catch (error) {
         console.error(error)
         photos.value = photos.value.filter((p) => p.id !== tempId)
@@ -294,7 +306,7 @@ const handleSetCover = async (photo: IRoomPhoto) => {
   if (!roomId.value || photo.id <= 0) return
   if (isMutatingPhotos.value) return
 
-  const previousPhotos = structuredClone(photos.value)
+  const previousPhotos = clonePhotosSnapshot()
   isMutatingPhotos.value = true
 
   try {
@@ -324,7 +336,7 @@ const handleDeletePhoto = async (photo: IRoomPhoto) => {
   if (!roomId.value || photo.id <= 0) return
   if (isMutatingPhotos.value) return
 
-  const previousPhotos = structuredClone(photos.value)
+  const previousPhotos = clonePhotosSnapshot()
   isMutatingPhotos.value = true
 
   try {
@@ -350,7 +362,7 @@ const handleMovePhoto = async (photo: IRoomPhoto, direction: 'up' | 'down') => {
   if (!roomId.value || photo.id <= 0) return
   if (isMutatingPhotos.value) return
 
-  const previousPhotos = structuredClone(photos.value)
+  const previousPhotos = clonePhotosSnapshot()
   isMutatingPhotos.value = true
 
   try {

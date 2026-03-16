@@ -3,7 +3,6 @@ import { computed, ref } from 'vue'
 import type { IRoomPhoto } from '@/common/types/entities'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import {
   Trash2,
   Star,
@@ -100,7 +99,7 @@ const getImageSrc = (photo: IRoomPhoto) => {
       </div>
 
       <div class="flex items-center gap-2">
-        <Input
+        <input
           ref="fileInput"
           type="file"
           multiple

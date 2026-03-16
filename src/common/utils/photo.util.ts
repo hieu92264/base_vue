@@ -17,7 +17,9 @@ export const resolvePhotoUrl = (input?: string | null) => {
   const value = String(input).trim()
   if (!value) return ''
 
+  // blob / data URL phải giữ nguyên
   if (/^blob:/i.test(value)) return value
+  if (/^data:/i.test(value)) return value
   if (/^https?:\/\//i.test(value)) return value
 
   const origin = getApiOrigin()
@@ -38,6 +40,11 @@ export const appendVersion = (
   version?: string | number | null,
 ) => {
   if (!url) return ''
+
+  // Không append version cho blob/data URL
+  if (/^blob:/i.test(url)) return url
+  if (/^data:/i.test(url)) return url
+
   if (!version) return url
 
   const separator = url.includes('?') ? '&' : '?'
@@ -46,13 +53,14 @@ export const appendVersion = (
 
 export const normalizePhoto = (photo: IRoomPhoto): IRoomPhoto => {
   const raw = photo.preview_url || photo.photo_url || photo.photo_path || ''
+  const resolvedUrl = resolvePhotoUrl(raw)
+
+  // dùng version ổn định, KHÔNG dùng Date.now()
+  const stableVersion = photo.photo_version ?? photo.updated_at ?? null
 
   return {
     ...photo,
-    photo_url: appendVersion(
-      resolvePhotoUrl(raw),
-      photo.photo_version || photo.updated_at || Date.now(),
-    ),
+    photo_url: appendVersion(resolvedUrl, stableVersion),
   }
 }
 
