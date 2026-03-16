@@ -180,6 +180,11 @@ export interface IComment {
   user?: IUser | null
   room?: IRoom | null
   replies?: ICommentReply[] | null
+
+  user_name?: string | null
+  user_avatar?: string | null
+  room_title?: string | null
+  room_slug?: string | null
 }
 
 export interface ICommentReply {
@@ -193,6 +198,9 @@ export interface ICommentReply {
   deleted_at: string | null
 
   user?: IUser | null
+
+  user_name?: string | null
+  user_avatar?: string | null
 }
 
 export type NewsStatus = 'draft' | 'published' | 'hidden'

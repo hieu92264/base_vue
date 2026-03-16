@@ -12,6 +12,8 @@ import {
   House,
   ClipboardList,
   FileCheck,
+  MessagesSquare,
+  Star,
 } from 'lucide-vue-next'
 
 export interface NavItem {
@@ -126,6 +128,18 @@ export const getSidebarData = () => {
           url: '/organizations/room-moderation',
           icon: FileCheck,
           code: 'org.room-moderation',
+        },
+        {
+          title: 'Contact / Lead',
+          url: '/organizations/contacts',
+          icon: MessagesSquare,
+          code: 'org.contacts',
+        },
+        {
+          title: 'Review / Comment',
+          url: '/organizations/reviews',
+          icon: Star,
+          code: 'org.reviews',
         },
       ],
     },

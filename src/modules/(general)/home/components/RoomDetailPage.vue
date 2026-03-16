@@ -17,6 +17,7 @@ import {
   useRoomDetailsQuery,
 } from '@/modules/(general)/home/hooks/use-home'
 import type { ContactFormValues } from '@/modules/(general)/home/-schemas/contact.schema'
+import RoomReviews from './RoomReviews.vue'
 
 // -------------------- Types --------------------
 type RoomPhoto = {
@@ -609,4 +610,9 @@ watch(
       :on-submit="handleContactSubmit"
     />
   </div>
+
+  <RoomReviews
+    v-if="roomDetails?.id"
+    :room-id="roomDetails.id"
+  />
 </template>

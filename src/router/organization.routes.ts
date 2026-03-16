@@ -46,6 +46,18 @@ const organizationRoutes: RouteRecordRaw[] = [
       import('@/modules/(organization)/room-moderation/index.vue'),
     meta: { layouts: BaseLayout, permissionCodes: 'org.room-moderation' },
   },
+  {
+    path: '/organizations/contacts',
+    name: 'organizations.contacts',
+    component: () => import('@/modules/(organization)/contacts/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.contacts' },
+  },
+  {
+    path: '/organizations/reviews',
+    name: 'organizations.reviews',
+    component: () => import('@/modules/(organization)/reviews/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.reviews' },
+  },
 ]
 
 export default organizationRoutes
