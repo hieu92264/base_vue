@@ -210,16 +210,36 @@ export interface INews extends IBaseEntity {
   author?: IUser | null
 }
 
-export type ContactStatus = 'new' | 'processing' | 'done'
+export type ContactStatus = 'new' | 'contacted' | 'successful' | 'unsuccessful'
 
 export interface IContact {
   id: number
+  room_id?: number | null
+  owner_user_id?: number | null
+
   name: string | null
   email: string | null
   phone: string | null
   subject: string | null
   message: string | null
+
+  move_in_date?: string | null
+
   status: ContactStatus
+  status_note?: string | null
+
+  handled_by?: number | null
+  handled_at?: string | null
+  handled_by_name?: string | null
+
+  room_title?: string | null
+  room_slug?: string | null
+  room_address?: string | null
+  room_price?: number | null
+
+  owner_name?: string | null
+  owner_phone?: string | null
+
   created_at: string | null
   updated_at: string | null
 }
