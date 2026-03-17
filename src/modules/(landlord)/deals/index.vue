@@ -44,17 +44,18 @@ const params = computed(() => ({
   status: filters.value.status !== 'all' ? filters.value.status : undefined,
   page: filters.value.page,
   per_page: filters.value.per_page,
+  mine: true,
 }))
 
 const dealsQuery = useQuery({
-  queryKey: computed(() => ['admin_deals_page', params.value]),
-  queryFn: () => DealService.getAdminDeals(params.value),
+  queryKey: computed(() => ['landlord_deals_page', params.value]),
+  queryFn: () => DealService.getLandlordDeals(params.value),
 })
 
 const wonLeadsQuery = useQuery({
-  queryKey: ['admin_won_leads_for_deals'],
+  queryKey: ['landlord_won_leads_for_deals'],
   queryFn: () =>
-    ContactService.getAdminContacts({
+    ContactService.getLandlordContacts({
       status: 'won',
       page: 1,
       per_page: 100,
@@ -155,7 +156,7 @@ watch(
 
 const createMutation = useMutation({
   mutationFn: () =>
-    DealService.createAdminDeal({
+    DealService.createLandlordDeal({
       room_id: Number(form.value.room_id),
       contact_id: form.value.contact_id ? Number(form.value.contact_id) : null,
       agreed_price: Number(form.value.agreed_price),
@@ -167,7 +168,7 @@ const createMutation = useMutation({
     }),
   onSuccess: () => {
     toast.success('Tạo deal thành công')
-    queryClient.invalidateQueries({ queryKey: ['admin_deals_page'] })
+    queryClient.invalidateQueries({ queryKey: ['landlord_deals_page'] })
     dealsQuery.refetch()
   },
   onError: () => {
@@ -181,13 +182,13 @@ const updateMutation = useMutation({
     status: DealStatus
     note?: string | null
   }) =>
-    DealService.updateAdminDeal(payload.id, {
+    DealService.updateLandlordDeal(payload.id, {
       status: payload.status,
       note: payload.note,
     }),
   onSuccess: () => {
     toast.success('Cập nhật deal thành công')
-    queryClient.invalidateQueries({ queryKey: ['admin_deals_page'] })
+    queryClient.invalidateQueries({ queryKey: ['landlord_deals_page'] })
   },
   onError: () => {
     toast.error('Cập nhật deal thất bại')
@@ -226,9 +227,9 @@ const summary = computed(() => {
 <template>
   <div class="w-full space-y-5 px-4 py-4 md:px-6">
     <div>
-      <h2 class="text-2xl font-bold tracking-tight">Deal / Booking</h2>
+      <h2 class="text-2xl font-bold tracking-tight">Deal của tôi</h2>
       <p class="text-sm text-muted-foreground">
-        Tạo deal từ lead đã won và theo dõi trạng thái chốt phòng
+        Tạo deal từ lead đã chốt và theo dõi tiến độ thuê phòng
       </p>
     </div>
 
@@ -447,7 +448,7 @@ const summary = computed(() => {
                     </div>
                   </div>
 
-                  <Badge :variant="statusVariant(item.status)">
+                  <Badge :variant="statusVariant(item.status) as any">
                     {{ statusLabel(item.status) }}
                   </Badge>
                 </div>
@@ -524,7 +525,7 @@ const summary = computed(() => {
                     </div>
                   </div>
 
-                  <Badge :variant="statusVariant(selectedDeal.status)">
+                  <Badge :variant="statusVariant(selectedDeal.status) as any">
                     {{ statusLabel(selectedDeal.status) }}
                   </Badge>
                 </div>

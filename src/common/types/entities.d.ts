@@ -149,6 +149,7 @@ export interface IRoom extends IBaseEntity {
   moderated_by?: number | null
   moderated_at?: string | null
   moderation_note?: string | null
+  availability_status?: 'available' | 'reserved' | 'occupied' | 'hidden'
 }
 
 export interface IRoomPhoto {

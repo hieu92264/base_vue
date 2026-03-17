@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { toast } from 'vue-sonner'
+import { Star } from 'lucide-vue-next'
 
 import { ReviewService } from '@/services/review.service'
 import { useAuthStore } from '@/stores/auth.store'
@@ -23,8 +24,6 @@ const reviewForm = ref({
   rating: 5,
 })
 
-const replyDrafts = ref<Record<number, string>>({})
-
 const reviewsQuery = useQuery({
   queryKey: computed(() => ['room_reviews', props.roomId]),
   queryFn: () =>
@@ -41,7 +40,7 @@ const createMutation = useMutation({
       rating: Number(reviewForm.value.rating),
     }),
   onSuccess: () => {
-    toast.success('Gửi review thành công')
+    toast.success('Gửi review thành công, review đang chờ duyệt')
     reviewForm.value.content = ''
     reviewForm.value.rating = 5
     queryClient.invalidateQueries({ queryKey: ['room_reviews', props.roomId] })
@@ -51,30 +50,7 @@ const createMutation = useMutation({
   },
 })
 
-const replyMutation = useMutation({
-  mutationFn: ({
-    commentId,
-    content,
-  }: {
-    commentId: number
-    content: string
-  }) => ReviewService.replyReview(commentId, { content }),
-  onSuccess: () => {
-    toast.success('Phản hồi thành công')
-    queryClient.invalidateQueries({ queryKey: ['room_reviews', props.roomId] })
-  },
-  onError: () => {
-    toast.error('Phản hồi thất bại')
-  },
-})
-
-const submitReply = (commentId: number) => {
-  const content = replyDrafts.value[commentId]?.trim()
-  if (!content) return
-
-  replyMutation.mutate({ commentId, content })
-  replyDrafts.value[commentId] = ''
-}
+const renderStars = (rating?: number | null) => Number(rating || 0)
 </script>
 
 <template>
@@ -123,7 +99,7 @@ const submitReply = (commentId: number) => {
         v-if="reviews.length === 0"
         class="py-8 text-center text-sm text-muted-foreground"
       >
-        Chưa có đánh giá nào.
+        Chưa có đánh giá hiển thị nào.
       </div>
 
       <div
@@ -145,8 +121,14 @@ const submitReply = (commentId: number) => {
                   'Ẩn danh'
                 }}
               </div>
-              <div class="text-sm text-muted-foreground">
-                Rating: {{ review.rating || '---' }}/5
+
+              <div class="mt-2 flex items-center gap-1 text-amber-500">
+                <Star
+                  v-for="n in 5"
+                  :key="n"
+                  class="h-4 w-4"
+                  :class="renderStars(review.rating) >= n ? 'fill-current' : ''"
+                />
               </div>
             </div>
 
@@ -180,26 +162,6 @@ const submitReply = (commentId: number) => {
                 {{ reply.content }}
               </div>
             </div>
-          </div>
-
-          <div
-            v-if="authStore.access_token"
-            class="mt-4 space-y-2"
-          >
-            <Textarea
-              v-model="replyDrafts[review.id]"
-              rows="3"
-              placeholder="Phản hồi review này..."
-            />
-            <Button
-              variant="outline"
-              :disabled="
-                replyMutation.isPending.value || !replyDrafts[review.id]?.trim()
-              "
-              @click="submitReply(review.id)"
-            >
-              Gửi phản hồi
-            </Button>
           </div>
         </div>
       </div>

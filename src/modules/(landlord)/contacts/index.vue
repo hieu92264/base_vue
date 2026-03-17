@@ -3,14 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
-import {
-  Search,
-  Phone,
-  Mail,
-  CalendarDays,
-  Handshake,
-  Clock3,
-} from 'lucide-vue-next'
+import { Search, Phone, Mail, CalendarDays, Handshake } from 'lucide-vue-next'
 
 import { ContactService, type LeadStatus } from '@/services/contact.service'
 import type { IContact } from '@/common/types/entities'
@@ -57,8 +50,8 @@ const params = computed(() => ({
 }))
 
 const contactsQuery = useQuery({
-  queryKey: computed(() => ['admin_contacts_pipeline', params.value]),
-  queryFn: () => ContactService.getAdminContacts(params.value),
+  queryKey: computed(() => ['landlord_contacts_pipeline', params.value]),
+  queryFn: () => ContactService.getLandlordContacts(params.value),
 })
 
 const contacts = computed<IContact[]>(
@@ -158,7 +151,7 @@ const updateMutation = useMutation({
     next_follow_up_at?: string | null
     viewing_at?: string | null
   }) =>
-    ContactService.updateAdminContactStatus(payload.id, {
+    ContactService.updateLandlordContactStatus(payload.id, {
       status: payload.status,
       status_note: payload.status_note,
       lost_reason: payload.lost_reason,
@@ -167,7 +160,7 @@ const updateMutation = useMutation({
     }),
   onSuccess: () => {
     toast.success('Cập nhật lead thành công')
-    queryClient.invalidateQueries({ queryKey: ['admin_contacts_pipeline'] })
+    queryClient.invalidateQueries({ queryKey: ['landlord_contacts_pipeline'] })
   },
   onError: () => {
     toast.error('Cập nhật lead thất bại')
@@ -213,7 +206,7 @@ const goToCreateDeal = () => {
   if (!selectedContact.value) return
 
   router.push({
-    name: 'organizations.deals',
+    name: 'landlord.deals',
     query: {
       contact_id: String(selectedContact.value.id),
       room_id: String(selectedContact.value.room_id ?? ''),
@@ -228,9 +221,10 @@ const goToCreateDeal = () => {
 <template>
   <div class="space-y-5 px-4 py-4 md:px-6">
     <div>
-      <h2 class="text-2xl font-bold tracking-tight">Quản lý contact / lead</h2>
+      <h2 class="text-2xl font-bold tracking-tight">Lead của tôi</h2>
       <p class="text-sm text-muted-foreground">
-        Theo dõi pipeline lead từ lúc khách gửi form đến lúc chốt deal
+        Xử lý khách quan tâm, hẹn xem phòng và chuyển sang deal khi chốt thành
+        công
       </p>
     </div>
 
@@ -333,7 +327,7 @@ const goToCreateDeal = () => {
                   {{ item.room_title || 'Chưa có phòng' }}
                 </div>
               </div>
-              <Badge :variant="statusVariant(item.status)">
+              <Badge :variant="statusVariant(item.status) as any">
                 {{ statusLabel(item.status) }}
               </Badge>
             </div>
@@ -433,10 +427,6 @@ const goToCreateDeal = () => {
                   {{ selectedContact.room_price || '---' }}
                 </div>
                 <div>
-                  <span class="font-medium">Chủ nhà:</span>
-                  {{ selectedContact.owner_name || '---' }}
-                </div>
-                <div>
                   <span class="font-medium">SĐT chủ nhà:</span>
                   {{ selectedContact.owner_phone || '---' }}
                 </div>
@@ -465,7 +455,7 @@ const goToCreateDeal = () => {
                 </div>
               </div>
 
-              <Badge :variant="statusVariant(selectedContact.status)">
+              <Badge :variant="statusVariant(selectedContact.status) as any">
                 {{ statusLabel(selectedContact.status) }}
               </Badge>
             </div>

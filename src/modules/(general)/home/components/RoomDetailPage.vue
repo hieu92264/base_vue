@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useMutation } from '@tanstack/vue-query'
-import axios from 'axios'
 
-// shadcn-vue
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -19,7 +16,6 @@ import {
 import type { ContactFormValues } from '@/modules/(general)/home/-schemas/contact.schema'
 import RoomReviews from './RoomReviews.vue'
 
-// -------------------- Types --------------------
 type RoomPhoto = {
   id: number
   room_id: number
@@ -57,6 +53,7 @@ type RoomDetail = {
   area: number | string | null
   description: string | null
   booking_status: string
+  availability_status?: string | null
   created_at: string | null
 
   category?: NamedEntity | null
@@ -71,26 +68,16 @@ type RoomDetail = {
   owner_user_id?: number
 }
 
-type CreateContactPayload = {
-  name: string
-  email?: string | null
-  phone?: string | null
-  subject?: string | null
-  message: string
-  room_id?: number | null
-  owner_user_id?: number | null
-}
-
-// -------------------- Router --------------------
 const route = useRoute()
 const router = useRouter()
 
+const roomKey = computed(() => String(route.params.slugOrId ?? ''))
+
 const roomIdNum = computed(() => {
-  const n = Number(route.params.id)
+  const raw = String(route.params.slugOrId ?? '')
+  const n = Number(raw)
   return Number.isFinite(n) ? n : 0
 })
-
-const roomKey = computed(() => String(route.params.slugOrId ?? ''))
 
 const roomQuery = useRoomDetailsQuery(roomKey)
 
@@ -101,11 +88,10 @@ const roomDetails = computed(
 const isLoading = computed(() => roomQuery.isLoading.value)
 const isError = computed(() => roomQuery.isError.value)
 
-// -------------------- Helpers --------------------
 const formatMoneyVND = (value: number | string) => {
   const n = Number(value ?? 0)
   if (Number.isNaN(n)) return String(value ?? '')
-  return n.toLocaleString('vi-VN') + ' ₫'
+  return n.toLocaleString('vi-VN') + ' đ'
 }
 
 const formatDateTime = (iso: string | null) => {
@@ -117,10 +103,20 @@ const formatDateTime = (iso: string | null) => {
   }).format(d)
 }
 
+const roomStatus = computed(() => {
+  return String(
+    roomDetails.value?.availability_status ||
+      roomDetails.value?.booking_status ||
+      'available',
+  ).toLowerCase()
+})
+
 const statusLabel = (s: string) => {
   const v = (s || '').toLowerCase()
   if (v === 'available') return 'Còn trống'
-  if (v === 'occupied') return 'Đã thuê'
+  if (v === 'reserved') return 'Đã giữ chỗ'
+  if (v === 'occupied') return 'Đã có người thuê'
+  if (v === 'hidden') return 'Tạm ẩn'
   if (v === 'pending') return 'Đang có người hỏi'
   if (v === 'confirmed') return 'Đã xác nhận'
   return s
@@ -129,17 +125,17 @@ const statusLabel = (s: string) => {
 const statusVariant = (s: string) => {
   const v = (s || '').toLowerCase()
   if (v === 'available') return 'default'
-  if (v === 'pending') return 'secondary'
-  if (v === 'occupied' || v === 'confirmed') return 'destructive'
+  if (v === 'reserved' || v === 'pending') return 'secondary'
+  if (v === 'occupied' || v === 'confirmed' || v === 'hidden')
+    return 'destructive'
   return 'secondary'
 }
 
 const isUnavailable = (s: string) => {
   const v = (s || '').toLowerCase()
-  return v === 'occupied' || v === 'confirmed'
+  return ['reserved', 'occupied', 'hidden', 'confirmed'].includes(v)
 }
 
-// -------------------- Photos --------------------
 const activePhoto = ref<string>('')
 
 const photosSorted = computed(() => {
@@ -162,11 +158,11 @@ const coverPhoto = computed(() => {
 })
 
 watchEffect(() => {
-  if (!activePhoto.value && coverPhoto.value)
+  if (!activePhoto.value && coverPhoto.value) {
     activePhoto.value = coverPhoto.value
+  }
 })
 
-// -------------------- Computed display --------------------
 const locationText = computed(() => {
   const r = roomDetails.value
   if (!r) return '—'
@@ -201,9 +197,7 @@ const zaloHref = computed(() => {
   return `https://zalo.me/${zalo.replace(/\s+/g, '')}`
 })
 
-// -------------------- Contact dialog + mutation --------------------
 const openContact = ref(false)
-
 const contactMutation = useContactMutaion()
 
 const handleContactSubmit = (v: ContactFormValues) => {
@@ -219,17 +213,6 @@ const handleContactSubmit = (v: ContactFormValues) => {
   ]
     .filter(Boolean)
     .join('\n')
-
-  console.log('Submitting contact form with data:', {
-    id: String(room.id),
-    formData: {
-      name: v.name,
-      phone: v.phone,
-      email: v.email,
-      moveInDate: v.moveInDate,
-      message: composedMessage,
-    },
-  })
 
   contactMutation.mutate({
     id: String(room.id),
@@ -253,7 +236,6 @@ watch(
 
 <template>
   <div class="mx-auto! w-full max-w-6xl! px-4 py-8">
-    <!-- Header bar -->
     <div
       class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
     >
@@ -262,33 +244,36 @@ watch(
           variant="ghost"
           class="px-2"
           @click="router.back()"
-          >← Quay lại</Button
         >
+          ← Quay lại
+        </Button>
         <Separator
           orientation="vertical"
           class="hidden h-6 sm:block"
         />
-        <div class="text-sm text-muted-foreground">Room #{{ roomIdNum }}</div>
+        <div class="text-sm text-muted-foreground">
+          Room #{{ roomIdNum || '---' }}
+        </div>
       </div>
 
       <div class="flex items-center gap-2">
         <Badge
-          v-if="roomDetails?.booking_status"
-          :variant="statusVariant(roomDetails.booking_status) as any"
+          v-if="roomStatus"
+          :variant="statusVariant(roomStatus) as any"
           class="capitalize"
         >
-          {{ statusLabel(roomDetails.booking_status) }}
+          {{ statusLabel(roomStatus) }}
         </Badge>
 
         <Badge
           v-if="postTypeText"
           variant="secondary"
-          >{{ postTypeText }}</Badge
         >
+          {{ postTypeText }}
+        </Badge>
       </div>
     </div>
 
-    <!-- Loading -->
     <div
       v-if="isLoading"
       class="grid grid-cols-1 gap-6 lg:grid-cols-12"
@@ -313,11 +298,9 @@ watch(
 
       <div class="lg:col-span-5 space-y-6">
         <Card class="rounded-2xl border-border/60 bg-card/80 shadow-sm">
-          <CardHeader class="pb-2"
-            ><CardTitle class="text-base"
-              >Thông tin phòng</CardTitle
-            ></CardHeader
-          >
+          <CardHeader class="pb-2">
+            <CardTitle class="text-base">Thông tin phòng</CardTitle>
+          </CardHeader>
           <CardContent class="space-y-3">
             <Skeleton class="h-20 w-full rounded-xl" />
             <Skeleton class="h-20 w-full rounded-xl" />
@@ -326,15 +309,14 @@ watch(
         </Card>
 
         <Card class="rounded-2xl border-border/60 bg-card/80 shadow-sm">
-          <CardHeader class="pb-2"
-            ><CardTitle class="text-base">Mô tả</CardTitle></CardHeader
-          >
+          <CardHeader class="pb-2">
+            <CardTitle class="text-base">Mô tả</CardTitle>
+          </CardHeader>
           <CardContent><Skeleton class="h-24 w-full" /></CardContent>
         </Card>
       </div>
     </div>
 
-    <!-- Error -->
     <div
       v-else-if="isError"
       class="rounded-2xl border border-border/60 bg-card/60 p-6"
@@ -351,12 +333,10 @@ watch(
       </div>
     </div>
 
-    <!-- Content -->
     <div
       v-else-if="roomDetails"
       class="grid grid-cols-1 gap-6 lg:grid-cols-12"
     >
-      <!-- Left: gallery -->
       <div class="lg:col-span-7">
         <Card
           class="overflow-hidden rounded-2xl border-border/60 bg-card/80 shadow-sm"
@@ -403,7 +383,7 @@ watch(
               <Button
                 variant="secondary"
                 class="rounded-xl"
-                :disabled="isUnavailable(roomDetails.booking_status)"
+                :disabled="isUnavailable(roomStatus)"
                 @click="openContact = true"
               >
                 Gửi yêu cầu
@@ -443,14 +423,11 @@ watch(
         </Card>
       </div>
 
-      <!-- Right: info -->
       <div class="lg:col-span-5 space-y-6">
         <Card class="rounded-2xl border-border/60 bg-card/80 shadow-sm">
-          <CardHeader class="pb-2"
-            ><CardTitle class="text-base"
-              >Thông tin phòng</CardTitle
-            ></CardHeader
-          >
+          <CardHeader class="pb-2">
+            <CardTitle class="text-base">Thông tin phòng</CardTitle>
+          </CardHeader>
           <CardContent class="space-y-4">
             <div class="grid grid-cols-2 gap-3">
               <div
@@ -476,7 +453,7 @@ watch(
               >
                 <div class="text-xs text-muted-foreground">Trạng thái</div>
                 <div class="mt-1 text-sm font-semibold">
-                  {{ statusLabel(roomDetails.booking_status) }}
+                  {{ statusLabel(roomStatus) }}
                 </div>
               </div>
 
@@ -509,7 +486,7 @@ watch(
             <Button
               class="w-full rounded-xl"
               size="lg"
-              :disabled="isUnavailable(roomDetails.booking_status)"
+              :disabled="isUnavailable(roomStatus)"
               @click="openContact = true"
             >
               Liên hệ chủ trọ
@@ -518,9 +495,9 @@ watch(
         </Card>
 
         <Card class="rounded-2xl border-border/60 bg-card/80 shadow-sm">
-          <CardHeader class="pb-2"
-            ><CardTitle class="text-base">Mô tả</CardTitle></CardHeader
-          >
+          <CardHeader class="pb-2">
+            <CardTitle class="text-base">Mô tả</CardTitle>
+          </CardHeader>
           <CardContent>
             <p
               class="whitespace-pre-line text-sm leading-relaxed text-foreground/90"
@@ -531,11 +508,9 @@ watch(
         </Card>
 
         <Card class="rounded-2xl border-border/60 bg-card/80 shadow-sm">
-          <CardHeader class="pb-2"
-            ><CardTitle class="text-base"
-              >Thông tin liên hệ</CardTitle
-            ></CardHeader
-          >
+          <CardHeader class="pb-2">
+            <CardTitle class="text-base">Thông tin liên hệ</CardTitle>
+          </CardHeader>
           <CardContent class="space-y-3">
             <div
               class="flex items-center justify-between rounded-xl border border-border/60 bg-background/40 p-3"
@@ -563,16 +538,18 @@ watch(
                 <Button
                   variant="secondary"
                   class="w-full rounded-xl"
-                  >Gọi điện</Button
                 >
+                  Gọi điện
+                </Button>
               </a>
               <Button
                 v-else
                 variant="secondary"
                 class="w-full rounded-xl"
                 disabled
-                >Gọi điện</Button
               >
+                Gọi điện
+              </Button>
 
               <a
                 v-if="zaloHref"
@@ -584,16 +561,18 @@ watch(
                 <Button
                   variant="outline"
                   class="w-full rounded-xl"
-                  >Chat Zalo</Button
                 >
+                  Chat Zalo
+                </Button>
               </a>
               <Button
                 v-else
                 variant="outline"
                 class="w-full rounded-xl"
                 disabled
-                >Chat Zalo</Button
               >
+                Chat Zalo
+              </Button>
             </div>
           </CardContent>
         </Card>
