@@ -44,10 +44,10 @@ export class ReviewService {
 
   static async updateModerationStatus(
     id: number,
-    payload: { status: 'visible' | 'hidden' },
+    payload: { status: 'pending' | 'visible' | 'hidden' },
   ): Promise<IComment> {
     const response: any = await axiosInstance.patch(
-      `/organizations/reviews/update-status/${id}`,
+      `/organizations/reviews/${id}/status`,
       payload,
     )
     return response?.data ?? response

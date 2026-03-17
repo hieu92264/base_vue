@@ -77,3 +77,29 @@ export enum UserType {
   TENANT = 'tenant',
   LANDLORD = 'landlord',
 }
+
+export const leadStatuses = [
+  'new',
+  'contacted',
+  'viewing_scheduled',
+  'viewed',
+  'negotiating',
+  'waiting_decision',
+  'won',
+  'lost',
+  'cancelled',
+] as const
+
+export const dealStatuses = [
+  'draft',
+  'reserved',
+  'confirmed',
+  'cancelled',
+  'completed',
+] as const
+
+export const reviewModerationStatuses = [
+  'pending',
+  'visible',
+  'hidden',
+] as const

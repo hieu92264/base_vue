@@ -53,6 +53,12 @@ const organizationRoutes: RouteRecordRaw[] = [
     meta: { layouts: BaseLayout, permissionCodes: 'org.contacts' },
   },
   {
+    path: '/organizations/deals',
+    name: 'organizations.deals',
+    component: () => import('@/modules/(organization)/deals/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.bookings' },
+  },
+  {
     path: '/organizations/reviews',
     name: 'organizations.reviews',
     component: () => import('@/modules/(organization)/reviews/index.vue'),

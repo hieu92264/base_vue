@@ -164,7 +164,7 @@ export interface IRoomPhoto {
   updated_at?: string | null
 }
 
-export type CommentVisibilityStatus = 'visible' | 'hidden'
+export type CommentModerationStatus = 'pending' | 'visible' | 'hidden'
 
 export interface IComment {
   id: number
@@ -172,7 +172,7 @@ export interface IComment {
   user_id: number
   content: string
   rating: number | null
-  status: CommentVisibilityStatus
+  status: CommentModerationStatus
   created_at: string | null
   updated_at: string | null
   deleted_at: string | null
@@ -192,7 +192,7 @@ export interface ICommentReply {
   comment_id: number
   user_id: number
   content: string
-  status: CommentVisibilityStatus
+  status: CommentModerationStatus
   created_at: string | null
   updated_at: string | null
   deleted_at: string | null
@@ -218,7 +218,16 @@ export interface INews extends IBaseEntity {
   author?: IUser | null
 }
 
-export type ContactStatus = 'new' | 'contacted' | 'successful' | 'unsuccessful'
+export type ContactStatus =
+  | 'new'
+  | 'contacted'
+  | 'viewing_scheduled'
+  | 'viewed'
+  | 'negotiating'
+  | 'waiting_decision'
+  | 'won'
+  | 'lost'
+  | 'cancelled'
 
 export interface IContact {
   id: number
@@ -232,9 +241,15 @@ export interface IContact {
   message: string | null
 
   move_in_date?: string | null
+  preferred_viewing_time?: string | null
 
   status: ContactStatus
   status_note?: string | null
+  lost_reason?: string | null
+  next_follow_up_at?: string | null
+  last_contacted_at?: string | null
+  viewing_at?: string | null
+  source?: string | null
 
   handled_by?: number | null
   handled_at?: string | null
@@ -255,7 +270,7 @@ export interface IContact {
 export interface IBooking {
   id: number
   room_id: number
-  tenant_user_id: number
+  tenant_user_id: number | null
   landlord_user_id: number
   start_date: string | null
   end_date: string | null
@@ -263,7 +278,7 @@ export interface IBooking {
   currency: string
   commission_percent: number
   commission_amount: number
-  status: BookingStatus
+  status: string
   note: string | null
   created_at: string | null
   updated_at: string | null
@@ -272,6 +287,56 @@ export interface IBooking {
   room?: IRoom | null
   tenant?: IUser | null
   landlord?: IUser | null
+}
+
+export interface IDeal {
+  id: number
+  room_id: number
+  contact_id?: number | null
+  tenant_user_id?: number | null
+  landlord_user_id: number
+
+  status: 'draft' | 'reserved' | 'confirmed' | 'cancelled' | 'completed'
+
+  agreed_price: number
+  currency?: string | null
+  commission_percent?: number | null
+  commission_amount?: number | null
+
+  start_date?: string | null
+  end_date?: string | null
+
+  reserved_at?: string | null
+  confirmed_at?: string | null
+  cancelled_at?: string | null
+  completed_at?: string | null
+
+  note?: string | null
+
+  tenant_name?: string | null
+  tenant_phone?: string | null
+  tenant_email?: string | null
+
+  landlord_name?: string | null
+  landlord_phone?: string | null
+
+  room?: IRoom | null
+  contact?: IContact | null
+  tenant?: IUser | null
+  landlord?: IUser | null
+
+  room_title?: string | null
+  room_slug?: string | null
+  room_address?: string | null
+  room_availability_status?: string | null
+
+  contact_name?: string | null
+  contact_phone?: string | null
+  contact_email?: string | null
+
+  created_at?: string | null
+  updated_at?: string | null
+  deleted_at?: string | null
 }
 
 export interface IPermissionUser {

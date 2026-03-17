@@ -14,6 +14,7 @@ import {
   FileCheck,
   MessagesSquare,
   Star,
+  Handshake,
 } from 'lucide-vue-next'
 
 export interface NavItem {
@@ -46,6 +47,7 @@ export const getSidebarData = () => {
     const children = item.children?.map(filterItem).filter(Boolean) as
       | NavItem[]
       | undefined
+
     const selfOk = canSee(item.code)
     const childOk = !!children && children.length > 0
 
@@ -72,6 +74,16 @@ export const getSidebarData = () => {
               title: 'Danh sách tin của tôi',
               url: '/landlord/my-rooms',
               icon: ClipboardList,
+            },
+            {
+              title: 'Lead của tôi',
+              url: '/landlord/contacts',
+              icon: MessagesSquare,
+            },
+            {
+              title: 'Deal của tôi',
+              url: '/landlord/deals',
+              icon: Handshake,
             },
           ],
         },
@@ -134,6 +146,12 @@ export const getSidebarData = () => {
           url: '/organizations/contacts',
           icon: MessagesSquare,
           code: 'org.contacts',
+        },
+        {
+          title: 'Deal / Booking',
+          url: '/organizations/deals',
+          icon: Handshake,
+          code: 'org.bookings',
         },
         {
           title: 'Review / Comment',

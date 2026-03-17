@@ -26,6 +26,18 @@ const landlordRoutes: RouteRecordRaw[] = [
     component: () => import('@/modules/(landlord)/rooms/form.vue'),
     meta: { layouts: BaseLayout, authOnly: true },
   },
+  {
+    path: '/landlord/contacts',
+    name: 'landlord.contacts',
+    component: () => import('@/modules/(landlord)/contacts/index.vue'),
+    meta: { layouts: BaseLayout, authOnly: true },
+  },
+  {
+    path: '/landlord/deals',
+    name: 'landlord.deals',
+    component: () => import('@/modules/(landlord)/deals/index.vue'),
+    meta: { layouts: BaseLayout, authOnly: true },
+  },
 ]
 
 export default landlordRoutes

@@ -2,6 +2,17 @@ import type { PaginatedResponse } from '@/common/types/api'
 import type { IContact } from '@/common/types/entities'
 import axiosInstance from '@/configs/axios.config'
 
+export type LeadStatus =
+  | 'new'
+  | 'contacted'
+  | 'viewing_scheduled'
+  | 'viewed'
+  | 'negotiating'
+  | 'waiting_decision'
+  | 'won'
+  | 'lost'
+  | 'cancelled'
+
 export type ContactSearchParams = {
   keyword?: string
   status?: string
@@ -27,12 +38,15 @@ export class ContactService {
   static async updateAdminContactStatus(
     id: number,
     payload: {
-      status: 'new' | 'contacted' | 'successful' | 'unsuccessful'
+      status: LeadStatus
       status_note?: string | null
+      lost_reason?: string | null
+      next_follow_up_at?: string | null
+      viewing_at?: string | null
     },
   ): Promise<IContact> {
     const response: any = await axiosInstance.patch(
-      `/organizations/contacts/update-status/${id}`,
+      `/organizations/contacts/${id}/status`,
       payload,
     )
     return response?.data ?? response
@@ -56,12 +70,15 @@ export class ContactService {
   static async updateLandlordContactStatus(
     id: number,
     payload: {
-      status: 'new' | 'contacted' | 'successful' | 'unsuccessful'
+      status: LeadStatus
       status_note?: string | null
+      lost_reason?: string | null
+      next_follow_up_at?: string | null
+      viewing_at?: string | null
     },
   ): Promise<IContact> {
     const response: any = await axiosInstance.patch(
-      `/organizations/landlord/contacts/update-status/${id}`,
+      `/organizations/landlord/contacts/${id}/status`,
       payload,
     )
     return response?.data ?? response
