@@ -16,6 +16,9 @@ import {
   Star,
   Handshake,
   Home,
+  Search,
+  Heart,
+  Bell,
 } from 'lucide-vue-next'
 
 export interface NavItem {
@@ -132,6 +135,7 @@ export const getSidebarData = () => {
           },
         ]
       : []),
+
     ...(isLandlord
       ? [
           {
@@ -161,15 +165,56 @@ export const getSidebarData = () => {
           },
         ]
       : []),
+
     ...(isTenant
       ? [
           {
             title: 'Người thuê',
             items: [
               {
+                title: 'Dashboard',
+                url: '/tenant/dashboard',
+                icon: LayoutDashboard,
+              },
+              {
                 title: 'Trang chủ',
                 url: '/home',
                 icon: Home,
+              },
+              {
+                title: 'Tìm phòng',
+                url: '/rooms',
+                icon: Search,
+              },
+              {
+                title: 'Phòng đã lưu',
+                url: '/saved-rooms',
+                icon: Heart,
+              },
+              {
+                title: 'Lịch hẹn xem phòng',
+                url: '/appointments',
+                icon: Calendar,
+              },
+              {
+                title: 'Yêu cầu thuê',
+                url: '/my-bookings',
+                icon: Handshake,
+              },
+              {
+                title: 'Liên hệ của tôi',
+                url: '/my-contacts',
+                icon: MessagesSquare,
+              },
+              {
+                title: 'Đánh giá của tôi',
+                url: '/my-reviews',
+                icon: Star,
+              },
+              {
+                title: 'Thông báo',
+                url: '/notifications',
+                icon: Bell,
               },
             ],
           },
