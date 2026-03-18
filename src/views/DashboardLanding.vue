@@ -19,7 +19,7 @@ onMounted(() => {
     return
   }
 
-  router.replace({ name: 'home' })
+  router.replace({ name: 'general.home' })
 })
 </script>
 
