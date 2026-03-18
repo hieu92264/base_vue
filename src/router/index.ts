@@ -6,7 +6,6 @@ import { useUserStore } from '@/stores/user.store'
 import { AuthService } from '@/services'
 import BaseLayout from '@/components/layouts/BaseLayout.vue'
 import organizationRoutes from '@/router/organization.routes'
-import Dashboard from '@/views/Dashboard.vue'
 import NProgress from '@/configs/nprogress.config'
 import generalRoutes from '@/router/general.routes'
 import landlordRoutes from './landlord.routes'
@@ -16,13 +15,15 @@ import landlordRoutes from './landlord.routes'
 //   base: () => import('@/components/layouts/BaseLayout.vue'),
 // }
 
+const DashboardLanding = () => import('@/views/DashboardLanding.vue')
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
       name: 'dashboard',
-      component: Dashboard,
+      component: DashboardLanding,
       meta: { layouts: BaseLayout },
     },
     ...authRoutes,

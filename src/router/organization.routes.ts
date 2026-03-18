@@ -64,6 +64,18 @@ const organizationRoutes: RouteRecordRaw[] = [
     component: () => import('@/modules/(organization)/reviews/index.vue'),
     meta: { layouts: BaseLayout, permissionCodes: 'org.reviews' },
   },
+  {
+    path: '/organizations/dashboard',
+    name: 'organizations.dashboard',
+    component: () => import('@/modules/(organization)/dashboard/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.dashboard' },
+  },
+  {
+    path: '/settings/profile',
+    name: 'settings.profile',
+    component: () => import('@/modules/(settings)/profile/index.vue'),
+    meta: { layouts: BaseLayout, authOnly: true },
+  },
 ]
 
 export default organizationRoutes

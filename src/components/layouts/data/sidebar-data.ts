@@ -159,6 +159,12 @@ export const getSidebarData = () => {
           icon: Star,
           code: 'org.reviews',
         },
+        {
+          title: 'Dashboard admin',
+          url: '/organizations/dashboard',
+          icon: LayoutDashboard,
+          code: 'org.dashboard',
+        },
       ],
     },
     {
