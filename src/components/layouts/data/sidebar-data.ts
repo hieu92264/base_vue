@@ -15,6 +15,7 @@ import {
   MessagesSquare,
   Star,
   Handshake,
+  Home,
 } from 'lucide-vue-next'
 
 export interface NavItem {
@@ -39,9 +40,10 @@ export const getSidebarData = () => {
     return userStore.can(code)
   }
 
-  const isLandlord =
-    userStore.user?.profile?.user_type === 'landlord' ||
-    userStore.user?.username === 'admin'
+  const currentRole = userStore.user?.profile?.user_type ?? 'tenant'
+  const isAdmin = currentRole === 'admin'
+  const isLandlord = currentRole === 'landlord'
+  const isTenant = currentRole === 'tenant'
 
   const filterItem = (item: NavItem): NavItem | null => {
     const children = item.children?.map(filterItem).filter(Boolean) as
@@ -60,123 +62,122 @@ export const getSidebarData = () => {
     return { ...item, children }
   }
 
-  const landlordGroup: NavGroup[] = isLandlord
-    ? [
-        {
-          title: 'Chủ nhà',
-          items: [
-            {
-              title: 'Dashboard chủ nhà',
-              url: '/landlord/dashboard',
-              icon: House,
-            },
-            {
-              title: 'Danh sách tin của tôi',
-              url: '/landlord/my-rooms',
-              icon: ClipboardList,
-            },
-            {
-              title: 'Lead của tôi',
-              url: '/landlord/contacts',
-              icon: MessagesSquare,
-            },
-            {
-              title: 'Deal của tôi',
-              url: '/landlord/deals',
-              icon: Handshake,
-            },
-          ],
-        },
-      ]
-    : []
+  const roleGroups: NavGroup[] = [
+    ...(isAdmin
+      ? [
+          {
+            title: 'Quản trị hệ thống',
+            items: [
+              {
+                title: 'Dashboard admin',
+                url: '/organizations/dashboard',
+                icon: LayoutDashboard,
+                code: 'org.dashboard',
+              },
+              {
+                title: 'Quyền hạn',
+                url: '/organizations/permissions',
+                icon: Lock,
+                code: 'org.permissions',
+              },
+              {
+                title: 'Danh mục',
+                url: '/organizations/categories',
+                icon: Tag,
+                code: 'org.categories',
+              },
+              {
+                title: 'Người dùng',
+                url: '/organizations/user',
+                icon: UserCog,
+                code: 'org.users',
+              },
+              {
+                title: 'Gán quyền user',
+                url: '/organizations/user-permissions',
+                icon: ShieldCheck,
+                code: 'org.user-permissions',
+              },
+              {
+                title: 'Slider',
+                url: '/organizations/sliders',
+                icon: Calendar,
+                code: 'org.sliders',
+              },
+              {
+                title: 'Duyệt tin đăng',
+                url: '/organizations/room-moderation',
+                icon: FileCheck,
+                code: 'org.room-moderation',
+              },
+              {
+                title: 'Contact / Lead',
+                url: '/organizations/contacts',
+                icon: MessagesSquare,
+                code: 'org.contacts',
+              },
+              {
+                title: 'Deal / Booking',
+                url: '/organizations/deals',
+                icon: Handshake,
+                code: 'org.bookings',
+              },
+              {
+                title: 'Review / Comment',
+                url: '/organizations/reviews',
+                icon: Star,
+                code: 'org.reviews',
+              },
+            ],
+          },
+        ]
+      : []),
+    ...(isLandlord
+      ? [
+          {
+            title: 'Chủ nhà',
+            items: [
+              {
+                title: 'Dashboard chủ nhà',
+                url: '/landlord/dashboard',
+                icon: House,
+              },
+              {
+                title: 'Danh sách tin của tôi',
+                url: '/landlord/my-rooms',
+                icon: ClipboardList,
+              },
+              {
+                title: 'Lead của tôi',
+                url: '/landlord/contacts',
+                icon: MessagesSquare,
+              },
+              {
+                title: 'Deal của tôi',
+                url: '/landlord/deals',
+                icon: Handshake,
+              },
+            ],
+          },
+        ]
+      : []),
+    ...(isTenant
+      ? [
+          {
+            title: 'Người thuê',
+            items: [
+              {
+                title: 'Trang chủ',
+                url: '/home',
+                icon: Home,
+              },
+            ],
+          },
+        ]
+      : []),
+  ]
 
-  const masterNavGroup: NavGroup[] = [
-    {
-      title: '',
-      items: [
-        {
-          title: 'Dashboard',
-          url: '/',
-          icon: LayoutDashboard,
-        },
-      ],
-    },
-    ...landlordGroup,
-    {
-      title: 'Quản lý tổ chức',
-      items: [
-        {
-          title: 'Quyền hạn',
-          url: '/organizations/permissions',
-          icon: Lock,
-          code: 'org.permissions',
-        },
-        {
-          title: 'Danh mục',
-          url: '/organizations/categories',
-          icon: Tag,
-          code: 'org.categories',
-        },
-        {
-          title: 'Người dùng',
-          url: '/organizations/user',
-          icon: UserCog,
-          code: 'org.users',
-        },
-        {
-          title: 'Gán quyền user',
-          url: '/organizations/user-permissions',
-          icon: ShieldCheck,
-          code: 'org.user-permissions',
-        },
-        {
-          title: 'Slider',
-          url: '/organizations/sliders',
-          icon: Calendar,
-          code: 'org.sliders',
-        },
-        {
-          title: 'Duyệt tin đăng',
-          url: '/organizations/room-moderation',
-          icon: FileCheck,
-          code: 'org.room-moderation',
-        },
-        {
-          title: 'Contact / Lead',
-          url: '/organizations/contacts',
-          icon: MessagesSquare,
-          code: 'org.contacts',
-        },
-        {
-          title: 'Deal / Booking',
-          url: '/organizations/deals',
-          icon: Handshake,
-          code: 'org.bookings',
-        },
-        {
-          title: 'Review / Comment',
-          url: '/organizations/reviews',
-          icon: Star,
-          code: 'org.reviews',
-        },
-        {
-          title: 'Dashboard admin',
-          url: '/organizations/dashboard',
-          icon: LayoutDashboard,
-          code: 'org.dashboard',
-        },
-      ],
-    },
-    {
-      title: 'Quản lý chung',
-      items: [
-        {
-          title: 'Home',
-          url: '/home',
-          icon: Calendar,
-        },
-      ],
-    },
+  const sharedGroups: NavGroup[] = [
     {
       title: 'Hệ thống',
       items: [
@@ -193,7 +194,7 @@ export const getSidebarData = () => {
     },
   ]
 
-  const filteredNavGroups: NavGroup[] = masterNavGroup
+  const filteredNavGroups: NavGroup[] = [...roleGroups, ...sharedGroups]
     .map((group) => ({
       ...group,
       items: group.items.map(filterItem).filter(Boolean) as NavItem[],

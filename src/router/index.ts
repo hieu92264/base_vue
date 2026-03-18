@@ -24,7 +24,7 @@ const router = createRouter({
       path: '/',
       name: 'dashboard',
       component: DashboardLanding,
-      meta: { layouts: BaseLayout },
+      meta: { layouts: BaseLayout, authOnly: true },
     },
     ...authRoutes,
     ...organizationRoutes,
@@ -70,6 +70,18 @@ router.beforeEach(async (to, from, next) => {
   if (requiredCodes.length > 0) {
     const denied = requiredCodes.some((code) => !userStore.can(code))
     if (denied) return next({ name: '403' })
+  }
+
+  const requiredUserTypes = to.matched
+    .map((r) => r.meta.userTypes as string[] | undefined)
+    .flat()
+    .filter(Boolean) as string[]
+
+  if (requiredUserTypes.length > 0) {
+    const actualType = userStore.user?.profile?.user_type
+    if (!actualType || !requiredUserTypes.includes(actualType)) {
+      return next({ name: '403' })
+    }
   }
 
   const needsAuth = to.matched.some((r) => r.meta.authOnly === true)

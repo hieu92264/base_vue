@@ -7,16 +7,14 @@ const router = useRouter()
 const userStore = useUserStore()
 
 onMounted(() => {
-  const isLandlord =
-    userStore.user?.profile?.user_type === 'landlord' ||
-    userStore.user?.username === 'admin'
+  const role = userStore.user?.profile?.user_type
 
-  if (userStore.can('org.dashboard')) {
+  if (role === 'admin' && userStore.can('org.dashboard')) {
     router.replace({ name: 'organizations.dashboard' })
     return
   }
 
-  if (isLandlord) {
+  if (role === 'landlord') {
     router.replace({ name: 'landlord.dashboard' })
     return
   }
