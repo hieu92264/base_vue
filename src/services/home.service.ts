@@ -71,6 +71,7 @@ export class HomeService {
 
   static async roomDetails(slugOrId: string): Promise<any> {
     const response: any = await axiosInstance.get(`/rooms/${slugOrId}`)
+    console.log(response)
     return response?.data ?? response
   }
 

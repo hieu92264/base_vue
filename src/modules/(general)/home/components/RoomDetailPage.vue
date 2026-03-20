@@ -197,6 +197,72 @@ const zaloHref = computed(() => {
   return `https://zalo.me/${zalo.replace(/\s+/g, '')}`
 })
 
+function isValidGoogleMapsUrl(value?: string | null): boolean {
+  if (!value) return false
+
+  try {
+    const url = new URL(value)
+    const host = url.hostname.toLowerCase()
+
+    return (
+      host.includes('google.com') ||
+      host.includes('maps.google.com') ||
+      host.includes('maps.app.goo.gl') ||
+      host.includes('goo.gl')
+    )
+  } catch {
+    return false
+  }
+}
+
+function extractLatLngFromGoogleMapsUrl(value?: string | null): {
+  lat: string
+  lng: string
+} | null {
+  if (!value) return null
+
+  try {
+    const url = new URL(value)
+    const source = `${url.pathname}${url.search}`
+
+    const atMatch = source.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)
+    if (atMatch) {
+      return {
+        lat: atMatch[1] ?? '',
+        lng: atMatch[2] ?? '',
+      }
+    }
+
+    const q = url.searchParams.get('q')
+    if (q) {
+      const qMatch = q.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/)
+      if (qMatch) {
+        return {
+          lat: qMatch[1] ?? '',
+          lng: qMatch[2] ?? '',
+        }
+      }
+    }
+
+    return null
+  } catch {
+    return null
+  }
+}
+
+function buildGoogleMapEmbedUrl(value?: string | null): string | null {
+  if (!isValidGoogleMapsUrl(value)) return null
+
+  const latLng = extractLatLngFromGoogleMapsUrl(value)
+  if (!latLng) return null
+
+  return `https://maps.google.com/maps?q=${latLng.lat},${latLng.lng}&z=16&output=embed`
+}
+
+const mapUrl = computed(() => roomDetails.value?.address ?? null)
+const mapEmbedUrl = computed(() => buildGoogleMapEmbedUrl(mapUrl.value))
+const hasValidMap = computed(() => !!mapEmbedUrl.value)
+
 const openContact = ref(false)
 const contactMutation = useContactMutaion()
 
@@ -206,10 +272,10 @@ const handleContactSubmit = (v: ContactFormValues) => {
 
   const composedMessage = [
     `Phòng: #${room.id} - ${room.title}`,
-    room.address ? `Địa chỉ: ${room.address}` : null,
     `Khu vực: ${locationText.value}`,
     `Ngày dự kiến dọn vào: ${v.moveInDate}`,
     v.message ? `Ghi chú: ${v.message}` : null,
+    hasValidMap.value && mapUrl.value ? `Google Maps: ${mapUrl.value}` : null,
   ]
     .filter(Boolean)
     .join('\n')
@@ -359,7 +425,7 @@ watch(
                   {{ roomDetails.title }}
                 </div>
                 <div class="truncate text-sm text-white/80">
-                  {{ roomDetails.address }}
+                  {{ locationText }}
                 </div>
               </div>
 
@@ -491,6 +557,35 @@ watch(
             >
               Liên hệ chủ trọ
             </Button>
+          </CardContent>
+        </Card>
+
+        <Card
+          v-if="hasValidMap"
+          class="rounded-2xl border-border/60 bg-card/80 shadow-sm"
+        >
+          <CardHeader class="pb-2">
+            <CardTitle class="text-base">Vị trí trên bản đồ</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <a
+              :href="mapUrl!"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="block overflow-hidden rounded-2xl border border-border/60 bg-muted/20 transition hover:opacity-95"
+            >
+              <iframe
+                :src="mapEmbedUrl!"
+                class="h-56 w-full"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                allowfullscreen
+              />
+            </a>
+
+            <p class="mt-2 text-xs text-muted-foreground">
+              Bấm vào bản đồ để mở Google Maps
+            </p>
           </CardContent>
         </Card>
 

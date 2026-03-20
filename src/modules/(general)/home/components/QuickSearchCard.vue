@@ -70,13 +70,15 @@
           </Label>
           <select
             :value="selectValue(form.district_id)"
-            :disabled="!form.city_id"
+            :disabled="!form.city_id || isLoadingDistricts"
             class="h-11 w-full rounded-2xl border border-border/60 bg-background/60 px-3 text-sm outline-none transition focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60"
             @change="onDistrictChange"
           >
-            <option :value="ALL">Tất cả</option>
+            <option :value="ALL">
+              {{ isLoadingDistricts ? 'Đang tải...' : 'Tất cả' }}
+            </option>
             <option
-              v-for="d in filteredDistricts"
+              v-for="d in districtItems"
               :key="d.id"
               :value="String(d.id)"
             >
@@ -91,13 +93,15 @@
           </Label>
           <select
             :value="selectValue(form.ward_id)"
-            :disabled="!form.district_id"
+            :disabled="!form.district_id || isLoadingWards"
             class="h-11 w-full rounded-2xl border border-border/60 bg-background/60 px-3 text-sm outline-none transition focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60"
             @change="onWardChange"
           >
-            <option :value="ALL">Tất cả</option>
+            <option :value="ALL">
+              {{ isLoadingWards ? 'Đang tải...' : 'Tất cả' }}
+            </option>
             <option
-              v-for="w in filteredWards"
+              v-for="w in wardItems"
               :key="w.id"
               :value="String(w.id)"
             >
@@ -163,12 +167,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
-import type { ICity, IDistrict, IWard } from '@/common/types/entities'
+import { computed, reactive, toRef } from 'vue'
+import type { ICity } from '@/common/types/entities'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  useDistrictsQuery,
+  useWardsQuery,
+} from '@/modules/(general)/home/hooks/use-home'
 
 type SearchPayload = {
   keyword: string
@@ -181,10 +189,8 @@ type SearchPayload = {
   max_area?: number
 }
 
-const props = defineProps<{
+defineProps<{
   cities: ICity[]
-  districts: IDistrict[]
-  wards: IWard[]
   loading?: boolean
 }>()
 
@@ -205,6 +211,17 @@ const form = reactive<SearchPayload>({
   max_area: undefined,
 })
 
+const cityIdRef = toRef(form, 'city_id')
+const districtIdRef = toRef(form, 'district_id')
+
+const { data: districts, isLoading: isLoadingDistricts } =
+  useDistrictsQuery(cityIdRef)
+
+const { data: wards, isLoading: isLoadingWards } = useWardsQuery(districtIdRef)
+
+const districtItems = computed(() => districts.value ?? [])
+const wardItems = computed(() => wards.value ?? [])
+
 function normalizeId(v: unknown): number | '' {
   if (v === ALL || v === '' || v === null || v === undefined) return ''
   const n = Number(v)
@@ -214,16 +231,6 @@ function normalizeId(v: unknown): number | '' {
 function selectValue(v: number | '') {
   return v === '' ? ALL : String(v)
 }
-
-const filteredDistricts = computed(() => {
-  if (!form.city_id) return []
-  return props.districts.filter((d) => d.city_id === form.city_id)
-})
-
-const filteredWards = computed(() => {
-  if (!form.district_id) return []
-  return props.wards.filter((w) => w.district_id === form.district_id)
-})
 
 function onCityChange(event: Event) {
   const value = (event.target as HTMLSelectElement).value

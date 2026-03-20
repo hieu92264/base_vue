@@ -4,12 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import QuickSearchCard from './QuickSearchCard.vue'
 import FeaturedRoomGrid from './FeaturedRoomGrid.vue'
 import { Button } from '@/components/ui/button'
-import {
-  useCitiesQuery,
-  useDistrictsQuery,
-  useRoomsQuery,
-  useWardsQuery,
-} from '../hooks/use-home'
+import { useCitiesQuery, useRoomsQuery } from '../hooks/use-home'
 
 function parseQueryNumber(value: unknown): number | undefined {
   if (typeof value !== 'string' || value.trim() === '') return undefined
@@ -26,9 +21,7 @@ function parseQueryNumberOrEmpty(value: unknown): number | '' {
 const route = useRoute()
 const router = useRouter()
 
-const { data: cities } = useCitiesQuery()
-const { data: districts } = useDistrictsQuery()
-const { data: wards } = useWardsQuery()
+const { data: cities, isLoading: isLoadingCities } = useCitiesQuery()
 
 const searchParams = computed(() => ({
   keyword: typeof route.query.keyword === 'string' ? route.query.keyword : '',
@@ -114,8 +107,7 @@ function goPage(page: number) {
       <div class="rounded-3xl border bg-card/70 shadow-sm">
         <QuickSearchCard
           :cities="cities ?? []"
-          :districts="districts ?? []"
-          :wards="wards ?? []"
+          :loading="isLoadingCities"
           @search="handleSearch"
         />
       </div>

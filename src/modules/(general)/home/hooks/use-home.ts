@@ -43,17 +43,23 @@ export const useCitiesQuery = () => {
   })
 }
 
-export const useDistrictsQuery = () => {
+export const useDistrictsQuery = (
+  cityId: Ref<number | ''> | ComputedRef<number | ''>,
+) => {
   return useQuery({
-    queryKey: [HomeQueryKeys.GET_DISTRICTS],
-    queryFn: HomeService.districts,
+    queryKey: computed(() => [HomeQueryKeys.GET_DISTRICTS, cityId.value]),
+    queryFn: () => HomeService.districts(cityId.value),
+    enabled: computed(() => !!cityId.value),
   })
 }
 
-export const useWardsQuery = () => {
+export const useWardsQuery = (
+  districtId: Ref<number | ''> | ComputedRef<number | ''>,
+) => {
   return useQuery({
-    queryKey: [HomeQueryKeys.GET_WARDS],
-    queryFn: HomeService.wards,
+    queryKey: computed(() => [HomeQueryKeys.GET_WARDS, districtId.value]),
+    queryFn: () => HomeService.wards({ district_id: districtId.value }),
+    enabled: computed(() => !!districtId.value),
   })
 }
 

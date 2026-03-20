@@ -6,10 +6,8 @@ import HomeSlider from '@/modules/(general)/home/components/HomeSlider.vue'
 import QuickSearchCard from '@/modules/(general)/home/components/QuickSearchCard.vue'
 import {
   useCitiesQuery,
-  useDistrictsQuery,
   useFeatureRoomsQuery,
   useSlidersQuery,
-  useWardsQuery,
 } from '@/modules/(general)/home/hooks/use-home'
 
 const router = useRouter()
@@ -19,19 +17,10 @@ const { data: featuredRooms, isLoading: isLoadingFeaturedRooms } =
   useFeatureRoomsQuery()
 
 const { data: cities, isLoading: isLoadingCities } = useCitiesQuery()
-const { data: districts, isLoading: isLoadingDistricts } = useDistrictsQuery()
-const { data: wards, isLoading: isLoadingWards } = useWardsQuery()
 
 const sliderItems = computed(() => sliders.value ?? [])
 const featuredItems = computed(() => featuredRooms.value ?? [])
 const cityItems = computed(() => cities.value ?? [])
-const districtItems = computed(() => districts.value ?? [])
-const wardItems = computed(() => wards.value ?? [])
-
-const isLoadingLocations = computed(
-  () =>
-    isLoadingCities.value || isLoadingDistricts.value || isLoadingWards.value,
-)
 
 function handleSearch(payload: {
   keyword: string
@@ -89,7 +78,7 @@ function handleSearch(payload: {
       </div>
     </section>
 
-    <section class="relative z-10 !mt-4 px-4 md:px-6">
+    <section class="relative z-10 mt-4! px-4 md:px-6">
       <div class="mx-auto! max-w-7xl!">
         <div
           class="rounded-3xl border bg-background/60 p-1 shadow-2xl shadow-black/5 backdrop-blur supports-[backdrop-filter]:bg-background/40"
@@ -97,9 +86,7 @@ function handleSearch(payload: {
           <div class="rounded-[1.35rem] bg-card/80 ring-1 ring-border/50">
             <QuickSearchCard
               :cities="cityItems"
-              :districts="districtItems"
-              :wards="wardItems"
-              :loading="isLoadingLocations"
+              :loading="isLoadingCities"
               @search="handleSearch"
             />
           </div>
