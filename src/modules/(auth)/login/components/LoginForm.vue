@@ -11,10 +11,10 @@
     <FieldGroup>
       <div class="flex flex-col items-center gap-1 text-center">
         <h1 class="text-2xl font-bold text-zinc-950 dark:text-zinc-50">
-          Login to account
+          Đăng nhập tài khoản
         </h1>
         <p class="text-muted-foreground text-sm text-balance">
-          Enter your username below to login to your account.
+          Nhập thông tin bên dưới để đăng nhập vào tài khoản của bạn.
         </p>
       </div>
 
@@ -22,7 +22,7 @@
         <FieldLabel
           for="username"
           class="dark:text-zinc-300"
-          >User name</FieldLabel
+          >Tên đăng nhập</FieldLabel
         >
         <Input
           id="username"
@@ -40,13 +40,13 @@
           <FieldLabel
             for="password"
             class="dark:text-zinc-300"
-            >Password</FieldLabel
+            >Mật khẩu</FieldLabel
           >
           <RouterLink
             to="/forgot-password"
             class="text-sm text-emerald-600 hover:underline dark:text-emerald-400"
           >
-            Forgot your password?
+            Quên mật khẩu?
           </RouterLink>
         </div>
         <PasswordInput
@@ -68,7 +68,7 @@
           v-if="isPending"
           class="mr-2 h-4 w-4 animate-spin"
         />
-        {{ isPending ? 'Please wait...' : 'Login' }}
+        {{ isPending ? 'Vui lòng chờ...' : 'Đăng nhập' }}
       </Button>
 
       <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">

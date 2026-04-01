@@ -129,7 +129,7 @@ const formatMoney = (value?: number | string | null) =>
 const getCover = (room?: IRoom | null) =>
   room?.photos?.find((p) => p.is_cover)?.photo_url ||
   room?.photos?.[0]?.photo_url ||
-  'https://placehold.co/800x500?text=No+Image'
+  'https://placehold.co/800x500?text=Khong+co+anh'
 
 const mutateStatus = useMutation({
   mutationFn: ({

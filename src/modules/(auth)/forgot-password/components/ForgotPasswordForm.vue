@@ -11,10 +11,10 @@
     <FieldGroup>
       <div class="flex flex-col items-center gap-1 text-center">
         <h1 class="text-2xl font-bold text-zinc-950 dark:text-zinc-50">
-          Forgot password
+          Quên mật khẩu
         </h1>
         <p class="text-muted-foreground text-sm text-balance">
-          Enter your email and we’ll send you a reset link.
+          Nhập email của bạn và chúng tôi sẽ gửi liên kết đặt lại mật khẩu.
         </p>
       </div>
 
@@ -45,16 +45,16 @@
           v-if="isPending"
           class="mr-2 h-4 w-4 animate-spin"
         />
-        {{ isPending ? 'Please wait...' : 'Send reset link' }}
+        {{ isPending ? 'Vui lòng chờ...' : 'Gửi liên kết đặt lại' }}
       </Button>
 
       <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">
-        Remembered your password?
+        Đã nhớ mật khẩu?
         <RouterLink
           to="/login"
           class="font-medium text-emerald-600 hover:underline dark:text-emerald-400"
         >
-          Back to login
+          Quay lại đăng nhập
         </RouterLink>
       </div>
     </FieldGroup>

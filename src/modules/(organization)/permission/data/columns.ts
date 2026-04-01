@@ -8,7 +8,7 @@ export const columns: ColumnDef<IPermission>[] = [
   {
     id: 'no',
     accessorKey: 'no',
-    header: 'No.',
+    header: 'STT',
     meta: { sticky: 'left' },
     enableSorting: false,
     enableColumnFilter: false,
@@ -18,7 +18,7 @@ export const columns: ColumnDef<IPermission>[] = [
   {
     id: 'code',
     accessorKey: 'code',
-    header: 'Code',
+    header: 'Mã',
     meta: { sticky: 'left' },
     size: 180,
     filterFn: 'includesString',
@@ -27,7 +27,7 @@ export const columns: ColumnDef<IPermission>[] = [
   {
     id: 'name',
     accessorKey: 'name',
-    header: 'Name',
+    header: 'Tên',
     size: 220,
     filterFn: 'includesString',
     cell: (info) => info.getValue(),
@@ -35,7 +35,7 @@ export const columns: ColumnDef<IPermission>[] = [
   {
     id: 'url',
     accessorKey: 'url',
-    header: 'URL',
+    header: 'Đường dẫn',
     size: 320,
     filterFn: 'includesString',
     cell: (info) => info.getValue(),
@@ -43,14 +43,14 @@ export const columns: ColumnDef<IPermission>[] = [
   {
     id: 'parent_id',
     accessorKey: 'parent_id',
-    header: 'Parent ID',
+    header: 'ID cha',
     size: 120,
     cell: (info) => info.getValue() ?? '-',
   },
   {
     id: 'isactive',
     accessorKey: 'isactive',
-    header: 'Active Status',
+    header: 'Trạng thái',
     size: 140,
     filterFn: (row, columnId, filterValue) => {
       const value = row.getValue(columnId)
@@ -58,12 +58,12 @@ export const columns: ColumnDef<IPermission>[] = [
       return statusText.includes(String(filterValue).toLowerCase())
     },
     cell: (info) =>
-      info.getValue() === RecordStatus.ACTIVE ? 'Active' : 'Inactive',
+      info.getValue() === RecordStatus.ACTIVE ? 'Hoạt động' : 'Ngưng hoạt động',
   },
   {
     id: 'action',
     accessorKey: 'action',
-    header: 'Actions',
+    header: 'Thao tác',
     meta: { sticky: 'right' },
     size: 80,
     enableSorting: false,

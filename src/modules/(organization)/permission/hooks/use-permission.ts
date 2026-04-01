@@ -30,11 +30,11 @@ export const useCreatePermissionMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [PermissionQueryKey.GET_PERMISSIONS],
       })
-      toast.success('Permission created successfully')
+      toast.success('Tạo quyền thành công')
     },
     onError: (error) => {
       console.error('Error creating permission:', error)
-      toast.error('Failed to create permission')
+      toast.error('Tạo quyền thất bại')
     },
   })
 }
@@ -53,11 +53,11 @@ export const useUpdatePermissionMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [PermissionQueryKey.GET_PERMISSIONS],
       })
-      toast.success('Permission updated successfully')
+      toast.success('Cập nhật quyền thành công')
     },
     onError: (error) => {
       console.error('Error updating permission:', error)
-      toast.error('Failed to update permission')
+      toast.error('Cập nhật quyền thất bại')
     },
   })
 }
@@ -82,11 +82,11 @@ export const useDeletePermissionMutation = () => {
           return updated
         },
       )
-      toast.success('Permission deleted successfully')
+      toast.success('Xóa quyền thành công')
     },
     onError: (error) => {
       console.error('Error deleting permission:', error)
-      toast.error('Failed to delete permission')
+      toast.error('Xóa quyền thất bại')
     },
   })
 }

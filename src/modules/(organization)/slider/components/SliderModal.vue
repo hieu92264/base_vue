@@ -144,10 +144,10 @@ watch(
     <DialogContent class="sm:max-w-2xl">
       <DialogHeader>
         <DialogTitle>
-          {{ initialData ? 'Edit Slider' : 'Add New Slider' }}
+          {{ initialData ? 'Chỉnh sửa slider' : 'Thêm slider mới' }}
         </DialogTitle>
         <DialogDescription>
-          Fill in slider information, then click Submit to save.
+          Điền thông tin slider rồi bấm Lưu để hoàn tất.
         </DialogDescription>
       </DialogHeader>
 
@@ -161,11 +161,11 @@ watch(
             name="title"
           >
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>Tiêu đề</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
-                  placeholder="Slider title"
+                  placeholder="Tiêu đề slider"
                 />
               </FormControl>
               <FormMessage />
@@ -177,7 +177,7 @@ watch(
             name="sort_order"
           >
             <FormItem>
-              <FormLabel>Sort Order</FormLabel>
+              <FormLabel>Thứ tự hiển thị</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
@@ -194,7 +194,7 @@ watch(
             name="link_url"
           >
             <FormItem class="md:col-span-2">
-              <FormLabel>Link URL</FormLabel>
+              <FormLabel>Liên kết</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
@@ -210,15 +210,15 @@ watch(
             name="isactive"
           >
             <FormItem>
-              <FormLabel>Status</FormLabel>
+              <FormLabel>Trạng thái</FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder="Chọn trạng thái" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem :value="1">Active</SelectItem>
-                    <SelectItem :value="0">Inactive</SelectItem>
+                    <SelectItem :value="1">Hoạt động</SelectItem>
+                    <SelectItem :value="0">Ngưng hoạt động</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -231,7 +231,7 @@ watch(
             name="image"
           >
             <FormItem>
-              <FormLabel>Image</FormLabel>
+              <FormLabel>Hình ảnh</FormLabel>
               <FormControl>
                 <Input
                   type="file"
@@ -247,7 +247,7 @@ watch(
             v-if="currentPreview"
             class="md:col-span-2"
           >
-            <p class="mb-2 text-sm font-medium">Preview</p>
+            <p class="mb-2 text-sm font-medium">Xem trước</p>
             <img
               :src="currentPreview"
               class="h-40 w-full rounded-md border object-cover"
@@ -259,11 +259,11 @@ watch(
             name="remark"
           >
             <FormItem class="md:col-span-2">
-              <FormLabel>Remark</FormLabel>
+              <FormLabel>Ghi chú</FormLabel>
               <FormControl>
                 <Textarea
                   v-bind="componentField"
-                  placeholder="Remark..."
+                  placeholder="Nhập ghi chú..."
                 />
               </FormControl>
               <FormMessage />
@@ -277,13 +277,13 @@ watch(
             variant="outline"
             @click="emit('update:open', false)"
           >
-            Cancel
+            Hủy
           </Button>
           <Button
             type="submit"
             :disabled="isPending"
           >
-            {{ isPending ? 'Saving...' : 'Submit' }}
+            {{ isPending ? 'Đang lưu...' : 'Lưu' }}
           </Button>
         </DialogFooter>
       </form>

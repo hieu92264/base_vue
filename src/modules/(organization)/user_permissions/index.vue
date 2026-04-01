@@ -154,7 +154,7 @@ const filteredUsers = computed(() => {
     <div class="flex items-center gap-3">
       <Select v-model="seletedUserId">
         <SelectTrigger class="w-90">
-          <SelectValue placeholder="Select user..." />
+          <SelectValue placeholder="Chọn người dùng..." />
         </SelectTrigger>
 
         <SelectContent class="max-h-65 overflow-auto">
@@ -162,12 +162,12 @@ const filteredUsers = computed(() => {
             <input
               v-model="userSearch"
               type="text"
-              placeholder="Search username/email..."
+              placeholder="Tìm tên đăng nhập/email..."
               class="w-full h-9 px-2 border rounded-md outline-none"
             />
           </div>
 
-          <SelectItem :value="0">-- Choose --</SelectItem>
+          <SelectItem :value="0">-- Chọn --</SelectItem>
 
           <SelectItem
             v-for="u in filteredUsers"
@@ -176,7 +176,7 @@ const filteredUsers = computed(() => {
           >
             {{ u.username }}
             <span class="text-muted-foreground"
-              >({{ u.email ?? 'no-email' }})</span
+              >({{ u.email ?? 'Chưa có email' }})</span
             >
           </SelectItem>
 
@@ -184,7 +184,7 @@ const filteredUsers = computed(() => {
             v-if="filteredUsers.length === 0"
             class="px-3 py-2 text-sm text-muted-foreground"
           >
-            No users found
+            Không tìm thấy người dùng
           </div>
         </SelectContent>
       </Select>
@@ -195,7 +195,7 @@ const filteredUsers = computed(() => {
         "
         @click="handleSubmit"
       >
-        {{ isSaving ? 'Saving...' : 'Save permissions' }}
+        {{ isSaving ? 'Đang lưu...' : 'Lưu phân quyền' }}
       </Button>
     </div>
 
@@ -203,7 +203,7 @@ const filteredUsers = computed(() => {
       v-if="!seletedUserId"
       class="text-sm text-muted-foreground"
     >
-      Please select a user to assign permissions.
+      Vui lòng chọn người dùng để phân quyền.
     </div>
 
     <div
@@ -214,7 +214,7 @@ const filteredUsers = computed(() => {
         v-if="isLoadingPerms"
         class="text-sm text-muted-foreground"
       >
-        Loading permissions...
+        Đang tải danh sách quyền...
       </div>
 
       <PermissionTreeNode

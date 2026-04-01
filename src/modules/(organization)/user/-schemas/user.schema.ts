@@ -5,10 +5,10 @@ export const userFormSchema = z
     id: z.number().optional(),
 
     isactive: z.enum(['Y', 'N']).optional(), // chặt hơn (optional)
-    username: z.string().min(1, 'Username is required'),
+    username: z.string().min(1, 'Tên đăng nhập là bắt buộc'),
     email: z
       .string()
-      .email('Invalid email')
+      .email('Email không hợp lệ')
       .optional()
       .or(z.literal(''))
       .transform((v) => (v === '' ? null : v)),
@@ -31,7 +31,7 @@ export const userFormSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['password'],
-        message: 'Password is required',
+        message: 'Mật khẩu là bắt buộc',
       })
     }
   })

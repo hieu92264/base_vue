@@ -11,10 +11,10 @@
     <FieldGroup>
       <div class="flex flex-col items-center gap-1 text-center">
         <h1 class="text-2xl font-bold text-zinc-950 dark:text-zinc-50">
-          Reset password
+          Đặt lại mật khẩu
         </h1>
         <p class="text-muted-foreground text-sm text-balance">
-          Enter your new password below.
+          Nhập mật khẩu mới của bạn bên dưới.
         </p>
       </div>
 
@@ -45,7 +45,7 @@
         <FieldLabel
           for="password"
           class="dark:text-zinc-300"
-          >New password</FieldLabel
+          >Mật khẩu mới</FieldLabel
         >
         <PasswordInput
           id="password"
@@ -61,7 +61,7 @@
           for="password_confirmation"
           class="dark:text-zinc-300"
         >
-          Confirm password
+          Xác nhận mật khẩu
         </FieldLabel>
         <PasswordInput
           id="password_confirmation"
@@ -88,7 +88,7 @@
           v-if="isPending"
           class="mr-2 h-4 w-4 animate-spin"
         />
-        {{ isPending ? 'Please wait...' : 'Update password' }}
+        {{ isPending ? 'Vui lòng chờ...' : 'Cập nhật mật khẩu' }}
       </Button>
 
       <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">
@@ -96,7 +96,7 @@
           to="/login"
           class="font-medium text-emerald-600 hover:underline dark:text-emerald-400"
         >
-          Back to login
+          Quay lại đăng nhập
         </RouterLink>
       </div>
     </FieldGroup>

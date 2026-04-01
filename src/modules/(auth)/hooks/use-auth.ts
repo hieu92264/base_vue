@@ -28,13 +28,13 @@ export const useDoRegisterMutation = () => {
     },
     onSuccess: async (response) => {
       toast.success(
-        'Register successfully! Please check your email to verify your account.',
+        'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
       )
       router.replace({ name: 'auth.login' })
     },
     onError: (error: any) => {
       console.error('Register error:', error)
-      toast.error(error?.response?.data?.message || 'Register failed')
+      toast.error(error?.response?.data?.message || 'Đăng ký thất bại')
     },
   })
 }
@@ -71,14 +71,14 @@ export const useDoLoginMutation = () => {
 
         console.log('locale: ', i18nStore.locale)
 
-        toast.success('Login successfully!')
+        toast.success('Đăng nhập thành công!')
 
         const redirectPath = route.query.redirect as string
         router.replace(redirectPath || { name: 'dashboard' })
       } else {
         authStore.clearSession()
         userStore.clearProfile()
-        toast.error('Cannot get user profile')
+        toast.error('Không thể lấy thông tin người dùng')
       }
     },
 
@@ -86,7 +86,7 @@ export const useDoLoginMutation = () => {
       authStore.clearSession()
       userStore.clearProfile()
       console.error('Login error:', error)
-      toast.error(error?.response?.data?.message || 'Login failed')
+      toast.error(error?.response?.data?.message || 'Đăng nhập thất bại')
     },
   })
 }
@@ -104,13 +104,13 @@ export const useDoLogoutMutation = () => {
     onSuccess: async (response) => {
       authStore.clearSession()
       userStore.clearProfile()
-      toast.success('Logout successfully!')
+      toast.success('Đăng xuất thành công!')
       router.replace({ name: 'auth.login' })
     },
 
     onError: (error: any) => {
       console.error('Logout error:', error)
-      toast.error(error?.response?.data?.message || 'Logout failed')
+      toast.error(error?.response?.data?.message || 'Đăng xuất thất bại')
     },
   })
 }
@@ -125,7 +125,7 @@ export const useForgotPasswordMutation = () => {
       )
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed')
+      toast.error(error?.response?.data?.message || 'Thao tác thất bại')
     },
   })
 }
@@ -140,14 +140,14 @@ export const useResetPasswordMutation = () => {
 
     onSuccess: () => {
       toast.success(
-        'Reset password successfully! Please login with your new password.',
+        'Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.',
       )
       router.replace({ name: 'auth.login' })
     },
 
     onError: (error: any) => {
       console.error('Reset password error:', error)
-      toast.error(error?.response?.data?.message || 'Reset password failed')
+      toast.error(error?.response?.data?.message || 'Đặt lại mật khẩu thất bại')
     },
   })
 }

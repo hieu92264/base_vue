@@ -8,7 +8,7 @@ export const columns: ColumnDef<ISlider>[] = [
   {
     id: 'no',
     accessorKey: 'no',
-    header: 'No.',
+    header: 'STT',
     meta: { sticky: 'left' },
     enableSorting: false,
     enableColumnFilter: false,
@@ -18,19 +18,19 @@ export const columns: ColumnDef<ISlider>[] = [
   {
     id: 'image_url',
     accessorKey: 'image_url',
-    header: 'Image',
+    header: 'Hình ảnh',
     size: 140,
     cell: ({ row }) =>
       h('img', {
         src:
-          row.original.image_url || 'https://placehold.co/120x70?text=No+Image',
+          row.original.image_url || 'https://placehold.co/120x70?text=Khong+co+anh',
         class: 'h-14 w-24 rounded object-cover border',
       }),
   },
   {
     id: 'title',
     accessorKey: 'title',
-    header: 'Title',
+    header: 'Tiêu đề',
     size: 240,
     filterFn: 'includesString',
     cell: (info) => info.getValue() || '-',
@@ -38,7 +38,7 @@ export const columns: ColumnDef<ISlider>[] = [
   {
     id: 'link_url',
     accessorKey: 'link_url',
-    header: 'Link URL',
+    header: 'Liên kết',
     size: 260,
     filterFn: 'includesString',
     cell: (info) => info.getValue() || '-',
@@ -46,14 +46,14 @@ export const columns: ColumnDef<ISlider>[] = [
   {
     id: 'sort_order',
     accessorKey: 'sort_order',
-    header: 'Sort Order',
+    header: 'Thứ tự',
     size: 120,
     cell: (info) => info.getValue(),
   },
   {
     id: 'isactive',
     accessorKey: 'isactive',
-    header: 'Status',
+    header: 'Trạng thái',
     size: 120,
     filterFn: (row, columnId, filterValue) => {
       const value = row.getValue(columnId)
@@ -61,19 +61,19 @@ export const columns: ColumnDef<ISlider>[] = [
       return statusText.includes(String(filterValue).toLowerCase())
     },
     cell: (info) =>
-      info.getValue() === RecordStatus.ACTIVE ? 'Active' : 'Inactive',
+      info.getValue() === RecordStatus.ACTIVE ? 'Hoạt động' : 'Ngưng hoạt động',
   },
   {
     id: 'remark',
     accessorKey: 'remark',
-    header: 'Remark',
+    header: 'Ghi chú',
     size: 220,
     cell: (info) => info.getValue() || '-',
   },
   {
     id: 'action',
     accessorKey: 'action',
-    header: 'Actions',
+    header: 'Thao tác',
     meta: { sticky: 'right' },
     size: 80,
     enableSorting: false,

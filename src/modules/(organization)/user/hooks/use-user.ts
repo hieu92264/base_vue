@@ -19,11 +19,11 @@ export const useCreateUserMutation = () => {
     mutationFn: UserService.createUser,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [UserQueryKey.GET_USERS] })
-      toast.success('User created successfully')
+      toast.success('Tạo người dùng thành công')
     },
     onError: (e) => {
       console.error(e)
-      toast.error('Failed to create user')
+      toast.error('Tạo người dùng thất bại')
     },
   })
 }
@@ -35,11 +35,11 @@ export const useUpdateUserMutation = () => {
       UserService.updateUser(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [UserQueryKey.GET_USERS] })
-      toast.success('User updated successfully')
+      toast.success('Cập nhật người dùng thành công')
     },
     onError: (e) => {
       console.error(e)
-      toast.error('Failed to update user')
+      toast.error('Cập nhật người dùng thất bại')
     },
   })
 }
@@ -50,11 +50,11 @@ export const useDeleteUserMutation = () => {
     mutationFn: UserService.deleteUser,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: [UserQueryKey.GET_USERS] })
-      toast.success('User deleted successfully')
+      toast.success('Xóa người dùng thành công')
     },
     onError: (e) => {
       console.error(e)
-      toast.error('Failed to delete user')
+      toast.error('Xóa người dùng thất bại')
     },
   })
 }

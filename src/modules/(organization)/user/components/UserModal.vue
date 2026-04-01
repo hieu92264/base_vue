@@ -71,7 +71,7 @@ const onOpenChange = (v: boolean) => {
 const onSubmit = form.handleSubmit((values) => {
   // Create: password required
   if (!isEdit.value && (!values.password || values.password.trim() === '')) {
-    form.setFieldError('password', 'Password is required')
+    form.setFieldError('password', 'Mật khẩu là bắt buộc')
     return
   }
 
@@ -127,9 +127,11 @@ watch(
   >
     <DialogContent class="sm:max-w-2xl">
       <DialogHeader>
-        <DialogTitle>{{ isEdit ? 'Edit User' : 'Add New User' }}</DialogTitle>
+        <DialogTitle>{{
+          isEdit ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'
+        }}</DialogTitle>
         <DialogDescription>
-          Manage User + User Profile in one form.
+          Quản lý người dùng và hồ sơ người dùng trong cùng một biểu mẫu.
         </DialogDescription>
       </DialogHeader>
 
@@ -144,7 +146,7 @@ watch(
             name="username"
           >
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Tên đăng nhập</FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
@@ -164,13 +166,13 @@ watch(
             name="password"
           >
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Mật khẩu</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
                   type="password"
                   :placeholder="
-                    isEdit ? '(Leave blank to keep current password)' : ''
+                    isEdit ? '(Để trống nếu muốn giữ nguyên mật khẩu hiện tại)' : ''
                   "
                 />
               </FormControl>
@@ -182,7 +184,7 @@ watch(
             name="locale"
           >
             <FormItem>
-              <FormLabel>Locale</FormLabel>
+              <FormLabel>Ngôn ngữ</FormLabel>
               <FormControl
                 ><Input
                   v-bind="componentField"
@@ -196,15 +198,15 @@ watch(
             name="isactive"
           >
             <FormItem>
-              <FormLabel>Status</FormLabel>
+              <FormLabel>Trạng thái</FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder="Chọn trạng thái" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Y">Active</SelectItem>
-                    <SelectItem value="N">Inactive</SelectItem>
+                    <SelectItem value="Y">Hoạt động</SelectItem>
+                    <SelectItem value="N">Ngưng hoạt động</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -216,7 +218,7 @@ watch(
             name="remark"
           >
             <FormItem>
-              <FormLabel>User Remark</FormLabel>
+              <FormLabel>Ghi chú người dùng</FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
@@ -229,7 +231,7 @@ watch(
             name="full_name"
           >
             <FormItem>
-              <FormLabel>Full name</FormLabel>
+              <FormLabel>Họ và tên</FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
@@ -239,7 +241,7 @@ watch(
             name="phone_number"
           >
             <FormItem>
-              <FormLabel>Phone number</FormLabel>
+              <FormLabel>Số điện thoại</FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
@@ -249,16 +251,16 @@ watch(
             name="user_type"
           >
             <FormItem>
-              <FormLabel>User type</FormLabel>
+              <FormLabel>Loại người dùng</FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Select type" />
+                    <SelectValue placeholder="Chọn loại người dùng" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="tenant">Tenant</SelectItem>
-                    <SelectItem value="landlord">Landlord</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="tenant">Người thuê</SelectItem>
+                    <SelectItem value="landlord">Chủ nhà</SelectItem>
+                    <SelectItem value="admin">Quản trị viên</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -270,7 +272,7 @@ watch(
             name="avatar_url"
           >
             <FormItem>
-              <FormLabel>Avatar URL</FormLabel>
+              <FormLabel>Đường dẫn ảnh đại diện</FormLabel>
               <FormControl
                 ><Input
                   v-bind="componentField"
@@ -284,7 +286,7 @@ watch(
             name="address"
           >
             <FormItem>
-              <FormLabel>Address</FormLabel>
+              <FormLabel>Địa chỉ</FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
@@ -314,7 +316,7 @@ watch(
             name="profile_remark"
           >
             <FormItem>
-              <FormLabel>Profile Remark</FormLabel>
+              <FormLabel>Ghi chú hồ sơ</FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
@@ -326,13 +328,13 @@ watch(
             variant="outline"
             @click="emit('update:open', false)"
           >
-            Cancel
+            Hủy
           </Button>
           <Button
             type="submit"
             :disabled="isPending"
           >
-            {{ isPending ? 'Saving...' : 'Submit' }}
+            {{ isPending ? 'Đang lưu...' : 'Lưu' }}
           </Button>
         </DialogFooter>
       </form>

@@ -92,10 +92,10 @@ watch(
     <DialogContent class="sm:max-w-lg">
       <DialogHeader>
         <DialogTitle>
-          {{ initialData ? 'Edit Category' : 'Add New Category' }}
+          {{ initialData ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}
         </DialogTitle>
         <DialogDescription>
-          Fill in category information, then click Submit to save.
+          Điền thông tin danh mục rồi bấm Lưu để hoàn tất.
         </DialogDescription>
       </DialogHeader>
 
@@ -110,11 +110,11 @@ watch(
               name="code"
             >
               <FormItem>
-                <FormLabel>Code</FormLabel>
+                <FormLabel>Mã danh mục</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
-                    placeholder="Enter category code"
+                    placeholder="Nhập mã danh mục"
                   />
                 </FormControl>
               </FormItem>
@@ -125,18 +125,18 @@ watch(
               name="isactive"
             >
               <FormItem>
-                <FormLabel>Status</FormLabel>
+                <FormLabel>Trạng thái</FormLabel>
                 <FormControl>
                   <Select v-bind="componentField">
                     <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="Chọn trạng thái" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem :value="RecordStatus.ACTIVE"
-                        >Active</SelectItem
+                        >Hoạt động</SelectItem
                       >
                       <SelectItem :value="RecordStatus.INACTIVE"
-                        >Inactive</SelectItem
+                        >Ngưng hoạt động</SelectItem
                       >
                     </SelectContent>
                   </Select>
@@ -150,11 +150,11 @@ watch(
             name="name"
           >
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Tên danh mục</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
-                  placeholder="Enter category name"
+                  placeholder="Nhập tên danh mục"
                 />
               </FormControl>
             </FormItem>
@@ -170,7 +170,7 @@ watch(
                 <FormControl>
                   <Input
                     v-bind="componentField"
-                    placeholder="Enter slug"
+                    placeholder="Nhập slug"
                   />
                 </FormControl>
               </FormItem>
@@ -181,7 +181,7 @@ watch(
               name="sort_order"
             >
               <FormItem>
-                <FormLabel>Sort Order</FormLabel>
+                <FormLabel>Thứ tự hiển thị</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
@@ -198,11 +198,11 @@ watch(
             name="remark"
           >
             <FormItem>
-              <FormLabel>Remark</FormLabel>
+              <FormLabel>Ghi chú</FormLabel>
               <FormControl>
                 <Textarea
                   v-bind="componentField"
-                  placeholder="Enter remark"
+                  placeholder="Nhập ghi chú"
                   rows="4"
                 />
               </FormControl>
@@ -216,13 +216,13 @@ watch(
             variant="outline"
             @click="closeModal"
           >
-            Cancel
+            Hủy
           </Button>
           <Button
             type="submit"
             :disabled="isPending"
           >
-            {{ isPending ? 'Saving...' : 'Submit' }}
+            {{ isPending ? 'Đang lưu...' : 'Lưu' }}
           </Button>
         </DialogFooter>
       </form>

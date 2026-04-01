@@ -30,16 +30,16 @@ const handleCancel = () => {
   >
     <AlertDialogContent>
       <AlertDialogHeader>
-        <AlertDialogTitle>Confirm delete row?</AlertDialogTitle>
+        <AlertDialogTitle>Xác nhận xóa dòng này?</AlertDialogTitle>
 
         <AlertDialogDescription>
-          This action cannot be undone. This will permanently delete the
-          employee data from our servers.
+          Hành động này không thể hoàn tác. Dữ liệu sẽ bị xóa vĩnh viễn khỏi hệ
+          thống.
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel @click="handleCancel">Cancel </AlertDialogCancel>
-        <AlertDialogAction @click="onConfirmDelete">Confirm</AlertDialogAction>
+        <AlertDialogCancel @click="handleCancel">Hủy</AlertDialogCancel>
+        <AlertDialogAction @click="onConfirmDelete">Xác nhận</AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>

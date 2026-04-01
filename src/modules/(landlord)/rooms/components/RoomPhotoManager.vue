@@ -80,9 +80,9 @@ const handleImageLoad = (photoId: number) => {
 
 const getImageSrc = (photo: IRoomPhoto) => {
   if (imageErrors.value[photo.id]) {
-    return 'https://placehold.co/600x400?text=Image+Loading'
+    return 'https://placehold.co/600x400?text=Dang+tai+anh'
   }
-  return photo.photo_url || 'https://placehold.co/600x400?text=No+Image'
+  return photo.photo_url || 'https://placehold.co/600x400?text=Khong+co+anh'
 }
 </script>
 
@@ -94,7 +94,7 @@ const getImageSrc = (photo: IRoomPhoto) => {
       <div>
         <h3 class="font-semibold">Ảnh phòng</h3>
         <p class="text-sm text-muted-foreground">
-          Upload ảnh, kéo thả file, chọn ảnh cover, đổi thứ tự, xóa ảnh
+          Tải ảnh lên, kéo thả file, chọn ảnh bìa, đổi thứ tự, xóa ảnh
         </p>
       </div>
 
@@ -133,14 +133,14 @@ const getImageSrc = (photo: IRoomPhoto) => {
         </div>
 
         <div>
-          <div class="font-medium">Kéo & thả ảnh vào đây</div>
+          <div class="font-medium">Kéo và thả ảnh vào đây</div>
           <div class="text-sm text-muted-foreground">
-            hoặc bấm nút <span class="font-medium">Chọn ảnh</span> để upload
+            hoặc bấm nút <span class="font-medium">Chọn ảnh</span> để tải lên
           </div>
         </div>
 
         <div class="text-xs text-muted-foreground">
-          Hỗ trợ JPG, PNG, WEBP, AVIF. Tối đa 5MB / ảnh.
+          Hỗ trợ JPG, PNG, WEBP, AVIF. Tối đa 5MB mỗi ảnh.
         </div>
       </div>
     </div>
@@ -170,12 +170,12 @@ const getImageSrc = (photo: IRoomPhoto) => {
           />
 
           <div class="absolute left-3 top-3 flex gap-2">
-            <Badge v-if="photo.is_cover">Ảnh cover</Badge>
+            <Badge v-if="photo.is_cover">Ảnh bìa</Badge>
             <Badge
               v-if="photo.id < 0"
               variant="secondary"
             >
-              Đang upload
+              Đang tải lên
             </Badge>
           </div>
         </div>
@@ -198,7 +198,7 @@ const getImageSrc = (photo: IRoomPhoto) => {
             @click="$emit('set-cover', photo)"
           >
             <Star class="mr-2 h-4 w-4" />
-            Đặt cover
+            Đặt làm ảnh bìa
           </Button>
 
           <Button

@@ -7,7 +7,7 @@ import { RecordStatus } from '@/common/constants/enums'
 export const columns: ColumnDef<IUser>[] = [
   {
     id: 'no',
-    header: 'No.',
+    header: 'STT',
     enableSorting: false,
     enableColumnFilter: false,
     size: 60,
@@ -19,7 +19,7 @@ export const columns: ColumnDef<IUser>[] = [
   {
     id: 'username',
     accessorKey: 'username',
-    header: 'Username',
+    header: 'Tên đăng nhập',
     size: 160,
     filterFn: 'includesString',
     meta: { sticky: 'left', maxWidth: '160px' },
@@ -37,7 +37,7 @@ export const columns: ColumnDef<IUser>[] = [
   {
     id: 'locale',
     accessorKey: 'locale',
-    header: 'Locale',
+    header: 'Ngôn ngữ',
     size: 80,
     meta: { maxWidth: '80px' },
     cell: (info) => String(info.getValue() ?? ''),
@@ -45,7 +45,7 @@ export const columns: ColumnDef<IUser>[] = [
   {
     id: 'last_login_at',
     accessorKey: 'last_login_at',
-    header: 'Last login',
+    header: 'Lần đăng nhập cuối',
     size: 170,
     meta: { maxWidth: '170px' },
     cell: (info) => String(info.getValue() ?? ''),
@@ -53,7 +53,7 @@ export const columns: ColumnDef<IUser>[] = [
   {
     id: 'last_login_ip',
     accessorKey: 'last_login_ip',
-    header: 'Last IP',
+    header: 'IP cuối',
     size: 140,
     meta: { maxWidth: '140px' },
     cell: (info) => String(info.getValue() ?? ''),
@@ -61,7 +61,7 @@ export const columns: ColumnDef<IUser>[] = [
   {
     id: 'user_remark',
     accessorKey: 'remark',
-    header: 'User remark',
+    header: 'Ghi chú người dùng',
     size: 240,
     filterFn: 'includesString',
     // ✅ nội dung dài nên wrap
@@ -71,7 +71,7 @@ export const columns: ColumnDef<IUser>[] = [
   {
     id: 'isactive',
     accessorKey: 'isactive',
-    header: 'Active',
+    header: 'Trạng thái',
     size: 90,
     meta: { maxWidth: '90px' },
     filterFn: (row, columnId, filterValue) => {
@@ -80,13 +80,13 @@ export const columns: ColumnDef<IUser>[] = [
       return statusText.includes(String(filterValue).toLowerCase())
     },
     cell: (info) =>
-      info.getValue() === RecordStatus.ACTIVE ? 'Active' : 'Inactive',
+      info.getValue() === RecordStatus.ACTIVE ? 'Hoạt động' : 'Ngưng hoạt động',
   },
 
   // ===== PROFILE =====
   {
     id: 'full_name',
-    header: 'Full name',
+    header: 'Họ và tên',
     accessorFn: (row) => row.profile?.full_name ?? '',
     size: 200,
     filterFn: 'includesString',
@@ -95,7 +95,7 @@ export const columns: ColumnDef<IUser>[] = [
   },
   {
     id: 'phone_number',
-    header: 'Phone',
+    header: 'Điện thoại',
     accessorFn: (row) => row.profile?.phone_number ?? '',
     size: 140,
     filterFn: 'includesString',
@@ -104,7 +104,7 @@ export const columns: ColumnDef<IUser>[] = [
   },
   {
     id: 'address',
-    header: 'Address',
+    header: 'Địa chỉ',
     accessorFn: (row) => row.profile?.address ?? '',
     size: 280,
     filterFn: 'includesString',
@@ -132,7 +132,7 @@ export const columns: ColumnDef<IUser>[] = [
   },
   {
     id: 'avatar_url',
-    header: 'Avatar URL',
+    header: 'Ảnh đại diện',
     accessorFn: (row) => row.profile?.avatar_url ?? '',
     size: 240,
     filterFn: 'includesString',
@@ -141,7 +141,7 @@ export const columns: ColumnDef<IUser>[] = [
   },
   {
     id: 'user_type',
-    header: 'User type',
+    header: 'Loại người dùng',
     accessorFn: (row) => row.profile?.user_type ?? '',
     size: 120,
     filterFn: 'includesString',
@@ -150,7 +150,7 @@ export const columns: ColumnDef<IUser>[] = [
   },
   {
     id: 'profile_remark',
-    header: 'Profile remark',
+    header: 'Ghi chú hồ sơ',
     accessorFn: (row) => row.profile?.remark ?? '',
     size: 240,
     filterFn: 'includesString',
@@ -161,7 +161,7 @@ export const columns: ColumnDef<IUser>[] = [
   // ===== ACTIONS =====
   {
     id: 'action',
-    header: 'Actions',
+    header: 'Thao tác',
     size: 80,
     enableSorting: false,
     enableColumnFilter: false,

@@ -51,10 +51,10 @@ const labels = computed(() => ({
       <DropdownMenuLabel class="font-normal">
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">
-            {{ userStore.user?.username || 'Username' }}
+            {{ userStore.user?.username || 'Tên người dùng' }}
           </p>
           <p class="text-xs leading-none text-muted-foreground">
-            {{ userStore.user?.email || 'no email' }}
+            {{ userStore.user?.email || 'Chưa có email' }}
           </p>
         </div>
       </DropdownMenuLabel>

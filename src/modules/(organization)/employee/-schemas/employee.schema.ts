@@ -3,7 +3,7 @@ import { WorkStatus } from '@/common/constants/enums'
 
 export const employeeFormSchema = z.object({
   id: z.number().optional(),
-  user_id: z.string().min(1, 'Please select a user account'),
+  user_id: z.string().min(1, 'Vui lòng chọn tài khoản người dùng'),
   full_name: z.string().min(1).max(100),
   status: z.nativeEnum(WorkStatus),
   email: z.string().email().optional().or(z.literal('')),
@@ -13,7 +13,7 @@ export const employeeFormSchema = z.object({
     .nullable()
     .or(z.literal(''))
     .refine((v) => v === '' || /^\d{4}-\d{2}-\d{2}$/.test(v || ''), {
-      message: 'DOB must be YYYY-MM-DD',
+      message: 'Ngày sinh phải có định dạng YYYY-MM-DD',
     }),
   phone: z.string().optional().or(z.literal('')),
   terminate_date: z
@@ -21,7 +21,7 @@ export const employeeFormSchema = z.object({
     .optional()
     .or(z.literal(''))
     .refine((v) => v === '' || /^\d{4}-\d{2}-\d{2}$/.test(v ?? ''), {
-      message: 'Terminate date must be YYYY-MM-DD',
+      message: 'Ngày nghỉ việc phải có định dạng YYYY-MM-DD',
     }),
   remark: z.string().max(500).optional().or(z.literal('')),
 })

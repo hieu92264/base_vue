@@ -23,11 +23,11 @@ export const useCreateSliderMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [SliderQueryKey.GET_SLIDERS],
       })
-      toast.success('Slider created successfully')
+      toast.success('Tạo slider thành công')
     },
     onError: (error) => {
       console.error(error)
-      toast.error('Failed to create slider')
+      toast.error('Tạo slider thất bại')
     },
   })
 }
@@ -47,11 +47,11 @@ export const useUpdateSliderMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [SliderQueryKey.GET_SLIDERS],
       })
-      toast.success('Slider updated successfully')
+      toast.success('Cập nhật slider thành công')
     },
     onError: (error) => {
       console.error(error)
-      toast.error('Failed to update slider')
+      toast.error('Cập nhật slider thất bại')
     },
   })
 }
@@ -65,11 +65,11 @@ export const useDeleteSliderMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [SliderQueryKey.GET_SLIDERS],
       })
-      toast.success('Slider deleted successfully')
+      toast.success('Xóa slider thành công')
     },
     onError: (error) => {
       console.error(error)
-      toast.error('Failed to delete slider')
+      toast.error('Xóa slider thất bại')
     },
   })
 }

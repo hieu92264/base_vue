@@ -31,14 +31,14 @@ export const useSyncUserPermissionsMutation = () => {
           variables.userId,
         ],
       })
-      toast.success('User permissions updated successfully', { duration: 3000 })
+      toast.success('Cập nhật quyền người dùng thành công', { duration: 3000 })
     },
 
     onError: (err: any) => {
-      console.error('Failed to update user permissions:', err)
+      console.error('Cập nhật quyền người dùng thất bại:', err)
       toast.error(
-        'Failed to update user permissions: ' +
-          (err?.message ?? 'Unknown error'),
+        'Cập nhật quyền người dùng thất bại: ' +
+          (err?.message ?? 'Lỗi không xác định'),
         {
           duration: 3000,
         },

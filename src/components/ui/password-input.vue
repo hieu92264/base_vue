@@ -54,7 +54,7 @@ const onInput = (event: Event) => {
         class="h-4 w-4 text-muted-foreground"
       />
       <span class="sr-only">
-        {{ showPassword ? 'Hide password' : 'Show password' }}
+        {{ showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu' }}
       </span>
     </Button>
   </div>

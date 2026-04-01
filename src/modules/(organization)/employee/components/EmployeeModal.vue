@@ -147,11 +147,11 @@ watch(
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle>
-          {{ initialData ? 'Edit Employee' : 'Add New Employee' }}
+          {{ initialData ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới' }}
         </DialogTitle>
 
         <DialogDescription>
-          Fill in employee information, then click Submit to save.
+          Điền thông tin nhân viên rồi bấm Lưu để hoàn tất.
         </DialogDescription>
       </DialogHeader>
 
@@ -165,11 +165,11 @@ watch(
             name="user_id"
           >
             <FormItem>
-              <FormLabel>User Account</FormLabel>
+              <FormLabel>Tài khoản người dùng</FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Select a user" />
+                    <SelectValue placeholder="Chọn người dùng" />
                   </SelectTrigger>
 
                   <SelectContent class="max-h-60 overflow-y-auto">
@@ -177,7 +177,7 @@ watch(
                     <div class="sticky top-0 z-10 bg-background p-2">
                       <Input
                         v-model="userSearch"
-                        placeholder="Search user..."
+                        placeholder="Tìm người dùng..."
                         @keydown.stop
                       />
                     </div>
@@ -194,7 +194,7 @@ watch(
                       v-if="filteredUserOptions.length === 0"
                       class="px-3 py-2 text-sm text-muted-foreground"
                     >
-                      No results
+                      Không có kết quả
                     </div>
                   </SelectContent>
                 </Select>
@@ -209,12 +209,12 @@ watch(
               name="full_name"
             >
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>Họ và tên</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
                     v-bind="componentField"
-                    placeholder="Enter full name"
+                    placeholder="Nhập họ và tên"
                   />
                 </FormControl>
               </FormItem>
@@ -225,11 +225,11 @@ watch(
               name="status"
             >
               <FormItem>
-                <FormLabel>Work Status</FormLabel>
+                <FormLabel>Trạng thái làm việc</FormLabel>
                 <FormControl>
                   <Select v-bind="componentField">
                     <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Select a status work" />
+                      <SelectValue placeholder="Chọn trạng thái làm việc" />
                     </SelectTrigger>
 
                     <SelectContent>
@@ -259,7 +259,7 @@ watch(
                   <Input
                     v-bind="componentField"
                     type="email"
-                    placeholder="Enter email"
+                    placeholder="Nhập email"
                   />
                 </FormControl>
               </FormItem>
@@ -273,7 +273,7 @@ watch(
               name="join_date"
             >
               <FormItem>
-                <FormLabel>Join Date</FormLabel>
+                <FormLabel>Ngày vào làm</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
@@ -288,7 +288,7 @@ watch(
               name="dob"
             >
               <FormItem>
-                <FormLabel>Date Of Birth</FormLabel>
+                <FormLabel>Ngày sinh</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
@@ -306,11 +306,11 @@ watch(
               name="phone"
             >
               <FormItem>
-                <FormLabel>Phone</FormLabel>
+                <FormLabel>Số điện thoại</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
-                    placeholder="Enter phone number"
+                    placeholder="Nhập số điện thoại"
                   />
                 </FormControl>
               </FormItem>
@@ -321,7 +321,7 @@ watch(
               name="terminate_date"
             >
               <FormItem>
-                <FormLabel>Terminate Date</FormLabel>
+                <FormLabel>Ngày nghỉ việc</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
@@ -338,11 +338,11 @@ watch(
               name="remark"
             >
               <FormItem>
-                <FormLabel>Remark</FormLabel>
+                <FormLabel>Ghi chú</FormLabel>
                 <FormControl>
                   <Textarea
                     v-bind="componentField"
-                    placeholder="Enter remark"
+                    placeholder="Nhập ghi chú"
                   />
                 </FormControl>
               </FormItem>
@@ -356,13 +356,13 @@ watch(
             variant="outline"
             @click="$emit('update:open', false)"
           >
-            Cancel
+            Hủy
           </Button>
           <Button
             type="submit"
             :disabled="isPending"
           >
-            {{ isPending ? 'Saving...' : 'Submit' }}
+            {{ isPending ? 'Đang lưu...' : 'Lưu' }}
           </Button>
         </DialogFooter>
       </form>

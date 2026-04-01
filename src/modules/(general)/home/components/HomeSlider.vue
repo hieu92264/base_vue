@@ -4,7 +4,7 @@
       v-if="isLoading"
       class="grid h-full place-items-center bg-muted/30 text-sm text-muted-foreground"
     >
-      Dang tai slider...
+      Đang tải slider...
     </div>
 
     <template v-else>
@@ -25,13 +25,13 @@
       <div class="absolute inset-x-0 bottom-0">
         <div class="mx-auto max-w-7xl p-6 text-white md:p-10">
           <p class="mb-3 text-xs uppercase tracking-[0.24em] text-white/70">
-            Greenland rental
+            Greenland Rental
           </p>
           <h1
             class="max-w-3xl text-3xl leading-tight font-semibold md:text-5xl"
           >
             {{
-              activeItem?.title || 'Tim phong de dang, dat nhanh trong vai phut'
+              activeItem?.title || 'Tìm phòng dễ dàng, đặt nhanh trong vài phút'
             }}
           </h1>
         </div>
@@ -100,12 +100,12 @@ function displayImage(item: ISlider) {
     return item.image_url
   }
 
-  return 'https://placehold.co/1600x800?text=No+Image'
+  return 'https://placehold.co/1600x800?text=Khong+co+anh'
 }
 
 function handleImageError(e: Event) {
   const target = e.target as HTMLImageElement
-  target.src = 'https://placehold.co/1600x800?text=Image+Error'
+  target.src = 'https://placehold.co/1600x800?text=Loi+hinh+anh'
 }
 
 function stopAuto() {

@@ -22,11 +22,11 @@ export const useCreateCategoryMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [CategoryQueryKey.GET_CATEGORIES],
       })
-      toast.success('Category created successfully')
+      toast.success('Tạo danh mục thành công')
     },
     onError: (error) => {
       console.error('Error creating category:', error)
-      toast.error('Failed to create category')
+      toast.error('Tạo danh mục thất bại')
     },
   })
 }
@@ -45,11 +45,11 @@ export const useUpdateCategoryMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [CategoryQueryKey.GET_CATEGORIES],
       })
-      toast.success('Category updated successfully')
+      toast.success('Cập nhật danh mục thành công')
     },
     onError: (error) => {
       console.error('Error updating category:', error)
-      toast.error('Failed to update category')
+      toast.error('Cập nhật danh mục thất bại')
     },
   })
 }
@@ -76,11 +76,11 @@ export const useDeleteCategoryMutation = () => {
           return updated
         },
       )
-      toast.success('Category deleted successfully')
+      toast.success('Xóa danh mục thành công')
     },
     onError: (error) => {
       console.error('Error deleting category:', error)
-      toast.error('Failed to delete category')
+      toast.error('Xóa danh mục thất bại')
     },
   })
 }

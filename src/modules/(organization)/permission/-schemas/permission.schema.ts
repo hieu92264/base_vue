@@ -2,9 +2,9 @@ import { z } from 'zod'
 
 export const permissionFormSchema = z.object({
   id: z.number().optional(),
-  code: z.string().min(1, 'Code is required'),
-  name: z.string().min(1, 'Name is required'),
-  url: z.string().min(1, 'URL is required'),
+  code: z.string().min(1, 'Mã quyền là bắt buộc'),
+  name: z.string().min(1, 'Tên quyền là bắt buộc'),
+  url: z.string().min(1, 'Đường dẫn là bắt buộc'),
   parent_id: z
     .union([z.string(), z.number()])
     .optional()

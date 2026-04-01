@@ -75,7 +75,7 @@ export class AxiosClient {
           error.code === AxiosError.ETIMEDOUT ||
           error.code === AxiosError.ECONNABORTED
         ) {
-          toast.error('Request timeout')
+          toast.error('Yêu cầu đã hết thời gian chờ')
           return Promise.reject(error)
         }
 
@@ -85,7 +85,7 @@ export class AxiosClient {
           let message = response?.data?.message
 
           if (isLoginPath && errorStatus === HttpStatusCode.Unauthorized) {
-            message = 'Invalid username or password'
+            message = 'Tên đăng nhập hoặc mật khẩu không đúng'
           }
 
           toast.error(message || 'Đã có lỗi xảy ra', {
@@ -160,7 +160,7 @@ export class AxiosClient {
             authStore.clearSession()
             userStore.clearProfile()
 
-            toast.error('Session expired. Please log in again.')
+            toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
 
             router.push({ name: 'auth.login' })
 

@@ -98,7 +98,7 @@ const onSubmit = form.handleSubmit((values) => {
     payload.parent_id != null &&
     Number(payload.parent_id) === Number(props.initialData.id)
   ) {
-    form.setFieldError('parent_id', 'Parent cannot be itself')
+    form.setFieldError('parent_id', 'Quyền cha không thể là chính nó')
     return
   }
 
@@ -150,10 +150,10 @@ watch(
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle>
-          {{ initialData ? 'Edit Permission' : 'Add New Permission' }}
+          {{ initialData ? 'Chỉnh sửa quyền' : 'Thêm quyền mới' }}
         </DialogTitle>
         <DialogDescription>
-          Fill in permission information, then click Submit to save.
+          Điền thông tin quyền rồi bấm Lưu để hoàn tất.
         </DialogDescription>
       </DialogHeader>
 
@@ -167,11 +167,11 @@ watch(
             name="code"
           >
             <FormItem>
-              <FormLabel>Code</FormLabel>
+              <FormLabel>Mã quyền</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
-                  placeholder="e.g. org.permissions"
+                  placeholder="Ví dụ: org.permissions"
                 />
               </FormControl>
             </FormItem>
@@ -182,11 +182,11 @@ watch(
             name="name"
           >
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Tên quyền</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
-                  placeholder="e.g. Permission"
+                  placeholder="Ví dụ: Quản lý quyền"
                 />
               </FormControl>
             </FormItem>
@@ -197,7 +197,7 @@ watch(
             name="url"
           >
             <FormItem>
-              <FormLabel>URL</FormLabel>
+              <FormLabel>Đường dẫn</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
@@ -212,23 +212,23 @@ watch(
             name="parent_id"
           >
             <FormItem>
-              <FormLabel>Parent Permission</FormLabel>
+              <FormLabel>Quyền cha</FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Select parent (optional)" />
+                    <SelectValue placeholder="Chọn quyền cha (không bắt buộc)" />
                   </SelectTrigger>
 
                   <SelectContent class="max-h-60 overflow-y-auto">
                     <div class="sticky top-0 z-10 bg-background p-2">
                       <Input
                         v-model="optionSearch"
-                        placeholder="Search permission..."
+                        placeholder="Tìm quyền..."
                         @keydown.stop
                       />
                     </div>
 
-                    <SelectItem :value="NONE_VALUE">None</SelectItem>
+                    <SelectItem :value="NONE_VALUE">Không có</SelectItem>
 
                     <SelectItem
                       v-for="option in filteredOptions"
@@ -242,7 +242,7 @@ watch(
                       v-if="filteredOptions.length === 0"
                       class="px-3 py-2 text-sm text-muted-foreground"
                     >
-                      No results
+                      Không có kết quả
                     </div>
                   </SelectContent>
                 </Select>
@@ -257,13 +257,13 @@ watch(
             variant="outline"
             @click="closeModal"
           >
-            Cancel
+            Hủy
           </Button>
           <Button
             type="submit"
             :disabled="isPending"
           >
-            {{ isPending ? 'Saving...' : 'Submit' }}
+            {{ isPending ? 'Đang lưu...' : 'Lưu' }}
           </Button>
         </DialogFooter>
       </form>

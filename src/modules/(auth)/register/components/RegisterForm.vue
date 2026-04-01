@@ -70,10 +70,10 @@ const handleSubmit = (event: Event) => {
     <FieldGroup>
       <div class="flex flex-col items-center gap-1 text-center">
         <h1 class="text-2xl font-bold text-zinc-950 dark:text-zinc-50">
-          Create an account
+          Tạo tài khoản
         </h1>
         <p class="text-muted-foreground text-sm text-balance">
-          Fill in the information below to create your account.
+          Điền thông tin bên dưới để tạo tài khoản.
         </p>
       </div>
 
@@ -81,7 +81,7 @@ const handleSubmit = (event: Event) => {
         <FieldLabel
           for="username"
           class="dark:text-zinc-300"
-          >User name</FieldLabel
+          >Tên đăng nhập</FieldLabel
         >
         <Input
           id="username"
@@ -115,7 +115,7 @@ const handleSubmit = (event: Event) => {
         <FieldLabel
           for="password"
           class="dark:text-zinc-300"
-          >Password</FieldLabel
+          >Mật khẩu</FieldLabel
         >
         <PasswordInput
           id="password"
@@ -130,7 +130,7 @@ const handleSubmit = (event: Event) => {
         <FieldLabel
           for="verify_password"
           class="dark:text-zinc-300"
-          >Verify password</FieldLabel
+          >Xác nhận mật khẩu</FieldLabel
         >
         <PasswordInput
           id="verify_password"
@@ -167,8 +167,8 @@ const handleSubmit = (event: Event) => {
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="tenant">Tenant (Người thuê)</SelectItem>
-            <SelectItem value="landlord">Landlord (Chủ nhà)</SelectItem>
+            <SelectItem value="tenant">Người thuê</SelectItem>
+            <SelectItem value="landlord">Chủ nhà</SelectItem>
           </SelectContent>
         </Select>
       </Field>
@@ -183,7 +183,7 @@ const handleSubmit = (event: Event) => {
           v-if="isPending"
           class="mr-2 h-4 w-4 animate-spin"
         />
-        {{ isPending ? 'Please wait...' : 'Register' }}
+        {{ isPending ? 'Vui lòng chờ...' : 'Đăng ký' }}
       </Button>
 
       <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">

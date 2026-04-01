@@ -35,11 +35,11 @@ const goHome = () => {
         500
       </h1>
 
-      <span class="font-medium"> Oops! Something went wrong :') </span>
+      <span class="font-medium"> Đã có lỗi xảy ra </span>
 
       <p class="text-center text-muted-foreground">
-        We apologize for the inconvenience. <br />
-        Please try again later.
+        Xin lỗi vì sự bất tiện này. <br />
+        Vui lòng thử lại sau.
       </p>
 
       <div
@@ -50,9 +50,9 @@ const goHome = () => {
           variant="outline"
           @click="goBack"
         >
-          Go Back
+          Quay lại
         </Button>
-        <Button @click="goHome"> Back to Home </Button>
+        <Button @click="goHome"> Về trang chủ </Button>
       </div>
     </div>
   </div>

@@ -11,20 +11,20 @@ const router = useRouter()
       class="m-auto flex h-full w-full flex-col items-center justify-center gap-2"
     >
       <h1 class="text-[7rem] leading-tight font-bold">401</h1>
-      <span class="font-medium">Unauthorized Access</span>
+      <span class="font-medium">Truy cập không được phép</span>
       <p class="text-center text-muted-foreground">
-        Please log in with the appropriate credentials <br />
-        to access this resource.
+        Vui lòng đăng nhập bằng tài khoản phù hợp <br />
+        để truy cập tài nguyên này.
       </p>
       <div class="mt-6 flex gap-4">
         <Button
           variant="outline"
           @click="router.back()"
         >
-          Go Back
+          Quay lại
         </Button>
         <Button @click="router.push({ name: 'dashboard' })">
-          Back to Home
+          Về trang chủ
         </Button>
       </div>
     </div>

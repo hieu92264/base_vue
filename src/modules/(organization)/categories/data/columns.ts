@@ -9,7 +9,7 @@ export const columns: ColumnDef<ICategory>[] = [
   {
     id: 'no',
     accessorKey: 'no',
-    header: 'No.',
+    header: 'STT',
     meta: { sticky: 'left' },
     enableSorting: false,
     enableColumnFilter: false,
@@ -19,7 +19,7 @@ export const columns: ColumnDef<ICategory>[] = [
   {
     id: 'code',
     accessorKey: 'code',
-    header: 'Code',
+    header: 'Mã',
     meta: { sticky: 'left' },
     size: 140,
     filterFn: 'includesString',
@@ -28,7 +28,7 @@ export const columns: ColumnDef<ICategory>[] = [
   {
     id: 'name',
     accessorKey: 'name',
-    header: 'Name',
+    header: 'Tên',
     size: 220,
     filterFn: 'includesString',
     cell: (info) => info.getValue(),
@@ -44,14 +44,14 @@ export const columns: ColumnDef<ICategory>[] = [
   {
     id: 'sort_order',
     accessorKey: 'sort_order',
-    header: 'Sort Order',
+    header: 'Thứ tự',
     size: 120,
     cell: (info) => info.getValue() ?? 0,
   },
   {
     id: 'remark',
     accessorKey: 'remark',
-    header: 'Remark',
+    header: 'Ghi chú',
     size: 260,
     cell: ({ row }) => {
       const remark = row.getValue('remark')
@@ -62,7 +62,7 @@ export const columns: ColumnDef<ICategory>[] = [
   {
     id: 'isactive',
     accessorKey: 'isactive',
-    header: 'Active Status',
+    header: 'Trạng thái',
     size: 140,
     filterFn: (row, columnId, filterValue) => {
       const value = row.getValue(columnId)
@@ -70,12 +70,12 @@ export const columns: ColumnDef<ICategory>[] = [
       return statusText.includes(String(filterValue).toLowerCase())
     },
     cell: (info) =>
-      info.getValue() === RecordStatus.ACTIVE ? 'Active' : 'Inactive',
+      info.getValue() === RecordStatus.ACTIVE ? 'Hoạt động' : 'Ngưng hoạt động',
   },
   {
     id: 'action',
     accessorKey: 'action',
-    header: 'Actions',
+    header: 'Thao tác',
     meta: { sticky: 'right' },
     size: 80,
     enableSorting: false,

@@ -46,11 +46,11 @@ export const useDeleteEmployeeMutation = () => {
         },
       )
 
-      toast.success('Employee deleted successfully')
+      toast.success('Xóa nhân viên thành công')
     },
     onError: (error) => {
       console.error('Error deleting employee:', error)
-      toast.error('Failed to delete employee')
+      toast.error('Xóa nhân viên thất bại')
     },
   })
 }
@@ -71,11 +71,11 @@ export const useCreateEmployeeMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [EmployeeQueryKey.GET_EMPLOYEES],
       })
-      toast.success('Employee created successfully')
+      toast.success('Tạo nhân viên thành công')
     },
     onError: (error) => {
       console.error('Error creating employee:', error)
-      toast.error('Failed to create employee')
+      toast.error('Tạo nhân viên thất bại')
     },
   })
 }
@@ -95,11 +95,11 @@ export const useUpdateEmployeeMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [EmployeeQueryKey.GET_EMPLOYEES],
       })
-      toast.success('Employee updated successfully')
+      toast.success('Cập nhật nhân viên thành công')
     },
     onError: (error) => {
       console.error('Error updating employee:', error)
-      toast.error('Failed to update employee')
+      toast.error('Cập nhật nhân viên thất bại')
     },
   })
 }

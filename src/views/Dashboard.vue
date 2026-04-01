@@ -68,7 +68,7 @@ const roomImage = (room: any) => {
   return (
     room?.photos?.find((p: any) => p.is_cover)?.photo_url ||
     room?.photos?.[0]?.photo_url ||
-    'https://placehold.co/600x400?text=No+Image'
+    'https://placehold.co/600x400?text=Khong+co+anh'
   )
 }
 </script>

@@ -11,20 +11,20 @@ const router = useRouter()
       class="m-auto flex h-full w-full flex-col items-center justify-center gap-2"
     >
       <h1 class="text-[7rem] leading-tight font-bold">404</h1>
-      <span class="font-medium">Oops! Page Not Found!</span>
+      <span class="font-medium">Không tìm thấy trang</span>
       <p class="text-center text-muted-foreground">
-        It seems like the page you're looking for <br />
-        does not exist or might have been removed.
+        Có vẻ trang bạn đang tìm kiếm <br />
+        không tồn tại hoặc đã bị xóa.
       </p>
       <div class="mt-6 flex gap-4">
         <Button
           variant="outline"
           @click="router.back()"
         >
-          Go Back
+          Quay lại
         </Button>
         <Button @click="router.push({ name: 'dashboard' })"
-          >Back to Home</Button
+          >Về trang chủ</Button
         >
       </div>
     </div>

@@ -10,7 +10,7 @@ export const columns: ColumnDef<IEmployee>[] = [
   {
     id: 'no',
     accessorKey: 'no',
-    header: 'No.',
+    header: 'STT',
     meta: {
       sticky: 'left',
     },
@@ -24,7 +24,7 @@ export const columns: ColumnDef<IEmployee>[] = [
   {
     id: 'employee_code',
     accessorKey: 'employee_code',
-    header: 'Employee Code',
+    header: 'Mã nhân viên',
     meta: {
       sticky: 'left',
     },
@@ -36,7 +36,7 @@ export const columns: ColumnDef<IEmployee>[] = [
   {
     id: 'isactive',
     accessorKey: 'isactive',
-    header: 'Active Status',
+    header: 'Trạng thái',
     size: 140,
     minSize: 120,
     maxSize: 200,
@@ -46,12 +46,12 @@ export const columns: ColumnDef<IEmployee>[] = [
       return statusText.includes(filterValue.toLowerCase())
     },
     cell: (info) =>
-      info.getValue() === RecordStatus.ACTIVE ? 'Active' : 'Inactive',
+      info.getValue() === RecordStatus.ACTIVE ? 'Hoạt động' : 'Ngưng hoạt động',
   },
   {
     id: 'user_id',
     accessorKey: 'user_id',
-    header: 'User ID',
+    header: 'ID người dùng',
     size: 120,
     minSize: 80,
     maxSize: 150,
@@ -61,7 +61,7 @@ export const columns: ColumnDef<IEmployee>[] = [
   {
     id: 'full_name',
     accessorKey: 'full_name',
-    header: 'Full Name',
+    header: 'Họ và tên',
     size: 180,
     minSize: 150,
     maxSize: 400,
@@ -70,7 +70,7 @@ export const columns: ColumnDef<IEmployee>[] = [
   {
     id: 'status',
     accessorKey: 'status',
-    header: 'Work Status',
+    header: 'Trạng thái làm việc',
     size: 150,
     minSize: 100,
     maxSize: 200,
@@ -79,7 +79,7 @@ export const columns: ColumnDef<IEmployee>[] = [
   {
     id: 'join_date',
     accessorKey: 'join_date',
-    header: 'Join Date',
+    header: 'Ngày vào làm',
     size: 130,
     minSize: 110,
     maxSize: 200,
@@ -100,7 +100,7 @@ export const columns: ColumnDef<IEmployee>[] = [
   {
     id: 'dob',
     accessorKey: 'dob',
-    header: 'Date of Birth',
+    header: 'Ngày sinh',
     size: 150,
     minSize: 110,
     maxSize: 200,
@@ -112,7 +112,7 @@ export const columns: ColumnDef<IEmployee>[] = [
   {
     id: 'phone',
     accessorKey: 'phone',
-    header: 'Phone Number',
+    header: 'Số điện thoại',
     size: 160,
     minSize: 120,
     maxSize: 250,
@@ -121,19 +121,19 @@ export const columns: ColumnDef<IEmployee>[] = [
   {
     id: 'terminate_date',
     accessorKey: 'terminate_date',
-    header: 'Terminate Date',
+    header: 'Ngày nghỉ việc',
     size: 160,
     minSize: 120,
     maxSize: 250,
     cell: (info) => {
       const val = info.getValue()
-      return val ? format(new Date(val as string), 'dd/MM/yyyy') : 'N/A'
+      return val ? format(new Date(val as string), 'dd/MM/yyyy') : '-'
     },
   },
   {
     id: 'remark',
     accessorKey: 'remark',
-    header: 'Remark',
+    header: 'Ghi chú',
     size: 250,
     minSize: 150,
     maxSize: 1000,
@@ -148,7 +148,7 @@ export const columns: ColumnDef<IEmployee>[] = [
   {
     id: 'action',
     accessorKey: 'action',
-    header: 'Actions',
+    header: 'Thao tác',
     meta: {
       sticky: 'right',
     },
