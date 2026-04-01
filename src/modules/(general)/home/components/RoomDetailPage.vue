@@ -225,7 +225,15 @@ function extractLatLngFromGoogleMapsUrl(value?: string | null): {
 
   try {
     const url = new URL(value)
-    const source = `${url.pathname}${url.search}`
+    const source = `${url.pathname}${url.search}${url.hash}`
+
+    const placeMatch = source.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/)
+    if (placeMatch) {
+      return {
+        lat: placeMatch[1] ?? '',
+        lng: placeMatch[2] ?? '',
+      }
+    }
 
     const atMatch = source.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)
     if (atMatch) {
@@ -262,6 +270,14 @@ function buildGoogleMapEmbedUrl(value?: string | null): string | null {
 }
 
 const mapUrl = computed(() => roomDetails.value?.address ?? null)
+const mapExternalUrl = computed(() => {
+  const latLng = extractLatLngFromGoogleMapsUrl(mapUrl.value)
+  if (latLng) {
+    return `https://www.google.com/maps/search/?api=1&query=${latLng.lat},${latLng.lng}`
+  }
+
+  return mapUrl.value
+})
 const mapEmbedUrl = computed(() => buildGoogleMapEmbedUrl(mapUrl.value))
 const hasValidMap = computed(() => !!mapEmbedUrl.value)
 
@@ -621,10 +637,16 @@ watch(
           </CardHeader>
           <CardContent>
             <a
-              :href="mapUrl!"
+              :href="mapExternalUrl!"
               target="_blank"
               rel="noopener noreferrer"
-              class="block overflow-hidden rounded-2xl border border-border/60 bg-muted/20 transition hover:opacity-95"
+              class="mb-3 inline-flex items-center justify-center rounded-xl border border-border/60 px-4 py-2 text-sm font-medium transition hover:bg-muted/40"
+            >
+              Open Google Maps
+            </a>
+
+            <div
+              class="overflow-hidden rounded-2xl border border-border/60 bg-muted/20"
             >
               <iframe
                 :src="mapEmbedUrl!"
@@ -633,7 +655,7 @@ watch(
                 referrerpolicy="no-referrer-when-downgrade"
                 allowfullscreen
               />
-            </a>
+            </div>
 
             <p class="mt-2 text-xs text-muted-foreground">
               Bấm vào bản đồ để mở Google Maps
