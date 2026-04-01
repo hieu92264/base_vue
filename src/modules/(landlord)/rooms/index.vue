@@ -284,7 +284,7 @@ const applyFilters = () => {
 
     <Card>
       <CardContent class="p-0">
-        <Table>
+        <Table class="min-w-[920px]">
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>
@@ -321,31 +321,31 @@ const applyFilters = () => {
               v-for="room in rooms"
               :key="room.id"
             >
-              <TableCell>#{{ room.id }}</TableCell>
-              <TableCell>
-                <div class="max-w-[280px]">
+              <TableCell class="whitespace-nowrap">#{{ room.id }}</TableCell>
+              <TableCell class="align-top">
+                <div class="max-w-[280px] min-w-0">
                   <div class="font-medium line-clamp-1">{{ room.title }}</div>
                   <div class="text-xs text-muted-foreground line-clamp-1">
                     {{ room.address || 'Chưa cập nhật địa chỉ' }}
                   </div>
                 </div>
               </TableCell>
-              <TableCell>{{ formatMoney(room.price) }} đ</TableCell>
-              <TableCell>{{ room.area || 0 }} m²</TableCell>
-              <TableCell>
+              <TableCell class="whitespace-nowrap">{{ formatMoney(room.price) }} đ</TableCell>
+              <TableCell class="whitespace-nowrap">{{ room.area || 0 }} m²</TableCell>
+              <TableCell class="whitespace-nowrap">
                 <Badge variant="outline">
                   {{ statusLabel(room.booking_status) }}
                 </Badge>
               </TableCell>
-              <TableCell>
+              <TableCell class="whitespace-nowrap">
                 <Badge
                   :variant="room.isactive === 'Y' ? 'default' : 'secondary'"
                 >
                   {{ activeLabel(room.isactive) }}
                 </Badge>
               </TableCell>
-              <TableCell>{{ room.created_at || '--' }}</TableCell>
-              <TableCell class="text-right">
+              <TableCell class="whitespace-nowrap">{{ room.created_at || '--' }}</TableCell>
+              <TableCell class="text-right whitespace-nowrap">
                 <div class="flex justify-end gap-2">
                   <Button
                     variant="outline"

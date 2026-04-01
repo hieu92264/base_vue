@@ -234,14 +234,17 @@ const applyStatus = (
             Không có tin đăng phù hợp bộ lọc.
           </div>
 
-          <Table v-else>
+          <Table
+            v-else
+            class="min-w-[760px]"
+          >
             <TableHeader>
               <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Tiêu đề</TableHead>
-                <TableHead>Chủ nhà</TableHead>
-                <TableHead>Giá</TableHead>
-                <TableHead>Trạng thái</TableHead>
+                <TableHead class="w-20">ID</TableHead>
+                <TableHead class="w-[42%]">Tiêu đề</TableHead>
+                <TableHead class="w-[22%]">Chủ nhà</TableHead>
+                <TableHead class="w-[16%]">Giá</TableHead>
+                <TableHead class="w-[20%]">Trạng thái</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -253,23 +256,25 @@ const applyStatus = (
                 :class="selectedRoomId === room.id ? 'bg-muted/60' : ''"
                 @click="selectedRoomId = room.id"
               >
-                <TableCell>#{{ room.id }}</TableCell>
-                <TableCell>
-                  <div class="font-medium">{{ room.title }}</div>
-                  <div class="text-xs text-muted-foreground">
+                <TableCell class="whitespace-nowrap">#{{ room.id }}</TableCell>
+                <TableCell class="align-top">
+                  <div class="font-medium break-words line-clamp-2">{{ room.title }}</div>
+                  <div class="text-xs text-muted-foreground break-words line-clamp-2">
                     {{ room.address || room.slug }}
                   </div>
                 </TableCell>
-                <TableCell>
-                  {{
-                    room.owner?.profile?.full_name ||
-                    room.owner?.username ||
-                    room.owner?.email ||
-                    '-'
-                  }}
+                <TableCell class="align-top">
+                  <div class="break-words line-clamp-2">
+                    {{
+                      room.owner?.profile?.full_name ||
+                      room.owner?.username ||
+                      room.owner?.email ||
+                      '-'
+                    }}
+                  </div>
                 </TableCell>
-                <TableCell>{{ formatMoney(room.price) }} đ</TableCell>
-                <TableCell>
+                <TableCell class="whitespace-nowrap">{{ formatMoney(room.price) }} đ</TableCell>
+                <TableCell class="whitespace-nowrap">
                   <Badge :variant="statusVariant(room.post_status) as any">
                     {{ statusLabel(room.post_status) }}
                   </Badge>
