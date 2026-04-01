@@ -15,6 +15,7 @@ import {
 } from '@/modules/(general)/home/hooks/use-home'
 import type { ContactFormValues } from '@/modules/(general)/home/-schemas/contact.schema'
 import RoomReviews from './RoomReviews.vue'
+import { useAuthStore } from '@/stores/auth.store'
 
 type RoomPhoto = {
   id: number
@@ -70,6 +71,7 @@ type RoomDetail = {
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 
 const roomKey = computed(() => String(route.params.slugOrId ?? ''))
 
@@ -295,8 +297,50 @@ const handleContactSubmit = (v: ContactFormValues) => {
 watch(
   () => contactMutation.isSuccess.value,
   (ok) => {
-    if (ok) openContact.value = false
+    if (ok) {
+      openContact.value = false
+      if (route.query.action === 'contact') {
+        const nextQuery = { ...route.query }
+        delete nextQuery.action
+        router.replace({
+          path: route.path,
+          query: nextQuery,
+        })
+      }
+    }
   },
+)
+
+const requireLoginToContact = () => {
+  const redirect = route.fullPath.includes('?')
+    ? `${route.fullPath}&action=contact`
+    : `${route.fullPath}?action=contact`
+
+  router.push({
+    name: 'auth.login',
+    query: {
+      redirect,
+    },
+  })
+}
+
+const openContactFlow = () => {
+  if (!authStore.access_token) {
+    requireLoginToContact()
+    return
+  }
+
+  openContact.value = true
+}
+
+watch(
+  [() => authStore.access_token, () => route.query.action],
+  ([token, action]) => {
+    if (token && action === 'contact' && !isUnavailable(roomStatus.value)) {
+      openContact.value = true
+    }
+  },
+  { immediate: true },
 )
 </script>
 
@@ -450,9 +494,13 @@ watch(
                 variant="secondary"
                 class="rounded-xl"
                 :disabled="isUnavailable(roomStatus)"
-                @click="openContact = true"
+                @click="openContactFlow"
               >
-                Gửi yêu cầu
+                {{
+                  authStore.access_token
+                    ? 'Gửi yêu cầu liên hệ'
+                    : 'Đăng nhập để gửi liên hệ'
+                }}
               </Button>
             </div>
 
@@ -553,9 +601,13 @@ watch(
               class="w-full rounded-xl"
               size="lg"
               :disabled="isUnavailable(roomStatus)"
-              @click="openContact = true"
+              @click="openContactFlow"
             >
-              Liên hệ chủ trọ
+              {{
+                authStore.access_token
+                  ? 'Liên hệ chủ trọ'
+                  : 'Đăng nhập để liên hệ'
+              }}
             </Button>
           </CardContent>
         </Card>

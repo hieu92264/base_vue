@@ -15,18 +15,53 @@ import { useDoLogoutMutation } from '@/modules/(auth)/hooks/use-auth'
 import { useUserStore } from '@/stores/user.store'
 import { LogOut, Settings, User } from 'lucide-vue-next'
 import { computed } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
+const route = useRoute()
 const userStore = useUserStore()
 const { mutate, isPending } = useDoLogoutMutation()
 const labels = computed(() => ({
   logout: t('common.logout'),
 }))
+
+const authLinks = computed(() => ({
+  login: {
+    path: '/login',
+    query: route.path ? { redirect: route.fullPath } : {},
+  },
+  register: {
+    path: '/register',
+    query: route.path ? { redirect: route.fullPath } : {},
+  },
+}))
 </script>
 
 <template>
-  <DropdownMenu :modal="false">
+  <div
+    v-if="!userStore.user"
+    class="flex items-center gap-2"
+  >
+    <Button
+      as-child
+      variant="outline"
+      class="rounded-xl"
+    >
+      <RouterLink :to="authLinks.login">Đăng nhập</RouterLink>
+    </Button>
+    <Button
+      as-child
+      class="rounded-xl"
+    >
+      <RouterLink :to="authLinks.register">Đăng ký</RouterLink>
+    </Button>
+  </div>
+
+  <DropdownMenu
+    v-else
+    :modal="false"
+  >
     <DropdownMenuTrigger as-child>
       <Button
         variant="ghost"

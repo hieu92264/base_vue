@@ -23,6 +23,15 @@ export type RoomSearchParams = {
   per_page?: number
 }
 
+export type ContactRequestPayload = {
+  name: string
+  phone: string
+  email?: string
+  subject?: string
+  message: string
+  move_in_date?: string
+}
+
 export class HomeService {
   static async sliders(): Promise<ISlider[]> {
     const response: ResponseBody<ISlider[]> =
@@ -71,11 +80,21 @@ export class HomeService {
 
   static async roomDetails(slugOrId: string): Promise<any> {
     const response: any = await axiosInstance.get(`/rooms/${slugOrId}`)
-    console.log(response)
     return response?.data ?? response
   }
 
+  static toContactPayload(formData: ContactFormValues): ContactRequestPayload {
+    return {
+      name: formData.name,
+      phone: formData.phone,
+      email: formData.email || undefined,
+      message: formData.message || '',
+      move_in_date: formData.moveInDate || undefined,
+    }
+  }
+
   static async contact(formData: ContactFormValues, id: string): Promise<void> {
-    await axiosInstance.post(`/contact/${id}`, formData)
+    const payload = HomeService.toContactPayload(formData)
+    await axiosInstance.post(`/contact/${id}`, payload)
   }
 }

@@ -22,8 +22,9 @@
         <FieldLabel
           for="username"
           class="dark:text-zinc-300"
-          >Tên đăng nhập</FieldLabel
         >
+          Tên đăng nhập
+        </FieldLabel>
         <Input
           id="username"
           v-model="username"
@@ -40,8 +41,9 @@
           <FieldLabel
             for="password"
             class="dark:text-zinc-300"
-            >Mật khẩu</FieldLabel
           >
+            Mật khẩu
+          </FieldLabel>
           <RouterLink
             to="/forgot-password"
             class="text-sm text-emerald-600 hover:underline dark:text-emerald-400"
@@ -74,7 +76,7 @@
       <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">
         Chưa có tài khoản?
         <RouterLink
-          to="/register"
+          :to="registerTarget"
           class="font-medium text-emerald-600 hover:underline dark:text-emerald-400"
         >
           Đăng ký
@@ -92,8 +94,8 @@ import PasswordInput from '@/components/ui/password-input.vue'
 import { cn } from '@/lib/utils'
 import { useDoLoginMutation } from '@/modules/(auth)/hooks/use-auth'
 import { Loader2 } from 'lucide-vue-next'
-import { ref, type HTMLAttributes } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, ref, type HTMLAttributes } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
@@ -101,13 +103,18 @@ const props = defineProps<{
 
 const username = ref('')
 const password = ref('')
+const route = useRoute()
+
+const registerTarget = computed(() => ({
+  path: '/register',
+  query: route.query.redirect ? { redirect: String(route.query.redirect) } : {},
+}))
 
 const { mutate, isPending } = useDoLoginMutation()
 
 const handleSubmit = (event: Event) => {
   event.preventDefault()
 
-  console.log(username.value, password.value)
   mutate({
     username: username.value,
     password: password.value,

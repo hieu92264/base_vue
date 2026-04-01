@@ -19,6 +19,11 @@ onMounted(() => {
     return
   }
 
+  if (role === 'tenant') {
+    router.replace({ name: 'tenant.dashboard' })
+    return
+  }
+
   router.replace({ name: 'general.home' })
 })
 </script>

@@ -9,11 +9,7 @@ import organizationRoutes from '@/router/organization.routes'
 import NProgress from '@/configs/nprogress.config'
 import generalRoutes from '@/router/general.routes'
 import landlordRoutes from './landlord.routes'
-
-// export const layouts = {
-//   blank: () => import('@/components/layouts/BlankLayout.vue'),
-//   base: () => import('@/components/layouts/BaseLayout.vue'),
-// }
+import tenantRoutes from './tenant.route'
 
 const DashboardLanding = () => import('@/views/DashboardLanding.vue')
 
@@ -24,11 +20,12 @@ const router = createRouter({
       path: '/',
       name: 'dashboard',
       component: DashboardLanding,
-      meta: { layouts: BaseLayout, authOnly: true },
+      meta: { layouts: BaseLayout, public: true },
     },
     ...authRoutes,
     ...organizationRoutes,
     ...landlordRoutes,
+    ...tenantRoutes,
     ...generalRoutes,
     ...errorRoutes,
   ],
@@ -50,12 +47,22 @@ router.beforeEach(async (to, from, next) => {
     } catch (e) {
       authStore.clearSession()
       userStore.clearProfile()
-      return next({ name: 'auth.login' })
+      return next({
+        name: 'auth.login',
+        query: {
+          redirect: to.fullPath,
+        },
+      })
     }
   }
 
   if (!authStore.access_token && !isGuestOnly && !isPublic) {
-    return next({ name: 'auth.login' })
+    return next({
+      name: 'auth.login',
+      query: {
+        redirect: to.fullPath,
+      },
+    })
   }
 
   if (authStore.access_token && isGuestOnly) {
@@ -85,7 +92,14 @@ router.beforeEach(async (to, from, next) => {
   }
 
   const needsAuth = to.matched.some((r) => r.meta.authOnly === true)
-  if (needsAuth && !authStore.access_token) return next({ name: 'auth.login' })
+  if (needsAuth && !authStore.access_token) {
+    return next({
+      name: 'auth.login',
+      query: {
+        redirect: to.fullPath,
+      },
+    })
+  }
 
   return next()
 })

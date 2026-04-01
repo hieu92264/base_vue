@@ -36,10 +36,8 @@ const props = defineProps<{
   roomTitle?: string | null
   roomPrice?: number | string | null
   formatMoney?: (value: number | string) => string
-
   isPending?: boolean
   isError?: boolean
-
   onSubmit: (values: ContactFormValues) => void
 }>()
 
@@ -59,7 +57,6 @@ const moneyText = computed(() => {
     : String(price ?? '')
 })
 
-// -------------------- Schema --------------------
 const contactSchema = z.object({
   name: z
     .string()
@@ -91,7 +88,6 @@ const form = useForm<ContactSchemaValues>({
   },
 })
 
-// ✅ valid + invalid
 const submit = form.handleSubmit(
   (values) => {
     props.onSubmit({
@@ -103,14 +99,12 @@ const submit = form.handleSubmit(
     })
   },
   (ctx) => {
-    // ✅ bấm submit là show lỗi ngay
     Object.keys(ctx?.errors ?? {}).forEach((name) => {
       form.setFieldTouched(name as any, true)
     })
   },
 )
 
-// Reset form khi dialog đóng
 watch(
   () => props.modelValue,
   (isOpen) => {
@@ -132,7 +126,6 @@ watch(
         </div>
       </DialogHeader>
 
-      <!-- ✅ CHỈ 1 FORM HTML, không bọc <Form> nữa -->
       <form
         class="mt-4 grid gap-3"
         @submit.prevent="submit"

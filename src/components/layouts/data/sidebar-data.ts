@@ -173,6 +173,16 @@ export const getSidebarData = () => {
               },
             ],
           },
+          {
+            title: 'Phòng đã liên hệ',
+            items: [
+              {
+                title: 'Dashboard',
+                url: '/tenant/dashboard',
+                icon: Handshake,
+              },
+            ],
+          },
         ]
       : []),
   ]

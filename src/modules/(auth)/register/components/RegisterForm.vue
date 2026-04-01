@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, type HTMLAttributes } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import { Loader2 } from 'lucide-vue-next'
 
 import { Button } from '@/components/ui/button'
@@ -8,8 +8,6 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import PasswordInput from '@/components/ui/password-input.vue'
 import { cn } from '@/lib/utils'
-
-// Bạn tạo hook này tương tự useDoLoginMutation
 import { useDoRegisterMutation } from '@/modules/(auth)/hooks/use-auth'
 import {
   Select,
@@ -23,7 +21,7 @@ const props = defineProps<{
   class?: HTMLAttributes['class']
 }>()
 
-const router = useRouter()
+const route = useRoute()
 
 const form = reactive({
   username: '',
@@ -55,6 +53,11 @@ const handleSubmit = (event: Event) => {
     user_type: form.user_type as any,
   })
 }
+
+const loginTarget = computed(() => ({
+  path: '/login',
+  query: route.query.redirect ? { redirect: String(route.query.redirect) } : {},
+}))
 </script>
 
 <template>
@@ -81,8 +84,9 @@ const handleSubmit = (event: Event) => {
         <FieldLabel
           for="username"
           class="dark:text-zinc-300"
-          >Tên đăng nhập</FieldLabel
         >
+          Tên đăng nhập
+        </FieldLabel>
         <Input
           id="username"
           v-model="form.username"
@@ -98,8 +102,9 @@ const handleSubmit = (event: Event) => {
         <FieldLabel
           for="email"
           class="dark:text-zinc-300"
-          >Email</FieldLabel
         >
+          Email
+        </FieldLabel>
         <Input
           id="email"
           v-model="form.email"
@@ -115,8 +120,9 @@ const handleSubmit = (event: Event) => {
         <FieldLabel
           for="password"
           class="dark:text-zinc-300"
-          >Mật khẩu</FieldLabel
         >
+          Mật khẩu
+        </FieldLabel>
         <PasswordInput
           id="password"
           v-model="form.password"
@@ -130,8 +136,9 @@ const handleSubmit = (event: Event) => {
         <FieldLabel
           for="verify_password"
           class="dark:text-zinc-300"
-          >Xác nhận mật khẩu</FieldLabel
         >
+          Xác nhận mật khẩu
+        </FieldLabel>
         <PasswordInput
           id="verify_password"
           v-model="form.verify_password"
@@ -141,7 +148,7 @@ const handleSubmit = (event: Event) => {
         />
         <p
           v-if="passwordMismatch"
-          class="text-xs text-red-500 mt-1"
+          class="mt-1 text-xs text-red-500"
         >
           Mật khẩu xác nhận không khớp.
         </p>
@@ -189,7 +196,7 @@ const handleSubmit = (event: Event) => {
       <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">
         Đã có tài khoản?
         <RouterLink
-          to="/login"
+          :to="loginTarget"
           class="font-medium text-emerald-600 hover:underline dark:text-emerald-400"
         >
           Đăng nhập

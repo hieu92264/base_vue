@@ -6,13 +6,11 @@ import { AuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth.store'
 import { useI18nStore } from '@/stores/i18n.store'
 import { useUserStore } from '@/stores/user.store'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
+import { useMutation } from '@tanstack/vue-query'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 
 export enum AuthQueryKeys {}
-
-type TQueryKey = readonly [typeof AuthQueryKeys, ...any[]]
 
 export type TLoginData = {
   username: string
@@ -21,20 +19,26 @@ export type TLoginData = {
 
 export const useDoRegisterMutation = () => {
   const router = useRouter()
+  const route = useRoute()
 
   return useMutation({
     mutationFn: async (data: RegisterFormValue) => {
-      return AuthService.register(data)
+      return await AuthService.register(data)
     },
-    onSuccess: async (response) => {
+    onSuccess: () => {
       toast.success(
         'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
       )
-      router.replace({ name: 'auth.login' })
+      router.replace({
+        name: 'auth.login',
+        query: route.query.redirect
+          ? { redirect: String(route.query.redirect) }
+          : undefined,
+      })
     },
     onError: (error: any) => {
       console.error('Register error:', error)
-      toast.error(error?.response?.data?.message || 'Đăng ký thất bại')
+      toast.error(error?.message || 'Đăng ký thất bại')
     },
   })
 }
@@ -69,8 +73,6 @@ export const useDoLoginMutation = () => {
           (profileRes.data.user?.locale || Language.ENGLISH) as Language,
         )
 
-        console.log('locale: ', i18nStore.locale)
-
         toast.success('Đăng nhập thành công!')
 
         const redirectPath = route.query.redirect as string
@@ -101,7 +103,7 @@ export const useDoLogoutMutation = () => {
       return AuthService.logout()
     },
 
-    onSuccess: async (response) => {
+    onSuccess: async () => {
       authStore.clearSession()
       userStore.clearProfile()
       toast.success('Đăng xuất thành công!')

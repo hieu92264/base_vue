@@ -266,6 +266,11 @@ export interface IContact {
 
   created_at: string | null
   updated_at: string | null
+
+  tenant_user_id?: number | null
+  tenant_name?: string | null
+  tenant_phone?: string | null
+  tenant_email?: string | null
 }
 
 export interface IBooking {

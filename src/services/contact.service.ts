@@ -67,6 +67,21 @@ export class ContactService {
     return response?.data ?? response
   }
 
+  static async getTenantContacts(
+    params?: ContactSearchParams,
+  ): Promise<PaginatedResponse<IContact>> {
+    return await axiosInstance.get('/organizations/tenant/contacts', {
+      params,
+    })
+  }
+
+  static async getTenantContactDetail(id: number): Promise<IContact> {
+    const response: any = await axiosInstance.get(
+      `/organizations/tenant/contacts/${id}`,
+    )
+    return response?.data ?? response
+  }
+
   static async updateLandlordContactStatus(
     id: number,
     payload: {

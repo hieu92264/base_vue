@@ -38,6 +38,12 @@ export class DealService {
     })
   }
 
+  static async getTenantDeals(params?: any): Promise<PaginatedResponse<IDeal>> {
+    return await axiosInstance.get('/organizations/tenant/bookings', {
+      params,
+    })
+  }
+
   static async createLandlordDeal(payload: any): Promise<IDeal> {
     const response: any = await axiosInstance.post(
       '/organizations/landlord/bookings',
