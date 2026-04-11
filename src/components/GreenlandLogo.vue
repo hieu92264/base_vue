@@ -7,35 +7,25 @@ const { state } = useSidebar()
 <template>
   <div
     :class="[
-      'flex items-center h-12 transition-all duration-300 ease-in-out',
-      // Khi thu gọn: bỏ px-2 để icon có không gian, dùng justify-center để căn giữa
-      state === 'collapsed' ? 'justify-center px-0' : 'px-2',
+      'flex w-full items-center transition-all duration-300 ease-in-out',
+      'justify-center',
+      state === 'collapsed' ? 'px-0 py-1' : 'px-3 py-2',
     ]"
   >
     <div
-      class="flex aspect-square h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-primary text-primary-foreground font-bold shadow-sm"
-    >
-      GL
-    </div>
-
-    <div
       :class="[
-        'flex flex-col justify-center transition-all duration-300 ease-in-out overflow-hidden',
-        state === 'collapsed'
-          ? 'w-0 opacity-0 ml-0'
-          : 'w-auto opacity-100 ml-3',
+        'flex items-center justify-center overflow-hidden rounded-xl border border-border/70 bg-white shadow-sm transition-all duration-300 ease-in-out',
+        state === 'collapsed' ? 'h-12 w-12 p-1' : 'h-20 w-20 p-2',
       ]"
     >
-      <span
-        class="text-sm font-semibold leading-none tracking-tight my-1 whitespace-nowrap"
-      >
-        GREENLAND
-      </span>
-      <span
-        class="text-[11px] leading-none text-muted-foreground font-medium whitespace-nowrap"
-      >
-        员工绩效评估表
-      </span>
+      <img
+        src="/images/logo.svg"
+        alt="Application logo"
+        :class="[
+          'block h-full w-full object-contain transition-all duration-300 ease-in-out',
+          state === 'collapsed' ? 'scale-95' : 'scale-100',
+        ]"
+      />
     </div>
   </div>
 </template>

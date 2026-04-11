@@ -65,7 +65,7 @@ watchEffect(() => {
     class="border-r"
   >
     <!-- Header -->
-    <SidebarHeader>
+    <SidebarHeader class="items-center px-0">
       <GreenlandLogo />
     </SidebarHeader>
 
