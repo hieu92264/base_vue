@@ -66,7 +66,8 @@ watchEffect(() => {
     style="--sidebar-width-icon: 3.5rem"
     class="border-r"
   >
-    <SidebarHeader>
+    <!-- Header -->
+    <SidebarHeader class="items-center px-0">
       <GreenlandLogo />
     </SidebarHeader>
 
