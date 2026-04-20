@@ -1,14 +1,14 @@
 <script setup lang="ts">
+import type { IPermission } from '@/common/types/entities'
 import DataTable from '@/components/DataTable.vue'
-import { computed, ref } from 'vue'
+import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
-import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
-
-import type { IPermission } from '@/common/types/entities'
-import { columns } from './data/columns'
-import PermissionModal from './components/PermissionModal.vue'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { PermissionFormValues } from './-schemas/permission.schema'
+import PermissionModal from './components/PermissionModal.vue'
+import { getColumns } from './data/columns'
 import {
   useCreatePermissionMutation,
   useDeletePermissionMutation,
@@ -17,6 +17,7 @@ import {
   useUpdatePermissionMutation,
 } from './hooks/use-permission'
 
+const { t } = useI18n()
 const { data, isLoading, isFetching, refetch } = useGetPermissionsQuery()
 
 const isConfirmDelete = ref(false)
@@ -31,6 +32,8 @@ const { mutate: deletePermission, isPending: isDeleting } =
   useDeletePermissionMutation()
 
 const { data: permissionOptionsResponse } = useGetPermissionOptionsQuery()
+
+const columns = computed(() => getColumns())
 
 const permissionOptions = computed(() => {
   const raw = permissionOptionsResponse.value || []
@@ -90,7 +93,7 @@ const handleSubmitPermission = (payload: PermissionFormValues) => {
 </script>
 
 <template>
-  <div class="w-full px-4 py-2 overflow-auto">
+  <div class="w-full overflow-auto px-4 py-2">
     <DataTable
       :columns="columns"
       :data="permissionData"
@@ -108,8 +111,8 @@ const handleSubmitPermission = (payload: PermissionFormValues) => {
           :disabled="isFetching"
           @click="openCreateModal"
         >
-          <Plus class="w-4 h-4" />
-          Add Permission
+          <Plus class="h-4 w-4" />
+          {{ t('pages.organizationPermissions.addPermission') }}
         </Button>
       </template>
     </DataTable>

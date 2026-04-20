@@ -1,3 +1,4 @@
+import i18n from '@/configs/i18n.config'
 import type { PermissionFormValues } from '@/modules/(organization)/permission/-schemas/permission.schema'
 import { PermissionService } from '@/services/permission.service'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
@@ -7,6 +8,8 @@ export enum PermissionQueryKey {
   GET_PERMISSIONS = 'get_permissions',
   GET_PERMISSION_OPTIONS = 'get_permission_options',
 }
+
+const t = (key: string) => (i18n.global as any).t(key) as string
 
 export const useGetPermissionsQuery = () => {
   return useQuery({
@@ -30,11 +33,11 @@ export const useCreatePermissionMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [PermissionQueryKey.GET_PERMISSIONS],
       })
-      toast.success('Tạo quyền thành công')
+      toast.success(t('pages.organizationPermissions.messages.createSuccess'))
     },
     onError: (error) => {
       console.error('Error creating permission:', error)
-      toast.error('Tạo quyền thất bại')
+      toast.error(t('pages.organizationPermissions.messages.createError'))
     },
   })
 }
@@ -53,11 +56,11 @@ export const useUpdatePermissionMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [PermissionQueryKey.GET_PERMISSIONS],
       })
-      toast.success('Cập nhật quyền thành công')
+      toast.success(t('pages.organizationPermissions.messages.updateSuccess'))
     },
     onError: (error) => {
       console.error('Error updating permission:', error)
-      toast.error('Cập nhật quyền thất bại')
+      toast.error(t('pages.organizationPermissions.messages.updateError'))
     },
   })
 }
@@ -72,7 +75,9 @@ export const useDeletePermissionMutation = () => {
         (oldData: any) => {
           if (!oldData) return []
           if (Array.isArray(oldData)) {
-            return oldData.filter((p) => String(p.id) !== String(deletedID))
+            return oldData.filter((permission) => {
+              return String(permission.id) !== String(deletedID)
+            })
           }
           const updated = { ...oldData }
           const keyToDelete = Object.keys(updated).find(
@@ -82,11 +87,11 @@ export const useDeletePermissionMutation = () => {
           return updated
         },
       )
-      toast.success('Xóa quyền thành công')
+      toast.success(t('pages.organizationPermissions.messages.deleteSuccess'))
     },
     onError: (error) => {
       console.error('Error deleting permission:', error)
-      toast.error('Xóa quyền thất bại')
+      toast.error(t('pages.organizationPermissions.messages.deleteError'))
     },
   })
 }

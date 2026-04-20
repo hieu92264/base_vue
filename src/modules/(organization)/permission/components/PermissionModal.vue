@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { IPermission } from '@/common/types/entities'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -8,17 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { computed, ref, watch } from 'vue'
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
 } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -26,6 +23,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   permissionFormSchema,
   type PermissionFormValues,
@@ -45,13 +46,14 @@ const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
 }>()
 
+const { t } = useI18n()
 const optionSearch = ref('')
 
 const filteredOptions = computed(() => {
   const q = optionSearch.value.trim().toLowerCase()
   if (!q) return props.permissionOptions ?? []
-  return (props.permissionOptions ?? []).filter((o) =>
-    o.text.toLowerCase().includes(q),
+  return (props.permissionOptions ?? []).filter((option) =>
+    option.text.toLowerCase().includes(q),
   )
 })
 
@@ -70,9 +72,9 @@ const closeModal = () => {
   emit('update:open', false)
 }
 
-const onOpenChange = (v: boolean) => {
-  emit('update:open', v)
-  if (!v) {
+const onOpenChange = (value: boolean) => {
+  emit('update:open', value)
+  if (!value) {
     optionSearch.value = ''
     form.resetForm({
       values: {
@@ -98,7 +100,10 @@ const onSubmit = form.handleSubmit((values) => {
     payload.parent_id != null &&
     Number(payload.parent_id) === Number(props.initialData.id)
   ) {
-    form.setFieldError('parent_id', 'Quyền cha không thể là chính nó')
+    form.setFieldError(
+      'parent_id',
+      t('pages.organizationPermissions.parentSelfError'),
+    )
     return
   }
 
@@ -150,10 +155,14 @@ watch(
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle>
-          {{ initialData ? 'Chỉnh sửa quyền' : 'Thêm quyền mới' }}
+          {{
+            initialData
+              ? t('pages.organizationPermissions.editPermission')
+              : t('pages.organizationPermissions.createPermission')
+          }}
         </DialogTitle>
         <DialogDescription>
-          Điền thông tin quyền rồi bấm Lưu để hoàn tất.
+          {{ t('pages.organizationPermissions.modalDescription') }}
         </DialogDescription>
       </DialogHeader>
 
@@ -167,11 +176,11 @@ watch(
             name="code"
           >
             <FormItem>
-              <FormLabel>Mã quyền</FormLabel>
+              <FormLabel>{{ t('pages.organizationPermissions.code') }}</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
-                  placeholder="Ví dụ: org.permissions"
+                  :placeholder="t('pages.organizationPermissions.codePlaceholder')"
                 />
               </FormControl>
             </FormItem>
@@ -182,11 +191,11 @@ watch(
             name="name"
           >
             <FormItem>
-              <FormLabel>Tên quyền</FormLabel>
+              <FormLabel>{{ t('pages.organizationPermissions.name') }}</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
-                  placeholder="Ví dụ: Quản lý quyền"
+                  :placeholder="t('pages.organizationPermissions.namePlaceholder')"
                 />
               </FormControl>
             </FormItem>
@@ -197,11 +206,11 @@ watch(
             name="url"
           >
             <FormItem>
-              <FormLabel>Đường dẫn</FormLabel>
+              <FormLabel>{{ t('pages.organizationPermissions.url') }}</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
-                  placeholder="/organizations/permissions"
+                  :placeholder="t('pages.organizationPermissions.urlPlaceholder')"
                 />
               </FormControl>
             </FormItem>
@@ -212,23 +221,31 @@ watch(
             name="parent_id"
           >
             <FormItem>
-              <FormLabel>Quyền cha</FormLabel>
+              <FormLabel>
+                {{ t('pages.organizationPermissions.parentPermission') }}
+              </FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Chọn quyền cha (không bắt buộc)" />
+                    <SelectValue
+                      :placeholder="
+                        t('pages.organizationPermissions.selectParentPermission')
+                      "
+                    />
                   </SelectTrigger>
 
                   <SelectContent class="max-h-60 overflow-y-auto">
                     <div class="sticky top-0 z-10 bg-background p-2">
                       <Input
                         v-model="optionSearch"
-                        placeholder="Tìm quyền..."
+                        :placeholder="t('pages.organizationPermissions.searchPermission')"
                         @keydown.stop
                       />
                     </div>
 
-                    <SelectItem :value="NONE_VALUE">Không có</SelectItem>
+                    <SelectItem :value="NONE_VALUE">
+                      {{ t('pages.organizationPermissions.noParent') }}
+                    </SelectItem>
 
                     <SelectItem
                       v-for="option in filteredOptions"
@@ -242,7 +259,7 @@ watch(
                       v-if="filteredOptions.length === 0"
                       class="px-3 py-2 text-sm text-muted-foreground"
                     >
-                      Không có kết quả
+                      {{ t('common.noResults') }}
                     </div>
                   </SelectContent>
                 </Select>
@@ -257,13 +274,13 @@ watch(
             variant="outline"
             @click="closeModal"
           >
-            Hủy
+            {{ t('common.cancel') }}
           </Button>
           <Button
             type="submit"
             :disabled="isPending"
           >
-            {{ isPending ? 'Đang lưu...' : 'Lưu' }}
+            {{ isPending ? t('common.savePending') : t('common.save') }}
           </Button>
         </DialogFooter>
       </form>

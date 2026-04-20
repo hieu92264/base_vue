@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { IUser } from '@/common/types/entities'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -8,17 +9,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { computed, watch } from 'vue'
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
 } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -26,6 +23,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { userFormSchema, type UserFormValues } from '../-schemas/user.schema'
 
 const props = defineProps<{
@@ -37,12 +38,12 @@ const props = defineProps<{
 
 const emit = defineEmits<{ (e: 'update:open', v: boolean): void }>()
 
+const { t } = useI18n()
 const isEdit = computed(() => !!props.initialData?.id)
 
 const form = useForm({
   validationSchema: toTypedSchema(userFormSchema),
   initialValues: {
-    // user
     id: undefined,
     isactive: 'Y',
     username: '',
@@ -50,8 +51,6 @@ const form = useForm({
     password: '',
     locale: null,
     remark: null,
-
-    // profile
     full_name: null,
     phone_number: null,
     avatar_url: null,
@@ -63,19 +62,17 @@ const form = useForm({
   },
 })
 
-const onOpenChange = (v: boolean) => {
-  emit('update:open', v)
-  if (!v) form.resetForm()
+const onOpenChange = (value: boolean) => {
+  emit('update:open', value)
+  if (!value) form.resetForm()
 }
 
 const onSubmit = form.handleSubmit((values) => {
-  // Create: password required
   if (!isEdit.value && (!values.password || values.password.trim() === '')) {
-    form.setFieldError('password', 'Mật khẩu là bắt buộc')
+    form.setFieldError('password', t('pages.organizationUsers.passwordRequired'))
     return
   }
 
-  // Edit: empty password -> do not update password
   if (isEdit.value && (!values.password || values.password.trim() === '')) {
     const { password, ...rest } = values
     props.handleSubmit(rest as any)
@@ -87,33 +84,30 @@ const onSubmit = form.handleSubmit((values) => {
 
 watch(
   () => props.initialData,
-  (u) => {
+  (user) => {
     if (!props.open) return
 
-    if (!u) {
+    if (!user) {
       form.resetForm()
       return
     }
 
     form.setValues({
-      // user
-      id: u.id,
-      isactive: u.isactive ?? 'Y',
-      username: u.username ?? '',
-      email: u.email ?? null,
+      id: user.id,
+      isactive: user.isactive ?? 'Y',
+      username: user.username ?? '',
+      email: user.email ?? null,
       password: '',
-      locale: u.locale ?? null,
-      remark: u.remark ?? null,
-
-      // profile
-      full_name: u.profile?.full_name ?? null,
-      phone_number: u.profile?.phone_number ?? null,
-      avatar_url: u.profile?.avatar_url ?? null,
-      address: u.profile?.address ?? null,
-      zalo: u.profile?.zalo ?? null,
-      facebook: u.profile?.facebook ?? null,
-      user_type: (u.profile?.user_type as any) ?? 'tenant',
-      profile_remark: u.profile?.remark ?? null,
+      locale: user.locale ?? null,
+      remark: user.remark ?? null,
+      full_name: user.profile?.full_name ?? null,
+      phone_number: user.profile?.phone_number ?? null,
+      avatar_url: user.profile?.avatar_url ?? null,
+      address: user.profile?.address ?? null,
+      zalo: user.profile?.zalo ?? null,
+      facebook: user.profile?.facebook ?? null,
+      user_type: (user.profile?.user_type as any) ?? 'tenant',
+      profile_remark: user.profile?.remark ?? null,
     } as any)
   },
   { immediate: true },
@@ -127,11 +121,15 @@ watch(
   >
     <DialogContent class="sm:max-w-2xl">
       <DialogHeader>
-        <DialogTitle>{{
-          isEdit ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới'
-        }}</DialogTitle>
+        <DialogTitle>
+          {{
+            isEdit
+              ? t('pages.organizationUsers.editUser')
+              : t('pages.organizationUsers.createUser')
+          }}
+        </DialogTitle>
         <DialogDescription>
-          Quản lý người dùng và hồ sơ người dùng trong cùng một biểu mẫu.
+          {{ t('pages.organizationUsers.modalDescription') }}
         </DialogDescription>
       </DialogHeader>
 
@@ -139,15 +137,19 @@ watch(
         class="space-y-6"
         @submit.prevent="onSubmit"
       >
-        <!-- USER -->
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             v-slot="{ componentField }"
             name="username"
           >
             <FormItem>
-              <FormLabel>Tên đăng nhập</FormLabel>
-              <FormControl><Input v-bind="componentField" /></FormControl>
+              <FormLabel>{{ t('pages.organizationUsers.username') }}</FormLabel>
+              <FormControl>
+                <Input
+                  v-bind="componentField"
+                  :placeholder="t('pages.organizationUsers.usernamePlaceholder')"
+                />
+              </FormControl>
             </FormItem>
           </FormField>
 
@@ -156,8 +158,13 @@ watch(
             name="email"
           >
             <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl><Input v-bind="componentField" /></FormControl>
+              <FormLabel>{{ t('pages.organizationUsers.email') }}</FormLabel>
+              <FormControl>
+                <Input
+                  v-bind="componentField"
+                  :placeholder="t('pages.organizationUsers.emailPlaceholder')"
+                />
+              </FormControl>
             </FormItem>
           </FormField>
 
@@ -166,13 +173,15 @@ watch(
             name="password"
           >
             <FormItem>
-              <FormLabel>Mật khẩu</FormLabel>
+              <FormLabel>{{ t('pages.organizationUsers.password') }}</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
                   type="password"
                   :placeholder="
-                    isEdit ? '(Để trống nếu muốn giữ nguyên mật khẩu hiện tại)' : ''
+                    isEdit
+                      ? t('pages.organizationUsers.passwordPlaceholderEdit')
+                      : ''
                   "
                 />
               </FormControl>
@@ -184,12 +193,13 @@ watch(
             name="locale"
           >
             <FormItem>
-              <FormLabel>Ngôn ngữ</FormLabel>
-              <FormControl
-                ><Input
+              <FormLabel>{{ t('pages.organizationUsers.locale') }}</FormLabel>
+              <FormControl>
+                <Input
                   v-bind="componentField"
-                  placeholder="en / vi"
-              /></FormControl>
+                  :placeholder="t('pages.organizationUsers.localePlaceholder')"
+                />
+              </FormControl>
             </FormItem>
           </FormField>
 
@@ -198,15 +208,17 @@ watch(
             name="isactive"
           >
             <FormItem>
-              <FormLabel>Trạng thái</FormLabel>
+              <FormLabel>{{ t('pages.organizationUsers.status') }}</FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Chọn trạng thái" />
+                    <SelectValue
+                      :placeholder="t('pages.organizationUsers.selectStatus')"
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Y">Hoạt động</SelectItem>
-                    <SelectItem value="N">Ngưng hoạt động</SelectItem>
+                    <SelectItem value="Y">{{ t('common.active') }}</SelectItem>
+                    <SelectItem value="N">{{ t('common.inactive') }}</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -218,20 +230,19 @@ watch(
             name="remark"
           >
             <FormItem>
-              <FormLabel>Ghi chú người dùng</FormLabel>
+              <FormLabel>{{ t('pages.organizationUsers.userRemark') }}</FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
         </div>
 
-        <!-- PROFILE -->
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             v-slot="{ componentField }"
             name="full_name"
           >
             <FormItem>
-              <FormLabel>Họ và tên</FormLabel>
+              <FormLabel>{{ t('pages.organizationUsers.fullName') }}</FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
@@ -241,7 +252,7 @@ watch(
             name="phone_number"
           >
             <FormItem>
-              <FormLabel>Số điện thoại</FormLabel>
+              <FormLabel>{{ t('pages.organizationUsers.phoneNumber') }}</FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
@@ -251,16 +262,24 @@ watch(
             name="user_type"
           >
             <FormItem>
-              <FormLabel>Loại người dùng</FormLabel>
+              <FormLabel>{{ t('pages.organizationUsers.userType') }}</FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Chọn loại người dùng" />
+                    <SelectValue
+                      :placeholder="t('pages.organizationUsers.selectUserType')"
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="tenant">Người thuê</SelectItem>
-                    <SelectItem value="landlord">Chủ nhà</SelectItem>
-                    <SelectItem value="admin">Quản trị viên</SelectItem>
+                    <SelectItem value="tenant">
+                      {{ t('status.userType.tenant') }}
+                    </SelectItem>
+                    <SelectItem value="landlord">
+                      {{ t('status.userType.landlord') }}
+                    </SelectItem>
+                    <SelectItem value="admin">
+                      {{ t('status.userType.admin') }}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -272,12 +291,13 @@ watch(
             name="avatar_url"
           >
             <FormItem>
-              <FormLabel>Đường dẫn ảnh đại diện</FormLabel>
-              <FormControl
-                ><Input
+              <FormLabel>{{ t('pages.organizationUsers.avatarUrl') }}</FormLabel>
+              <FormControl>
+                <Input
                   v-bind="componentField"
-                  placeholder="https://..."
-              /></FormControl>
+                  :placeholder="t('pages.organizationUsers.avatarUrlPlaceholder')"
+                />
+              </FormControl>
             </FormItem>
           </FormField>
 
@@ -286,7 +306,7 @@ watch(
             name="address"
           >
             <FormItem>
-              <FormLabel>Địa chỉ</FormLabel>
+              <FormLabel>{{ t('pages.organizationUsers.address') }}</FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
@@ -296,7 +316,7 @@ watch(
             name="zalo"
           >
             <FormItem>
-              <FormLabel>Zalo</FormLabel>
+              <FormLabel>{{ t('pages.organizationUsers.zalo') }}</FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
@@ -306,7 +326,7 @@ watch(
             name="facebook"
           >
             <FormItem>
-              <FormLabel>Facebook</FormLabel>
+              <FormLabel>{{ t('pages.organizationUsers.facebook') }}</FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
@@ -316,7 +336,9 @@ watch(
             name="profile_remark"
           >
             <FormItem>
-              <FormLabel>Ghi chú hồ sơ</FormLabel>
+              <FormLabel>
+                {{ t('pages.organizationUsers.profileRemark') }}
+              </FormLabel>
               <FormControl><Input v-bind="componentField" /></FormControl>
             </FormItem>
           </FormField>
@@ -328,13 +350,13 @@ watch(
             variant="outline"
             @click="emit('update:open', false)"
           >
-            Hủy
+            {{ t('common.cancel') }}
           </Button>
           <Button
             type="submit"
             :disabled="isPending"
           >
-            {{ isPending ? 'Đang lưu...' : 'Lưu' }}
+            {{ isPending ? t('common.savePending') : t('common.save') }}
           </Button>
         </DialogFooter>
       </form>

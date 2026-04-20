@@ -1,14 +1,6 @@
 <script setup lang="ts">
 import type { IPermission, IUser } from '@/common/types/entities'
-import { useGetUsersQuery } from '../user/hooks/use-user'
-import { computed, ref, watch } from 'vue'
-import { useGetPermissionsQuery } from '../permission/hooks/use-permission'
 import { arrayToTree } from '@/common/utils/arrayToTree.util'
-import {
-  useGetUserPermissionsQuery,
-  useSyncUserPermissionsMutation,
-} from './hooks/use-user-permissions'
-import PermissionTreeNode from './components/PermissionTreeNode.vue'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -17,8 +9,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useGetPermissionsQuery } from '../permission/hooks/use-permission'
+import { useGetUsersQuery } from '../user/hooks/use-user'
+import PermissionTreeNode from './components/PermissionTreeNode.vue'
+import {
+  useGetUserPermissionsQuery,
+  useSyncUserPermissionsMutation,
+} from './hooks/use-user-permissions'
 
 type TreeNode = IPermission & { children?: TreeNode[] }
+
+const { t } = useI18n()
 
 const { data: usersRes } = useGetUsersQuery()
 const users = computed(() =>
@@ -46,14 +49,10 @@ const seletedUserId = ref<number>(0)
 const { data: userPermRes, isFetching: isFetchingUserPerm } =
   useGetUserPermissionsQuery(seletedUserId)
 
-watch(
-  seletedUserId,
-  (val) => {
-    userSearch.value = ''
-    selected.value = new Set()
-  },
-  { immediate: false },
-)
+watch(seletedUserId, () => {
+  userSearch.value = ''
+  selected.value = new Set()
+})
 
 const selected = ref<Set<number>>(new Set())
 const expanded = ref<Set<number>>(new Set())
@@ -61,7 +60,7 @@ const expanded = ref<Set<number>>(new Set())
 const collectIds = (node: TreeNode): number[] => {
   const ids = [node.id]
   if (node.children?.length) {
-    for (const c of node.children) ids.push(...collectIds(c))
+    for (const child of node.children) ids.push(...collectIds(child))
   }
   return ids
 }
@@ -70,68 +69,66 @@ const normalizeSelection = (
   nodes: TreeNode[],
   set: Set<number>,
 ): Set<number> => {
-  const walk = (n: TreeNode): { total: number; checked: number } => {
-    if (!n.children?.length) {
-      const ok = set.has(n.id)
-      return { total: 1, checked: ok ? 1 : 0 }
+  const walk = (node: TreeNode): { total: number; checked: number } => {
+    if (!node.children?.length) {
+      const checked = set.has(node.id)
+      return { total: 1, checked: checked ? 1 : 0 }
     }
     let total = 0
     let checked = 0
-    for (const c of n.children) {
-      const r = walk(c)
-      total += r.total
-      checked += r.checked
+    for (const child of node.children) {
+      const result = walk(child)
+      total += result.total
+      checked += result.checked
     }
 
-    if (checked === total && total > 0) set.add(n.id)
-    else set.delete(n.id)
+    if (checked === total && total > 0) set.add(node.id)
+    else set.delete(node.id)
 
     return { total, checked }
   }
 
-  for (const r of nodes) walk(r)
+  for (const root of nodes) walk(root)
   return set
 }
 
 watch(
   () => userPermRes.value,
-  (v) => {
-    const ids = (v as any)?.permission_ids ?? []
+  (value) => {
+    const ids = (value as any)?.permission_ids ?? []
     selected.value = normalizeSelection(
       permissionTree.value,
       new Set<number>(ids),
     )
-    expanded.value = new Set(permissionTree.value.map((x) => x.id))
+    expanded.value = new Set(permissionTree.value.map((item) => item.id))
   },
   { immediate: true },
 )
 
 const onToggleExpand = (id: number) => {
-  const s = new Set(expanded.value)
-  if (s.has(id)) s.delete(id)
-  else s.add(id)
-  expanded.value = s
+  const next = new Set(expanded.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  expanded.value = next
 }
 
 const onToggle = (node: TreeNode, checked: boolean) => {
-  const s = new Set(selected.value)
+  const next = new Set(selected.value)
   const ids = collectIds(node)
 
   if (checked) {
-    for (const id of ids) s.add(id)
+    for (const id of ids) next.add(id)
   } else {
-    for (const id of ids) s.delete(id)
+    for (const id of ids) next.delete(id)
   }
 
-  selected.value = normalizeSelection(permissionTree.value, s)
+  selected.value = normalizeSelection(permissionTree.value, next)
 }
 
 const { mutate: syncPerms, isPending: isSaving } =
   useSyncUserPermissionsMutation()
 
 const handleSubmit = () => {
-  console.log('Submitting permissions for user ID:', seletedUserId.value)
-  console.log('Selected permission IDs:', Array.from(selected.value.values()))
   syncPerms({
     userId: Number(seletedUserId.value),
     permission_ids: Array.from(selected.value.values()),
@@ -142,49 +139,51 @@ const userSearch = ref('')
 const filteredUsers = computed(() => {
   const q = userSearch.value.trim().toLowerCase()
   if (!q) return users.value
-  return users.value.filter((u) => {
-    const hay = `${u.username ?? ''} ${u.email ?? ''}`.toLowerCase()
-    return hay.includes(q)
+  return users.value.filter((user) => {
+    const haystack = `${user.username ?? ''} ${user.email ?? ''}`.toLowerCase()
+    return haystack.includes(q)
   })
 })
 </script>
 
 <template>
-  <div class="w-full px-4 py-3 space-y-4">
+  <div class="w-full space-y-4 px-4 py-3">
     <div class="flex items-center gap-3">
       <Select v-model="seletedUserId">
         <SelectTrigger class="w-90">
-          <SelectValue placeholder="Chọn người dùng..." />
+          <SelectValue :placeholder="t('pages.organizationUserPermissions.selectUser')" />
         </SelectTrigger>
 
         <SelectContent class="max-h-65 overflow-auto">
-          <div class="p-2 sticky top-0 bg-background z-10">
+          <div class="sticky top-0 z-10 bg-background p-2">
             <input
               v-model="userSearch"
               type="text"
-              placeholder="Tìm tên đăng nhập/email..."
-              class="w-full h-9 px-2 border rounded-md outline-none"
+              :placeholder="t('pages.organizationUserPermissions.searchUser')"
+              class="h-9 w-full rounded-md border px-2 outline-none"
             />
           </div>
 
-          <SelectItem :value="0">-- Chọn --</SelectItem>
+          <SelectItem :value="0">
+            {{ t('pages.organizationUserPermissions.selectOption') }}
+          </SelectItem>
 
           <SelectItem
-            v-for="u in filteredUsers"
-            :key="u.id"
-            :value="u.id"
+            v-for="user in filteredUsers"
+            :key="user.id"
+            :value="user.id"
           >
-            {{ u.username }}
-            <span class="text-muted-foreground"
-              >({{ u.email ?? 'Chưa có email' }})</span
-            >
+            {{ user.username }}
+            <span class="text-muted-foreground">
+              ({{ user.email ?? t('common.noEmail') }})
+            </span>
           </SelectItem>
 
           <div
             v-if="filteredUsers.length === 0"
             class="px-3 py-2 text-sm text-muted-foreground"
           >
-            Không tìm thấy người dùng
+            {{ t('pages.organizationUserPermissions.noUsersFound') }}
           </div>
         </SelectContent>
       </Select>
@@ -195,7 +194,11 @@ const filteredUsers = computed(() => {
         "
         @click="handleSubmit"
       >
-        {{ isSaving ? 'Đang lưu...' : 'Lưu phân quyền' }}
+        {{
+          isSaving
+            ? t('pages.organizationUserPermissions.savePending')
+            : t('pages.organizationUserPermissions.savePermissions')
+        }}
       </Button>
     </div>
 
@@ -203,18 +206,18 @@ const filteredUsers = computed(() => {
       v-if="!seletedUserId"
       class="text-sm text-muted-foreground"
     >
-      Vui lòng chọn người dùng để phân quyền.
+      {{ t('pages.organizationUserPermissions.selectUserHint') }}
     </div>
 
     <div
       v-else
-      class="border rounded-md p-3 max-h-[70vh] overflow-auto"
+      class="max-h-[70vh] overflow-auto rounded-md border p-3"
     >
       <div
         v-if="isLoadingPerms"
         class="text-sm text-muted-foreground"
       >
-        Đang tải danh sách quyền...
+        {{ t('pages.organizationUserPermissions.loadingPermissions') }}
       </div>
 
       <PermissionTreeNode
@@ -224,9 +227,9 @@ const filteredUsers = computed(() => {
         :node="node"
         :selected="selected"
         :expanded="expanded"
-        :onToggle="onToggle"
-        :onToggleExpand="onToggleExpand"
-        :collectIds="collectIds"
+        :on-toggle="onToggle"
+        :on-toggle-expand="onToggleExpand"
+        :collect-ids="collectIds"
       />
     </div>
   </div>

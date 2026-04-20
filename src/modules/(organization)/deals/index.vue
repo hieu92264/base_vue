@@ -1,18 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { useRoute } from 'vue-router'
-import { toast } from 'vue-sonner'
-import { Search, Handshake, Home, UserRound, FileText } from 'lucide-vue-next'
-
-import { DealService, type DealStatus } from '@/services/deal.service'
-import { ContactService } from '@/services/contact.service'
 import type { IContact, IDeal } from '@/common/types/entities'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -20,17 +11,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { ContactService } from '@/services/contact.service'
+import { DealService, type DealStatus } from '@/services/deal.service'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { FileText, Handshake, Home, Search, UserRound } from 'lucide-vue-next'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
+import { toast } from 'vue-sonner'
 
+const { t } = useI18n()
 const route = useRoute()
 const queryClient = useQueryClient()
 
-const dealStatusOptions: { value: DealStatus; label: string }[] = [
-  { value: 'draft', label: 'Nháp' },
-  { value: 'reserved', label: 'Giữ chỗ' },
-  { value: 'confirmed', label: 'Đã xác nhận' },
-  { value: 'cancelled', label: 'Đã hủy' },
-  { value: 'completed', label: 'Hoàn tất' },
-]
+const dealStatusOptions = computed((): { value: DealStatus; label: string }[] => [
+  { value: 'draft', label: t('status.deal.draft') },
+  { value: 'reserved', label: t('status.deal.reserved') },
+  { value: 'confirmed', label: t('status.deal.confirmed') },
+  { value: 'cancelled', label: t('status.deal.cancelled') },
+  { value: 'completed', label: t('status.deal.completed') },
+])
 
 const filters = ref({
   keyword: '',
@@ -62,9 +63,7 @@ const wonLeadsQuery = useQuery({
 })
 
 const deals = computed<IDeal[]>(() => dealsQuery.data.value?.data ?? [])
-const wonLeads = computed<IContact[]>(
-  () => wonLeadsQuery.data.value?.data ?? [],
-)
+const wonLeads = computed<IContact[]>(() => wonLeadsQuery.data.value?.data ?? [])
 const meta = computed(() => dealsQuery.data.value?.meta)
 
 const selectedId = ref<number | null>(null)
@@ -89,8 +88,8 @@ const selectedDeal = computed<IDeal | null>(() => {
 
 const statusLabel = (value?: string) => {
   return (
-    dealStatusOptions.find((item) => item.value === value)?.label ??
-    'Không xác định'
+    dealStatusOptions.value.find((item) => item.value === value)?.label ??
+    t('status.unknown')
   )
 }
 
@@ -166,12 +165,12 @@ const createMutation = useMutation({
       note: form.value.note || null,
     }),
   onSuccess: () => {
-    toast.success('Tạo deal thành công')
+    toast.success(t('pages.organizationDeals.messages.createSuccess'))
     queryClient.invalidateQueries({ queryKey: ['admin_deals_page'] })
     dealsQuery.refetch()
   },
   onError: () => {
-    toast.error('Tạo deal thất bại')
+    toast.error(t('pages.organizationDeals.messages.createError'))
   },
 })
 
@@ -186,11 +185,11 @@ const updateMutation = useMutation({
       note: payload.note,
     }),
   onSuccess: () => {
-    toast.success('Cập nhật deal thành công')
+    toast.success(t('pages.organizationDeals.messages.updateSuccess'))
     queryClient.invalidateQueries({ queryKey: ['admin_deals_page'] })
   },
   onError: () => {
-    toast.error('Cập nhật deal thất bại')
+    toast.error(t('pages.organizationDeals.messages.updateError'))
   },
 })
 
@@ -215,20 +214,34 @@ const summary = computed(() => {
   const count = (target: string) =>
     deals.value.filter((item) => item.status === target).length
   return [
-    { label: 'Nháp', value: count('draft') },
-    { label: 'Giữ chỗ', value: count('reserved') },
-    { label: 'Xác nhận', value: count('confirmed') },
-    { label: 'Hoàn tất', value: count('completed') },
+    { label: t('pages.organizationDeals.summary.draft'), value: count('draft') },
+    {
+      label: t('pages.organizationDeals.summary.reserved'),
+      value: count('reserved'),
+    },
+    {
+      label: t('pages.organizationDeals.summary.confirmed'),
+      value: count('confirmed'),
+    },
+    {
+      label: t('pages.organizationDeals.summary.completed'),
+      value: count('completed'),
+    },
   ]
 })
+
+const roomFallback = (roomId?: number | null) =>
+  t('pages.organizationDeals.roomFallback', { id: roomId ?? '-' })
 </script>
 
 <template>
   <div class="w-full space-y-5 px-4 py-4 md:px-6">
     <div>
-      <h2 class="text-2xl font-bold tracking-tight">Deal / Booking</h2>
+      <h2 class="text-2xl font-bold tracking-tight">
+        {{ t('pages.organizationDeals.title') }}
+      </h2>
       <p class="text-sm text-muted-foreground">
-        Tạo deal từ lead đã won và theo dõi trạng thái chốt phòng
+        {{ t('pages.organizationDeals.description') }}
       </p>
     </div>
 
@@ -248,12 +261,16 @@ const summary = computed(() => {
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-[380px_minmax(0,1fr)]">
       <Card class="w-full min-w-0 border-border/70">
         <CardHeader class="pb-4">
-          <CardTitle class="text-base">Tạo deal mới</CardTitle>
+          <CardTitle class="text-base">
+            {{ t('pages.organizationDeals.createTitle') }}
+          </CardTitle>
         </CardHeader>
 
         <CardContent class="space-y-4">
           <div class="space-y-2">
-            <label class="text-sm font-medium">Lead đã chốt</label>
+            <label class="text-sm font-medium">
+              {{ t('pages.organizationDeals.wonLead') }}
+            </label>
             <Select
               :model-value="form.contact_id || 'none'"
               @update:model-value="
@@ -261,16 +278,17 @@ const summary = computed(() => {
               "
             >
               <SelectTrigger class="w-full">
-                <SelectValue placeholder="Chọn lead đã won" />
+                <SelectValue :placeholder="t('pages.organizationDeals.selectWonLead')" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">Không chọn</SelectItem>
+                <SelectItem value="none">{{ t('common.none') }}</SelectItem>
                 <SelectItem
                   v-for="lead in wonLeads"
                   :key="lead.id"
                   :value="String(lead.id)"
                 >
-                  {{ lead.name || 'Khách' }} - {{ lead.room_title || '---' }}
+                  {{ lead.name || t('pages.organizationDeals.guest') }} -
+                  {{ lead.room_title || t('common.notAvailable') }}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -281,26 +299,32 @@ const summary = computed(() => {
             class="rounded-xl border bg-muted/30 p-3 text-sm"
           >
             <div>
-              <span class="font-medium">Phòng:</span>
-              {{ selectedWonLead.room_title || '---' }}
+              <span class="font-medium">{{ t('pages.organizationDeals.room') }}:</span>
+              {{ selectedWonLead.room_title || t('common.notAvailable') }}
             </div>
             <div>
-              <span class="font-medium">Khách:</span>
-              {{ selectedWonLead.name || '---' }}
+              <span class="font-medium">{{ t('pages.organizationDeals.guest') }}:</span>
+              {{ selectedWonLead.name || t('common.notAvailable') }}
             </div>
             <div>
-              <span class="font-medium">Điện thoại:</span>
-              {{ selectedWonLead.phone || '---' }}
+              <span class="font-medium">
+                {{ t('pages.organizationDeals.tenantPhone') }}:
+              </span>
+              {{ selectedWonLead.phone || t('common.notAvailable') }}
             </div>
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">Room ID</label>
+            <label class="text-sm font-medium">
+              {{ t('pages.organizationDeals.roomId') }}
+            </label>
             <Input v-model="form.room_id" />
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">Giá chốt</label>
+            <label class="text-sm font-medium">
+              {{ t('pages.organizationDeals.agreedPrice') }}
+            </label>
             <Input
               v-model="form.agreed_price"
               type="number"
@@ -309,7 +333,9 @@ const summary = computed(() => {
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">Ngày vào ở</label>
+            <label class="text-sm font-medium">
+              {{ t('pages.organizationDeals.moveInDate') }}
+            </label>
             <Input
               v-model="form.start_date"
               type="date"
@@ -317,22 +343,30 @@ const summary = computed(() => {
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">Tên khách</label>
+            <label class="text-sm font-medium">
+              {{ t('pages.organizationDeals.tenantName') }}
+            </label>
             <Input v-model="form.tenant_name" />
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">Số điện thoại khách</label>
+            <label class="text-sm font-medium">
+              {{ t('pages.organizationDeals.tenantPhone') }}
+            </label>
             <Input v-model="form.tenant_phone" />
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">Email khách</label>
+            <label class="text-sm font-medium">
+              {{ t('pages.organizationDeals.tenantEmail') }}
+            </label>
             <Input v-model="form.tenant_email" />
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">Ghi chú</label>
+            <label class="text-sm font-medium">
+              {{ t('pages.organizationDeals.note') }}
+            </label>
             <Textarea
               v-model="form.note"
               rows="4"
@@ -348,7 +382,7 @@ const summary = computed(() => {
             "
             @click="createMutation.mutate()"
           >
-            Tạo deal
+            {{ t('pages.organizationDeals.createDeal') }}
           </Button>
         </CardContent>
       </Card>
@@ -356,7 +390,9 @@ const summary = computed(() => {
       <div class="min-w-0 space-y-4">
         <Card class="w-full min-w-0 border-border/70">
           <CardHeader class="pb-4">
-            <CardTitle class="text-base">Bộ lọc deal</CardTitle>
+            <CardTitle class="text-base">
+              {{ t('pages.organizationDeals.filtersTitle') }}
+            </CardTitle>
           </CardHeader>
 
           <CardContent
@@ -369,7 +405,7 @@ const summary = computed(() => {
               <Input
                 v-model="filters.keyword"
                 class="w-full pl-9"
-                placeholder="Tìm theo phòng, khách, email, điện thoại..."
+                :placeholder="t('pages.organizationDeals.keywordPlaceholder')"
                 @keyup.enter="applyFilters"
               />
             </div>
@@ -379,10 +415,10 @@ const summary = computed(() => {
               @update:model-value="(v) => (filters.status = String(v))"
             >
               <SelectTrigger class="w-full">
-                <SelectValue placeholder="Trạng thái" />
+                <SelectValue :placeholder="t('pages.organizationDeals.statusPlaceholder')" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tất cả</SelectItem>
+                <SelectItem value="all">{{ t('common.all') }}</SelectItem>
                 <SelectItem
                   v-for="item in dealStatusOptions"
                   :key="item.value"
@@ -397,7 +433,7 @@ const summary = computed(() => {
               class="w-full"
               @click="applyFilters"
             >
-              Lọc dữ liệu
+              {{ t('pages.organizationDeals.applyFilters') }}
             </Button>
           </CardContent>
         </Card>
@@ -405,7 +441,9 @@ const summary = computed(() => {
         <div class="grid grid-cols-1 gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
           <Card class="w-full min-w-0 border-border/70">
             <CardHeader class="pb-4">
-              <CardTitle class="text-base">Danh sách deal</CardTitle>
+              <CardTitle class="text-base">
+                {{ t('pages.organizationDeals.listTitle') }}
+              </CardTitle>
             </CardHeader>
 
             <CardContent class="space-y-3">
@@ -413,14 +451,14 @@ const summary = computed(() => {
                 v-if="dealsQuery.isLoading.value"
                 class="py-10 text-center text-sm text-muted-foreground"
               >
-                Đang tải dữ liệu...
+                {{ t('pages.organizationDeals.loadingData') }}
               </div>
 
               <div
                 v-else-if="deals.length === 0"
                 class="py-10 text-center text-sm text-muted-foreground"
               >
-                Chưa có deal.
+                {{ t('pages.organizationDeals.emptyData') }}
               </div>
 
               <button
@@ -436,13 +474,13 @@ const summary = computed(() => {
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
                     <div class="truncate font-semibold">
-                      {{ item.room_title || `Room #${item.room_id}` }}
+                      {{ item.room_title || roomFallback(item.room_id) }}
                     </div>
                     <div class="mt-1 truncate text-xs text-muted-foreground">
                       {{
                         item.tenant_name ||
                         item.contact_name ||
-                        'Chưa có tenant'
+                        t('pages.organizationDeals.noTenant')
                       }}
                     </div>
                   </div>
@@ -455,22 +493,26 @@ const summary = computed(() => {
                 <div class="mt-3 space-y-2 text-sm text-muted-foreground">
                   <div class="flex items-center gap-2">
                     <Home class="h-4 w-4 shrink-0" />
-                    <span class="truncate">{{
-                      item.room_address || '---'
-                    }}</span>
+                    <span class="truncate">
+                      {{ item.room_address || t('common.notAvailable') }}
+                    </span>
                   </div>
                   <div class="flex items-center gap-2">
                     <UserRound class="h-4 w-4 shrink-0" />
-                    <span>{{
-                      item.tenant_phone || item.contact_phone || '---'
-                    }}</span>
+                    <span>
+                      {{
+                        item.tenant_phone ||
+                        item.contact_phone ||
+                        t('common.notAvailable')
+                      }}
+                    </span>
                   </div>
                   <div class="flex items-center gap-2">
                     <Handshake class="h-4 w-4 shrink-0" />
-                    <span
-                      >{{ item.agreed_price || 0 }}
-                      {{ item.currency || 'VND' }}</span
-                    >
+                    <span>
+                      {{ item.agreed_price || 0 }}
+                      {{ item.currency || 'VND' }}
+                    </span>
                   </div>
                 </div>
               </button>
@@ -484,18 +526,22 @@ const summary = computed(() => {
                   :disabled="filters.page <= 1"
                   @click="goPrevPage"
                 >
-                  Trang trước
+                  {{ t('pages.organizationDeals.previousPage') }}
                 </Button>
                 <div class="text-sm text-muted-foreground">
-                  Trang {{ meta?.current_page || 1 }} /
-                  {{ meta?.last_page || 1 }}
+                  {{
+                    t('pages.organizationDeals.pageText', {
+                      current: meta?.current_page || 1,
+                      last: meta?.last_page || 1,
+                    })
+                  }}
                 </div>
                 <Button
                   variant="outline"
                   :disabled="!meta || filters.page >= meta.last_page"
                   @click="goNextPage"
                 >
-                  Trang sau
+                  {{ t('pages.organizationDeals.nextPage') }}
                 </Button>
               </div>
             </CardContent>
@@ -503,7 +549,9 @@ const summary = computed(() => {
 
           <Card class="w-full min-w-0 border-border/70">
             <CardHeader class="pb-4">
-              <CardTitle class="text-base">Chi tiết deal</CardTitle>
+              <CardTitle class="text-base">
+                {{ t('pages.organizationDeals.detailsTitle') }}
+              </CardTitle>
             </CardHeader>
 
             <CardContent
@@ -516,11 +564,11 @@ const summary = computed(() => {
                     <div class="truncate text-lg font-semibold">
                       {{
                         selectedDeal.room_title ||
-                        `Room #${selectedDeal.room_id}`
+                        roomFallback(selectedDeal.room_id)
                       }}
                     </div>
                     <div class="truncate text-sm text-muted-foreground">
-                      {{ selectedDeal.room_address || '---' }}
+                      {{ selectedDeal.room_address || t('common.notAvailable') }}
                     </div>
                   </div>
 
@@ -531,41 +579,56 @@ const summary = computed(() => {
 
                 <div class="grid gap-2 text-sm">
                   <div>
-                    <span class="font-medium">Khách:</span>
+                    <span class="font-medium">
+                      {{ t('pages.organizationDeals.guest') }}:
+                    </span>
                     {{
                       selectedDeal.tenant_name ||
                       selectedDeal.contact_name ||
-                      '---'
+                      t('common.notAvailable')
                     }}
                   </div>
                   <div>
-                    <span class="font-medium">Điện thoại:</span>
+                    <span class="font-medium">
+                      {{ t('pages.organizationDeals.tenantPhone') }}:
+                    </span>
                     {{
                       selectedDeal.tenant_phone ||
                       selectedDeal.contact_phone ||
-                      '---'
+                      t('common.notAvailable')
                     }}
                   </div>
                   <div>
-                    <span class="font-medium">Email:</span>
+                    <span class="font-medium">
+                      {{ t('pages.organizationDeals.tenantEmail') }}:
+                    </span>
                     {{
                       selectedDeal.tenant_email ||
                       selectedDeal.contact_email ||
-                      '---'
+                      t('common.notAvailable')
                     }}
                   </div>
                   <div>
-                    <span class="font-medium">Giá chốt:</span>
+                    <span class="font-medium">
+                      {{ t('pages.organizationDeals.agreedPrice') }}:
+                    </span>
                     {{ selectedDeal.agreed_price || 0 }}
                     {{ selectedDeal.currency || 'VND' }}
                   </div>
                   <div>
-                    <span class="font-medium">Ngày vào ở:</span>
-                    {{ selectedDeal.start_date || '---' }}
+                    <span class="font-medium">
+                      {{ t('pages.organizationDeals.moveInDate') }}:
+                    </span>
+                    {{ selectedDeal.start_date || t('common.notAvailable') }}
                   </div>
                   <div>
-                    <span class="font-medium">Tình trạng phòng:</span>
-                    {{ selectedDeal.room_availability_status || '---' }}
+                    <span class="font-medium">
+                      {{ t('pages.organizationDeals.roomStatus') }}:
+                    </span>
+                    {{
+                      selectedDeal.room_availability_status ||
+                      t('common.notAvailable')
+                    }}
                   </div>
                 </div>
               </div>
@@ -576,7 +639,7 @@ const summary = computed(() => {
               >
                 <div class="mb-2 flex items-center gap-2 font-medium">
                   <FileText class="h-4 w-4" />
-                  Ghi chú
+                  {{ t('pages.organizationDeals.noteTitle') }}
                 </div>
                 <div class="whitespace-pre-wrap text-sm text-muted-foreground">
                   {{ selectedDeal.note }}
@@ -584,7 +647,9 @@ const summary = computed(() => {
               </div>
 
               <div class="space-y-3">
-                <div class="text-sm font-medium">Cập nhật trạng thái deal</div>
+                <div class="text-sm font-medium">
+                  {{ t('pages.organizationDeals.updateStatusTitle') }}
+                </div>
                 <div class="flex flex-wrap gap-2">
                   <Button
                     v-for="item in dealStatusOptions"
@@ -609,7 +674,7 @@ const summary = computed(() => {
               v-else
               class="py-10 text-center text-sm text-muted-foreground"
             >
-              Chọn một deal để xem chi tiết
+              {{ t('pages.organizationDeals.selectDealPrompt') }}
             </CardContent>
           </Card>
         </div>

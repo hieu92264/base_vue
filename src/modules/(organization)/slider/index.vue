@@ -1,14 +1,14 @@
 <script setup lang="ts">
+import type { ISlider } from '@/common/types/entities'
 import DataTable from '@/components/DataTable.vue'
-import { computed, ref } from 'vue'
+import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
-import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
-
-import type { ISlider } from '@/common/types/entities'
-import { columns } from './data/columns'
-import SliderModal from './components/SliderModal.vue'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { SliderFormValues } from './-schemas/slider.schema'
+import SliderModal from './components/SliderModal.vue'
+import { getColumns } from './data/columns'
 import {
   useCreateSliderMutation,
   useDeleteSliderMutation,
@@ -16,6 +16,7 @@ import {
   useUpdateSliderMutation,
 } from './hooks/use-slider'
 
+const { t } = useI18n()
 const { data, isLoading, isFetching, refetch } = useGetSlidersQuery()
 
 const isConfirmDelete = ref(false)
@@ -29,9 +30,9 @@ const { mutate: updateSlider, isPending: isUpdating } =
 const { mutate: deleteSlider, isPending: isDeleting } =
   useDeleteSliderMutation()
 
-const sliderData = computed(() => {
-  return data.value?.data ?? []
-})
+const columns = computed(() => getColumns())
+
+const sliderData = computed(() => data.value?.data ?? [])
 
 const openCreateModal = () => {
   isOpenModal.value = true
@@ -99,7 +100,7 @@ const handleSubmitSlider = (payload: SliderFormValues) => {
           @click="openCreateModal"
         >
           <Plus class="h-4 w-4" />
-          Add Slider
+          {{ t('pages.organizationSliders.addSlider') }}
         </Button>
       </template>
     </DataTable>

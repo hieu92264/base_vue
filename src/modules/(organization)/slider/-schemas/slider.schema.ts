@@ -1,12 +1,17 @@
+import i18n from '@/configs/i18n.config'
 import { z } from 'zod'
+
+const t = (key: string) => (i18n.global as any).t(key) as string
 
 export const sliderFormSchema = z.object({
   id: z.number().optional(),
   title: z.string().nullable().optional(),
   link_url: z.string().nullable().optional(),
-  sort_order: z.coerce.number().min(0, 'Thứ tự hiển thị phải lớn hơn hoặc bằng 0'),
-  isactive: z.coerce.number().refine((v) => [0, 1].includes(v), {
-    message: 'Trạng thái phải là 0 hoặc 1',
+  sort_order: z.coerce
+    .number()
+    .min(0, t('pages.organizationSliders.validation.sortOrderInvalid')),
+  isactive: z.coerce.number().refine((value) => [0, 1].includes(value), {
+    message: t('pages.organizationSliders.validation.statusInvalid'),
   }),
   remark: z.string().nullable().optional(),
   image: z.any().optional(),

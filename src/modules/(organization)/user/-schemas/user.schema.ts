@@ -1,22 +1,24 @@
+import i18n from '@/configs/i18n.config'
 import { z } from 'zod'
+
+const t = (key: string) => (i18n.global as any).t(key) as string
 
 export const userFormSchema = z
   .object({
     id: z.number().optional(),
-
-    isactive: z.enum(['Y', 'N']).optional(), // chặt hơn (optional)
-    username: z.string().min(1, 'Tên đăng nhập là bắt buộc'),
+    isactive: z.enum(['Y', 'N']).optional(),
+    username: z
+      .string()
+      .min(1, t('pages.organizationUsers.validation.usernameRequired')),
     email: z
       .string()
-      .email('Email không hợp lệ')
+      .email(t('pages.organizationUsers.validation.emailInvalid'))
       .optional()
       .or(z.literal(''))
-      .transform((v) => (v === '' ? null : v)),
+      .transform((value) => (value === '' ? null : value)),
     password: z.string().optional(),
-
     locale: z.string().optional().nullable(),
     remark: z.string().optional().nullable(),
-
     full_name: z.string().optional().nullable(),
     phone_number: z.string().optional().nullable(),
     avatar_url: z.string().optional().nullable(),
@@ -26,12 +28,12 @@ export const userFormSchema = z
     user_type: z.enum(['admin', 'tenant', 'landlord']),
     profile_remark: z.string().optional().nullable(),
   })
-  .superRefine((val, ctx) => {
-    if (!val.id && (!val.password || val.password.trim() === '')) {
+  .superRefine((value, ctx) => {
+    if (!value.id && (!value.password || value.password.trim() === '')) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['password'],
-        message: 'Mật khẩu là bắt buộc',
+        message: t('pages.organizationUsers.validation.passwordRequired'),
       })
     }
   })

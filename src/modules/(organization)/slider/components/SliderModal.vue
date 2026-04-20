@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ISlider } from '@/common/types/entities'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -8,12 +9,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { computed, ref, watch } from 'vue'
-import { useForm } from 'vee-validate'
-import { toTypedSchema } from '@vee-validate/zod'
 import {
   FormControl,
   FormField,
@@ -21,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -28,6 +24,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   sliderFormSchema,
   type SliderFormValues,
@@ -44,6 +45,7 @@ const emit = defineEmits<{
   (e: 'update:open', value: boolean): void
 }>()
 
+const { t } = useI18n()
 const imagePreview = ref<string>('')
 
 const form = useForm({
@@ -65,10 +67,10 @@ const currentPreview = computed(() => {
   return ''
 })
 
-const onOpenChange = (v: boolean) => {
-  emit('update:open', v)
+const onOpenChange = (value: boolean) => {
+  emit('update:open', value)
 
-  if (!v) {
+  if (!value) {
     imagePreview.value = ''
     form.resetForm({
       values: {
@@ -84,8 +86,8 @@ const onOpenChange = (v: boolean) => {
   }
 }
 
-const handleFileChange = (e: Event, handleChange: (value: any) => void) => {
-  const target = e.target as HTMLInputElement
+const handleFileChange = (event: Event, handleChange: (value: any) => void) => {
+  const target = event.target as HTMLInputElement
   const file = target.files?.[0]
 
   handleChange(file)
@@ -144,10 +146,14 @@ watch(
     <DialogContent class="sm:max-w-2xl">
       <DialogHeader>
         <DialogTitle>
-          {{ initialData ? 'Chỉnh sửa slider' : 'Thêm slider mới' }}
+          {{
+            initialData
+              ? t('pages.organizationSliders.editSlider')
+              : t('pages.organizationSliders.createSlider')
+          }}
         </DialogTitle>
         <DialogDescription>
-          Điền thông tin slider rồi bấm Lưu để hoàn tất.
+          {{ t('pages.organizationSliders.modalDescription') }}
         </DialogDescription>
       </DialogHeader>
 
@@ -161,11 +167,11 @@ watch(
             name="title"
           >
             <FormItem>
-              <FormLabel>Tiêu đề</FormLabel>
+              <FormLabel>{{ t('pages.organizationSliders.title') }}</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
-                  placeholder="Tiêu đề slider"
+                  :placeholder="t('pages.organizationSliders.titlePlaceholder')"
                 />
               </FormControl>
               <FormMessage />
@@ -177,7 +183,7 @@ watch(
             name="sort_order"
           >
             <FormItem>
-              <FormLabel>Thứ tự hiển thị</FormLabel>
+              <FormLabel>{{ t('pages.organizationSliders.sortOrder') }}</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
@@ -194,11 +200,11 @@ watch(
             name="link_url"
           >
             <FormItem class="md:col-span-2">
-              <FormLabel>Liên kết</FormLabel>
+              <FormLabel>{{ t('pages.organizationSliders.linkUrl') }}</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
-                  placeholder="https://example.com"
+                  :placeholder="t('pages.organizationSliders.linkPlaceholder')"
                 />
               </FormControl>
               <FormMessage />
@@ -210,15 +216,17 @@ watch(
             name="isactive"
           >
             <FormItem>
-              <FormLabel>Trạng thái</FormLabel>
+              <FormLabel>{{ t('pages.organizationSliders.status') }}</FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Chọn trạng thái" />
+                    <SelectValue
+                      :placeholder="t('pages.organizationSliders.selectStatus')"
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem :value="1">Hoạt động</SelectItem>
-                    <SelectItem :value="0">Ngưng hoạt động</SelectItem>
+                    <SelectItem :value="1">{{ t('common.active') }}</SelectItem>
+                    <SelectItem :value="0">{{ t('common.inactive') }}</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -231,12 +239,12 @@ watch(
             name="image"
           >
             <FormItem>
-              <FormLabel>Hình ảnh</FormLabel>
+              <FormLabel>{{ t('pages.organizationSliders.image') }}</FormLabel>
               <FormControl>
                 <Input
                   type="file"
                   accept=".jpg,.jpeg,.png,.webp,.avif"
-                  @change="(e: Event) => handleFileChange(e, handleChange)"
+                  @change="(event: Event) => handleFileChange(event, handleChange)"
                 />
               </FormControl>
               <FormMessage />
@@ -247,7 +255,9 @@ watch(
             v-if="currentPreview"
             class="md:col-span-2"
           >
-            <p class="mb-2 text-sm font-medium">Xem trước</p>
+            <p class="mb-2 text-sm font-medium">
+              {{ t('pages.organizationSliders.preview') }}
+            </p>
             <img
               :src="currentPreview"
               class="h-40 w-full rounded-md border object-cover"
@@ -259,11 +269,11 @@ watch(
             name="remark"
           >
             <FormItem class="md:col-span-2">
-              <FormLabel>Ghi chú</FormLabel>
+              <FormLabel>{{ t('pages.organizationSliders.remark') }}</FormLabel>
               <FormControl>
                 <Textarea
                   v-bind="componentField"
-                  placeholder="Nhập ghi chú..."
+                  :placeholder="t('pages.organizationSliders.remarkPlaceholder')"
                 />
               </FormControl>
               <FormMessage />
@@ -277,13 +287,13 @@ watch(
             variant="outline"
             @click="emit('update:open', false)"
           >
-            Hủy
+            {{ t('common.cancel') }}
           </Button>
           <Button
             type="submit"
             :disabled="isPending"
           >
-            {{ isPending ? 'Đang lưu...' : 'Lưu' }}
+            {{ isPending ? t('common.savePending') : t('common.save') }}
           </Button>
         </DialogFooter>
       </form>

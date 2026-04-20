@@ -1,3 +1,4 @@
+import i18n from '@/configs/i18n.config'
 import { EmployeeService } from '@/services/employee.service'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { toast } from 'vue-sonner'
@@ -7,6 +8,8 @@ export enum EmployeeQueryKey {
   GET_EMPLOYEES = 'get_employees',
   GET_USER_OPTIONS = 'get_user_options',
 }
+
+const t = (key: string) => (i18n.global as any).t(key) as string
 
 export const useGetEmployeesQuery = () => {
   return useQuery({
@@ -20,17 +23,15 @@ export const useDeleteEmployeeMutation = () => {
   return useMutation({
     mutationFn: EmployeeService.deleteEmployee,
     onSuccess: (_, deletedID) => {
-      console.log('Delete employee response: ', deletedID)
-
       queryClient.setQueryData(
         [EmployeeQueryKey.GET_EMPLOYEES],
         (oldData: any) => {
-          console.log('Old employee data: ', oldData)
-
           if (!oldData) return []
 
           if (Array.isArray(oldData)) {
-            return oldData.filter((emp) => String(emp.id) !== String(deletedID))
+            return oldData.filter((employee) => {
+              return String(employee.id) !== String(deletedID)
+            })
           }
 
           const updatedData = { ...oldData }
@@ -38,19 +39,17 @@ export const useDeleteEmployeeMutation = () => {
             (key) => String(updatedData[key].id) === String(deletedID),
           )
 
-          if (keyToDelete) {
-            delete updatedData[keyToDelete]
-          }
+          if (keyToDelete) delete updatedData[keyToDelete]
 
           return updatedData
         },
       )
 
-      toast.success('Xóa nhân viên thành công')
+      toast.success(t('pages.organizationEmployees.messages.deleteSuccess'))
     },
     onError: (error) => {
       console.error('Error deleting employee:', error)
-      toast.error('Xóa nhân viên thất bại')
+      toast.error(t('pages.organizationEmployees.messages.deleteError'))
     },
   })
 }
@@ -66,16 +65,15 @@ export const useCreateEmployeeMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: EmployeeService.createEmployee,
-    onSuccess: (res) => {
-      console.log('Create employee response: ', res)
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [EmployeeQueryKey.GET_EMPLOYEES],
       })
-      toast.success('Tạo nhân viên thành công')
+      toast.success(t('pages.organizationEmployees.messages.createSuccess'))
     },
     onError: (error) => {
       console.error('Error creating employee:', error)
-      toast.error('Tạo nhân viên thất bại')
+      toast.error(t('pages.organizationEmployees.messages.createError'))
     },
   })
 }
@@ -90,16 +88,15 @@ export const useUpdateEmployeeMutation = () => {
       employeeId: number
       employeeData: EmployeeFormValues
     }) => EmployeeService.updateEmployee(employeeId, employeeData),
-    onSuccess: (res) => {
-      console.log('Update employee response: ', res)
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [EmployeeQueryKey.GET_EMPLOYEES],
       })
-      toast.success('Cập nhật nhân viên thành công')
+      toast.success(t('pages.organizationEmployees.messages.updateSuccess'))
     },
     onError: (error) => {
       console.error('Error updating employee:', error)
-      toast.error('Cập nhật nhân viên thất bại')
+      toast.error(t('pages.organizationEmployees.messages.updateError'))
     },
   })
 }

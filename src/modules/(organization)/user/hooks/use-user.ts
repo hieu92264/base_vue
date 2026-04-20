@@ -1,3 +1,4 @@
+import i18n from '@/configs/i18n.config'
 import { UserService } from '@/services/user.service'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { toast } from 'vue-sonner'
@@ -7,6 +8,8 @@ export enum UserQueryKey {
   GET_USERS = 'get_users',
 }
 
+const t = (key: string) => (i18n.global as any).t(key) as string
+
 export const useGetUsersQuery = () =>
   useQuery({
     queryKey: [UserQueryKey.GET_USERS],
@@ -14,47 +17,47 @@ export const useGetUsersQuery = () =>
   })
 
 export const useCreateUserMutation = () => {
-  const qc = useQueryClient()
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: UserService.createUser,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [UserQueryKey.GET_USERS] })
-      toast.success('Tạo người dùng thành công')
+      queryClient.invalidateQueries({ queryKey: [UserQueryKey.GET_USERS] })
+      toast.success(t('pages.organizationUsers.messages.createSuccess'))
     },
-    onError: (e) => {
-      console.error(e)
-      toast.error('Tạo người dùng thất bại')
+    onError: (error) => {
+      console.error(error)
+      toast.error(t('pages.organizationUsers.messages.createError'))
     },
   })
 }
 
 export const useUpdateUserMutation = () => {
-  const qc = useQueryClient()
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UserFormValues }) =>
       UserService.updateUser(id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [UserQueryKey.GET_USERS] })
-      toast.success('Cập nhật người dùng thành công')
+      queryClient.invalidateQueries({ queryKey: [UserQueryKey.GET_USERS] })
+      toast.success(t('pages.organizationUsers.messages.updateSuccess'))
     },
-    onError: (e) => {
-      console.error(e)
-      toast.error('Cập nhật người dùng thất bại')
+    onError: (error) => {
+      console.error(error)
+      toast.error(t('pages.organizationUsers.messages.updateError'))
     },
   })
 }
 
 export const useDeleteUserMutation = () => {
-  const qc = useQueryClient()
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: UserService.deleteUser,
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: [UserQueryKey.GET_USERS] })
-      toast.success('Xóa người dùng thành công')
+      queryClient.invalidateQueries({ queryKey: [UserQueryKey.GET_USERS] })
+      toast.success(t('pages.organizationUsers.messages.deleteSuccess'))
     },
-    onError: (e) => {
-      console.error(e)
-      toast.error('Xóa người dùng thất bại')
+    onError: (error) => {
+      console.error(error)
+      toast.error(t('pages.organizationUsers.messages.deleteError'))
     },
   })
 }

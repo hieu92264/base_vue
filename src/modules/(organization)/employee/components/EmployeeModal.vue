@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { WorkStatus } from '@/common/constants/enums'
 import type { IEmployee } from '@/common/types/entities'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,6 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -17,34 +24,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { computed, ref, watch } from 'vue'
 import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
+import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   employeeFormSchema,
   type EmployeeFormValues,
 } from '@/modules/(organization)/employee/-schemas/employee.schema'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from '@/components/ui/form'
-import { toTypedSchema } from '@vee-validate/zod'
-
-// export type EmployeeFormValues = Pick<
-//   IEmployee,
-//   | 'user_id'
-//   | 'full_name'
-//   | 'status'
-//   | 'join_date'
-//   | 'email'
-//   | 'dob'
-//   | 'phone'
-//   | 'terminate_date'
-//   | 'remark'
-// >
 
 const props = defineProps<{
   open: boolean
@@ -54,26 +42,19 @@ const props = defineProps<{
   handleSubmit: (data: EmployeeFormValues) => void
 }>()
 
+const emit = defineEmits(['update:open', 'submit'])
+
+const { t } = useI18n()
 const userSearch = ref('')
 
 const filteredUserOptions = computed(() => {
   const q = userSearch.value.trim().toLowerCase()
   if (!q) return props.userOptions ?? []
 
-  return (props.userOptions ?? []).filter((o) =>
-    o.text.toLowerCase().includes(q),
+  return (props.userOptions ?? []).filter((option) =>
+    option.text.toLowerCase().includes(q),
   )
 })
-
-watch(
-  () => props.userOptions,
-  (newVal) => {
-    console.log('Dữ liệu userOptions mới nhận được:', newVal)
-  },
-  { immediate: true },
-)
-
-const emit = defineEmits(['update:open', 'submit'])
 
 const form = useForm({
   validationSchema: toTypedSchema(employeeFormSchema),
@@ -91,23 +72,23 @@ const form = useForm({
   },
 })
 
-const workStatusOptions = Object.entries(WorkStatus).map(([key, value]) => {
-  return {
-    text: key.charAt(0) + key.slice(1).toLowerCase().replace('_', ' '),
-    value: value,
-  }
-})
+const workStatusOptions = computed(() =>
+  Object.values(WorkStatus).map((value) => ({
+    text: t(`status.work.${value}`),
+    value,
+  })),
+)
 
-const toDateInputValue = (v?: string | null) => {
-  if (!v) return ''
-  if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v
+const toDateInputValue = (value?: string | null) => {
+  if (!value) return ''
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value
 
-  const d = new Date(v)
-  if (Number.isNaN(d.getTime())) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
 
-  const yyyy = d.getFullYear()
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
   return `${yyyy}-${mm}-${dd}`
 }
 
@@ -147,11 +128,15 @@ watch(
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle>
-          {{ initialData ? 'Chỉnh sửa nhân viên' : 'Thêm nhân viên mới' }}
+          {{
+            initialData
+              ? t('pages.organizationEmployees.editEmployee')
+              : t('pages.organizationEmployees.createEmployee')
+          }}
         </DialogTitle>
 
         <DialogDescription>
-          Điền thông tin nhân viên rồi bấm Lưu để hoàn tất.
+          {{ t('pages.organizationEmployees.modalDescription') }}
         </DialogDescription>
       </DialogHeader>
 
@@ -165,19 +150,22 @@ watch(
             name="user_id"
           >
             <FormItem>
-              <FormLabel>Tài khoản người dùng</FormLabel>
+              <FormLabel>
+                {{ t('pages.organizationEmployees.userAccount') }}
+              </FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Chọn người dùng" />
+                    <SelectValue
+                      :placeholder="t('pages.organizationEmployees.selectUser')"
+                    />
                   </SelectTrigger>
 
                   <SelectContent class="max-h-60 overflow-y-auto">
-                    <!-- Search box -->
                     <div class="sticky top-0 z-10 bg-background p-2">
                       <Input
                         v-model="userSearch"
-                        placeholder="Tìm người dùng..."
+                        :placeholder="t('pages.organizationEmployees.searchUser')"
                         @keydown.stop
                       />
                     </div>
@@ -194,7 +182,7 @@ watch(
                       v-if="filteredUserOptions.length === 0"
                       class="px-3 py-2 text-sm text-muted-foreground"
                     >
-                      Không có kết quả
+                      {{ t('pages.organizationEmployees.noUserResult') }}
                     </div>
                   </SelectContent>
                 </Select>
@@ -202,19 +190,20 @@ watch(
             </FormItem>
           </FormField>
 
-          <!-- full name and work status -->
           <div class="grid grid-cols-2 gap-4">
             <FormField
               v-slot="{ componentField }"
               name="full_name"
             >
               <FormItem>
-                <FormLabel>Họ và tên</FormLabel>
+                <FormLabel>{{ t('pages.organizationEmployees.fullName') }}</FormLabel>
                 <FormControl>
                   <Input
-                    type="text"
                     v-bind="componentField"
-                    placeholder="Nhập họ và tên"
+                    type="text"
+                    :placeholder="
+                      t('pages.organizationEmployees.fullNamePlaceholder')
+                    "
                   />
                 </FormControl>
               </FormItem>
@@ -225,11 +214,17 @@ watch(
               name="status"
             >
               <FormItem>
-                <FormLabel>Trạng thái làm việc</FormLabel>
+                <FormLabel>
+                  {{ t('pages.organizationEmployees.workStatus') }}
+                </FormLabel>
                 <FormControl>
                   <Select v-bind="componentField">
                     <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Chọn trạng thái làm việc" />
+                      <SelectValue
+                        :placeholder="
+                          t('pages.organizationEmployees.selectWorkStatus')
+                        "
+                      />
                     </SelectTrigger>
 
                     <SelectContent>
@@ -247,33 +242,31 @@ watch(
             </FormField>
           </div>
 
-          <!-- email -->
           <div class="grid grid-cols-1 gap-4">
             <FormField
               v-slot="{ componentField }"
               name="email"
             >
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{{ t('pages.organizationEmployees.email') }}</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
                     type="email"
-                    placeholder="Nhập email"
+                    :placeholder="t('pages.organizationEmployees.emailPlaceholder')"
                   />
                 </FormControl>
               </FormItem>
             </FormField>
           </div>
 
-          <!-- join_date and dob -->
           <div class="grid grid-cols-2 gap-4">
             <FormField
               v-slot="{ componentField }"
               name="join_date"
             >
               <FormItem>
-                <FormLabel>Ngày vào làm</FormLabel>
+                <FormLabel>{{ t('pages.organizationEmployees.joinDate') }}</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
@@ -288,7 +281,7 @@ watch(
               name="dob"
             >
               <FormItem>
-                <FormLabel>Ngày sinh</FormLabel>
+                <FormLabel>{{ t('pages.organizationEmployees.dob') }}</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
@@ -299,18 +292,17 @@ watch(
             </FormField>
           </div>
 
-          <!-- phone and terminate date -->
           <div class="grid grid-cols-2 gap-4">
             <FormField
               v-slot="{ componentField }"
               name="phone"
             >
               <FormItem>
-                <FormLabel>Số điện thoại</FormLabel>
+                <FormLabel>{{ t('pages.organizationEmployees.phone') }}</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
-                    placeholder="Nhập số điện thoại"
+                    :placeholder="t('pages.organizationEmployees.phonePlaceholder')"
                   />
                 </FormControl>
               </FormItem>
@@ -321,7 +313,9 @@ watch(
               name="terminate_date"
             >
               <FormItem>
-                <FormLabel>Ngày nghỉ việc</FormLabel>
+                <FormLabel>
+                  {{ t('pages.organizationEmployees.terminateDate') }}
+                </FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
@@ -338,11 +332,11 @@ watch(
               name="remark"
             >
               <FormItem>
-                <FormLabel>Ghi chú</FormLabel>
+                <FormLabel>{{ t('pages.organizationEmployees.remark') }}</FormLabel>
                 <FormControl>
                   <Textarea
                     v-bind="componentField"
-                    placeholder="Nhập ghi chú"
+                    :placeholder="t('pages.organizationEmployees.remarkPlaceholder')"
                   />
                 </FormControl>
               </FormItem>
@@ -356,13 +350,13 @@ watch(
             variant="outline"
             @click="$emit('update:open', false)"
           >
-            Hủy
+            {{ t('common.cancel') }}
           </Button>
           <Button
             type="submit"
             :disabled="isPending"
           >
-            {{ isPending ? 'Đang lưu...' : 'Lưu' }}
+            {{ isPending ? t('common.savePending') : t('common.save') }}
           </Button>
         </DialogFooter>
       </form>

@@ -1,5 +1,10 @@
 <script setup lang="ts">
+import type { IEmployee } from '@/common/types/entities'
 import DataTable from '@/components/DataTable.vue'
+import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
+import { Button } from '@/components/ui/button'
+import EmployeeModal from '@/modules/(organization)/employee/components/EmployeeModal.vue'
+import { getColumns } from '@/modules/(organization)/employee/data/columns'
 import {
   useCreateEmployeeMutation,
   useDeleteEmployeeMutation,
@@ -7,16 +12,14 @@ import {
   useGetUserOptionsQuery,
   useUpdateEmployeeMutation,
 } from '@/modules/(organization)/employee/hooks/use-employee'
-import { computed, ref } from 'vue'
-import type { IEmployee } from '@/common/types/entities'
-import { columns } from '@/modules/(organization)/employee/data/columns'
-import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
-import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
-import EmployeeModal from '@/modules/(organization)/employee/components/EmployeeModal.vue'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { EmployeeFormValues } from './-schemas/employee.schema'
 
-const { data, error, isLoading, isFetching, refetch } = useGetEmployeesQuery()
+const { t } = useI18n()
+const { data, isLoading, isFetching, refetch } = useGetEmployeesQuery()
+
 const isConfirmDelete = ref(false)
 const selectedEmployee = ref<IEmployee | null>(null)
 const isOpenModal = ref(false)
@@ -25,19 +28,18 @@ const { mutate: createEmployee, isPending: isCreating } =
   useCreateEmployeeMutation()
 const { mutate: updateEmployee, isPending: isUpdating } =
   useUpdateEmployeeMutation()
-
-const { data: userOptionsResponse } = useGetUserOptionsQuery(1)
-
-const userOptions = computed(() => {
-  return userOptionsResponse.value || []
-})
 const { mutate: deleteEmployee, isPending: isDeletingEmployee } =
   useDeleteEmployeeMutation()
 
+const { data: userOptionsResponse } = useGetUserOptionsQuery(1)
+
+const columns = computed(() => getColumns())
+
+const userOptions = computed(() => userOptionsResponse.value || [])
+
 const employeeData = computed(() => {
   if (!data.value) return []
-  const newData = Object.values(data.value) as IEmployee[]
-  return newData
+  return Object.values(data.value) as IEmployee[]
 })
 
 const openCreateModal = () => {
@@ -86,7 +88,7 @@ const handleSubmitEmployee = (data: EmployeeFormValues) => {
 </script>
 
 <template>
-  <div class="w-full px-4 py-2 overflow-auto">
+  <div class="w-full overflow-auto px-4 py-2">
     <DataTable
       :columns="columns"
       :data="employeeData"
@@ -104,8 +106,8 @@ const handleSubmitEmployee = (data: EmployeeFormValues) => {
           :disabled="isFetching"
           @click="openCreateModal"
         >
-          <Plus class="w-4 h-4" />
-          Add Employee
+          <Plus class="h-4 w-4" />
+          {{ t('pages.organizationEmployees.addEmployee') }}
         </Button>
       </template>
     </DataTable>
@@ -118,7 +120,7 @@ const handleSubmitEmployee = (data: EmployeeFormValues) => {
           if (!v) selectedEmployee = null
         }
       "
-      :is-pending="false"
+      :is-pending="isCreating || isUpdating"
       :initial-data="selectedEmployee"
       :handle-submit="handleSubmitEmployee"
       :user-options="

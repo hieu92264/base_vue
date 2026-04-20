@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import type { IUser } from '@/common/types/entities'
 import DataTable from '@/components/DataTable.vue'
-import { computed, ref } from 'vue'
+import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
-import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
-import type { IUser } from '@/common/types/entities'
-import { columns } from './data/columns'
-import UserModal from './components/UserModal.vue'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { UserFormValues } from './-schemas/user.schema'
+import UserModal from './components/UserModal.vue'
+import { getColumns } from './data/columns'
 import {
   useCreateUserMutation,
   useDeleteUserMutation,
@@ -15,6 +16,7 @@ import {
   useUpdateUserMutation,
 } from './hooks/use-user'
 
+const { t } = useI18n()
 const { data, isLoading, isFetching, refetch } = useGetUsersQuery()
 
 const isConfirmDelete = ref(false)
@@ -25,6 +27,8 @@ const { mutate: createUser, isPending: isCreating } = useCreateUserMutation()
 const { mutate: updateUser, isPending: isUpdating } = useUpdateUserMutation()
 const { mutate: deleteUser, isPending: isDeleting } = useDeleteUserMutation()
 
+const columns = computed(() => getColumns())
+
 const userData = computed(() => {
   if (!data.value) return []
   return Object.values(data.value) as IUser[]
@@ -34,14 +38,17 @@ const openCreateModal = () => {
   isOpenModal.value = true
   selectedUser.value = null
 }
+
 const openEditModal = (row: IUser) => {
   selectedUser.value = { ...row }
   isOpenModal.value = true
 }
+
 const openDeleteDialog = (row: IUser) => {
   selectedUser.value = row
   isConfirmDelete.value = true
 }
+
 const handleConfirmDelete = () => {
   if (!selectedUser.value) return
   deleteUser(selectedUser.value.id, {
@@ -67,7 +74,7 @@ const handleSubmitUser = (payload: UserFormValues) => {
 </script>
 
 <template>
-  <div class="w-full px-4 py-2 overflow-auto">
+  <div class="w-full overflow-auto px-4 py-2">
     <DataTable
       :columns="columns"
       :data="userData"
@@ -85,8 +92,8 @@ const handleSubmitUser = (payload: UserFormValues) => {
           :disabled="isFetching"
           @click="openCreateModal"
         >
-          <Plus class="w-4 h-4" />
-          Add User
+          <Plus class="h-4 w-4" />
+          {{ t('pages.organizationUsers.addUser') }}
         </Button>
       </template>
     </DataTable>

@@ -1,28 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { toast } from 'vue-sonner'
-import {
-  Search,
-  CheckCircle2,
-  XCircle,
-  EyeOff,
-  Clock3,
-  RefreshCcw,
-  MapPin,
-  Wallet,
-  UserRound,
-  Phone,
-  Mail,
-} from 'lucide-vue-next'
-
-import { LandlordService } from '@/services/landlord.service'
+import { DateFormatterLocale, Language } from '@/common/constants/enums'
 import type { IRoom } from '@/common/types/entities'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -38,7 +20,27 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Textarea } from '@/components/ui/textarea'
+import { LandlordService } from '@/services/landlord.service'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import {
+  CheckCircle2,
+  EyeOff,
+  Mail,
+  MapPin,
+  Phone,
+  RefreshCcw,
+  Search,
+  UserRound,
+  Wallet,
+  XCircle,
+  Clock3,
+} from 'lucide-vue-next'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { toast } from 'vue-sonner'
 
+const { t, locale } = useI18n()
 const queryClient = useQueryClient()
 
 const filters = ref({
@@ -100,13 +102,13 @@ watch(
 const statusLabel = (status?: string) => {
   switch (status) {
     case 'approved':
-      return 'Đã duyệt'
+      return t('status.moderation.approved')
     case 'rejected':
-      return 'Từ chối'
+      return t('status.moderation.rejected')
     case 'hidden':
-      return 'Đã ẩn'
+      return t('status.moderation.hidden')
     default:
-      return 'Chờ duyệt'
+      return t('status.moderation.pending')
   }
 }
 
@@ -124,12 +126,15 @@ const statusVariant = (status?: string) => {
 }
 
 const formatMoney = (value?: number | string | null) =>
-  new Intl.NumberFormat('vi-VN').format(Number(value ?? 0))
+  new Intl.NumberFormat(
+    DateFormatterLocale[locale.value as Language] ??
+      DateFormatterLocale[Language.VIETNAMESE],
+  ).format(Number(value ?? 0))
 
 const getCover = (room?: IRoom | null) =>
-  room?.photos?.find((p) => p.is_cover)?.photo_url ||
+  room?.photos?.find((photo) => photo.is_cover)?.photo_url ||
   room?.photos?.[0]?.photo_url ||
-  'https://placehold.co/800x500?text=Khong+co+anh'
+  `https://placehold.co/800x500?text=${t('pages.organizationRoomModeration.noImagePlaceholder')}`
 
 const mutateStatus = useMutation({
   mutationFn: ({
@@ -146,12 +151,12 @@ const mutateStatus = useMutation({
       moderation_note,
     }),
   onSuccess: () => {
-    toast.success('Cập nhật duyệt bài thành công')
+    toast.success(t('pages.organizationRoomModeration.messages.updateSuccess'))
     queryClient.invalidateQueries({ queryKey: ['room_moderation_list'] })
     queryClient.invalidateQueries({ queryKey: ['landlord_my_rooms'] })
   },
   onError: () => {
-    toast.error('Cập nhật duyệt bài thất bại')
+    toast.error(t('pages.organizationRoomModeration.messages.updateError'))
   },
 })
 
@@ -171,15 +176,17 @@ const applyStatus = (
 <template>
   <div class="space-y-4 px-4 py-4">
     <div>
-      <h2 class="text-2xl font-bold">Duyệt bài đăng phòng trọ</h2>
+      <h2 class="text-2xl font-bold">
+        {{ t('pages.organizationRoomModeration.title') }}
+      </h2>
       <p class="text-sm text-muted-foreground">
-        Quản lý trạng thái pending / approved / rejected / hidden cho tin đăng
+        {{ t('pages.organizationRoomModeration.description') }}
       </p>
     </div>
 
     <Card>
       <CardHeader>
-        <CardTitle>Bộ lọc</CardTitle>
+        <CardTitle>{{ t('pages.organizationRoomModeration.filtersTitle') }}</CardTitle>
       </CardHeader>
       <CardContent class="grid grid-cols-1 gap-3 md:grid-cols-4">
         <div class="relative md:col-span-2">
@@ -189,7 +196,7 @@ const applyStatus = (
           <Input
             v-model="filters.keyword"
             class="pl-9"
-            placeholder="Tìm theo tiêu đề, slug, địa chỉ"
+            :placeholder="t('pages.organizationRoomModeration.keywordPlaceholder')"
             @keyup.enter="roomsQuery.refetch()"
           />
         </div>
@@ -199,39 +206,41 @@ const applyStatus = (
           @update:model-value="(v) => (filters.post_status = String(v))"
         >
           <SelectTrigger>
-            <SelectValue placeholder="Trạng thái duyệt" />
+            <SelectValue :placeholder="t('pages.organizationRoomModeration.statusPlaceholder')" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tất cả</SelectItem>
-            <SelectItem value="pending">Chờ duyệt</SelectItem>
-            <SelectItem value="approved">Đã duyệt</SelectItem>
-            <SelectItem value="rejected">Từ chối</SelectItem>
-            <SelectItem value="hidden">Đã ẩn</SelectItem>
+            <SelectItem value="all">{{ t('common.all') }}</SelectItem>
+            <SelectItem value="pending">{{ t('status.moderation.pending') }}</SelectItem>
+            <SelectItem value="approved">{{ t('status.moderation.approved') }}</SelectItem>
+            <SelectItem value="rejected">{{ t('status.moderation.rejected') }}</SelectItem>
+            <SelectItem value="hidden">{{ t('status.moderation.hidden') }}</SelectItem>
           </SelectContent>
         </Select>
 
-        <Button @click="roomsQuery.refetch()">Lọc dữ liệu</Button>
+        <Button @click="roomsQuery.refetch()">
+          {{ t('pages.organizationRoomModeration.applyFilters') }}
+        </Button>
       </CardContent>
     </Card>
 
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-5">
       <Card class="xl:col-span-3">
         <CardHeader>
-          <CardTitle>Danh sách tin cần duyệt</CardTitle>
+          <CardTitle>{{ t('pages.organizationRoomModeration.listTitle') }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div
             v-if="roomsQuery.isLoading.value"
             class="py-10 text-center text-sm text-muted-foreground"
           >
-            Đang tải dữ liệu...
+            {{ t('pages.organizationRoomModeration.loadingData') }}
           </div>
 
           <div
             v-else-if="rooms.length === 0"
             class="py-10 text-center text-sm text-muted-foreground"
           >
-            Không có tin đăng phù hợp bộ lọc.
+            {{ t('pages.organizationRoomModeration.emptyData') }}
           </div>
 
           <Table
@@ -240,11 +249,21 @@ const applyStatus = (
           >
             <TableHeader>
               <TableRow>
-                <TableHead class="w-20">ID</TableHead>
-                <TableHead class="w-[42%]">Tiêu đề</TableHead>
-                <TableHead class="w-[22%]">Chủ nhà</TableHead>
-                <TableHead class="w-[16%]">Giá</TableHead>
-                <TableHead class="w-[20%]">Trạng thái</TableHead>
+                <TableHead class="w-20">
+                  {{ t('pages.organizationRoomModeration.columns.id') }}
+                </TableHead>
+                <TableHead class="w-[42%]">
+                  {{ t('pages.organizationRoomModeration.columns.title') }}
+                </TableHead>
+                <TableHead class="w-[22%]">
+                  {{ t('pages.organizationRoomModeration.columns.owner') }}
+                </TableHead>
+                <TableHead class="w-[16%]">
+                  {{ t('pages.organizationRoomModeration.columns.price') }}
+                </TableHead>
+                <TableHead class="w-[20%]">
+                  {{ t('pages.organizationRoomModeration.columns.status') }}
+                </TableHead>
               </TableRow>
             </TableHeader>
 
@@ -258,22 +277,26 @@ const applyStatus = (
               >
                 <TableCell class="whitespace-nowrap">#{{ room.id }}</TableCell>
                 <TableCell class="align-top">
-                  <div class="font-medium break-words line-clamp-2">{{ room.title }}</div>
-                  <div class="text-xs text-muted-foreground break-words line-clamp-2">
+                  <div class="line-clamp-2 break-words font-medium">
+                    {{ room.title }}
+                  </div>
+                  <div class="line-clamp-2 break-words text-xs text-muted-foreground">
                     {{ room.address || room.slug }}
                   </div>
                 </TableCell>
                 <TableCell class="align-top">
-                  <div class="break-words line-clamp-2">
+                  <div class="line-clamp-2 break-words">
                     {{
                       room.owner?.profile?.full_name ||
                       room.owner?.username ||
                       room.owner?.email ||
-                      '-'
+                      t('common.notAvailable')
                     }}
                   </div>
                 </TableCell>
-                <TableCell class="whitespace-nowrap">{{ formatMoney(room.price) }} đ</TableCell>
+                <TableCell class="whitespace-nowrap">
+                  {{ formatMoney(room.price) }}
+                </TableCell>
                 <TableCell class="whitespace-nowrap">
                   <Badge :variant="statusVariant(room.post_status) as any">
                     {{ statusLabel(room.post_status) }}
@@ -288,8 +311,12 @@ const applyStatus = (
             class="mt-4 flex items-center justify-between"
           >
             <div class="text-sm text-muted-foreground">
-              Tổng {{ meta.total }} tin • Trang {{ meta.current_page }}/{{
-                meta.last_page
+              {{
+                t('pages.organizationRoomModeration.totalText', {
+                  total: meta.total,
+                  current: meta.current_page,
+                  last: meta.last_page,
+                })
               }}
             </div>
 
@@ -300,7 +327,7 @@ const applyStatus = (
                 :disabled="filters.page <= 1"
                 @click="filters.page -= 1"
               >
-                Trước
+                {{ t('pages.organizationRoomModeration.previousPage') }}
               </Button>
               <Button
                 variant="outline"
@@ -308,7 +335,7 @@ const applyStatus = (
                 :disabled="filters.page >= meta.last_page"
                 @click="filters.page += 1"
               >
-                Sau
+                {{ t('pages.organizationRoomModeration.nextPage') }}
               </Button>
             </div>
           </div>
@@ -317,7 +344,9 @@ const applyStatus = (
 
       <Card class="xl:col-span-2">
         <CardHeader>
-          <CardTitle>Chi tiết tin đăng</CardTitle>
+          <CardTitle>
+            {{ t('pages.organizationRoomModeration.detailsTitle') }}
+          </CardTitle>
         </CardHeader>
         <CardContent
           v-if="selectedRoom"
@@ -338,12 +367,20 @@ const applyStatus = (
 
             <div class="flex items-start gap-2 text-sm text-muted-foreground">
               <MapPin class="mt-0.5 h-4 w-4" />
-              <span>{{ selectedRoom.address || 'Chưa có địa chỉ' }}</span>
+              <span>
+                {{
+                  selectedRoom.address ||
+                  t('pages.organizationRoomModeration.noAddress')
+                }}
+              </span>
             </div>
 
             <div class="flex items-center gap-2 text-sm">
               <Wallet class="h-4 w-4" />
-              <span>{{ formatMoney(selectedRoom.price) }} đ / tháng</span>
+              <span>
+                {{ formatMoney(selectedRoom.price) }}
+                {{ t('pages.organizationRoomModeration.perMonth') }}
+              </span>
             </div>
 
             <div class="flex items-center gap-2 text-sm">
@@ -352,7 +389,7 @@ const applyStatus = (
                 {{
                   selectedRoom.owner?.profile?.full_name ||
                   selectedRoom.owner?.username ||
-                  '-'
+                  t('common.notAvailable')
                 }}
               </span>
             </div>
@@ -375,18 +412,25 @@ const applyStatus = (
           </div>
 
           <div class="rounded-lg border p-3">
-            <div class="mb-2 text-sm font-medium">Mô tả</div>
-            <div class="text-sm text-muted-foreground whitespace-pre-line">
-              {{ selectedRoom.description || 'Chưa có mô tả.' }}
+            <div class="mb-2 text-sm font-medium">
+              {{ t('pages.organizationRoomModeration.descriptionLabel') }}
+            </div>
+            <div class="whitespace-pre-line text-sm text-muted-foreground">
+              {{
+                selectedRoom.description ||
+                t('pages.organizationRoomModeration.emptyDescription')
+              }}
             </div>
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">Ghi chú kiểm duyệt</label>
+            <label class="text-sm font-medium">
+              {{ t('pages.organizationRoomModeration.moderationNote') }}
+            </label>
             <Textarea
               v-model="moderationNote"
               rows="5"
-              placeholder="Ví dụ: Tin hợp lệ, thông tin rõ ràng, ảnh đúng nội dung..."
+              :placeholder="t('pages.organizationRoomModeration.moderationNotePlaceholder')"
             />
           </div>
 
@@ -396,7 +440,7 @@ const applyStatus = (
               @click="applyStatus('approved')"
             >
               <CheckCircle2 class="mr-2 h-4 w-4" />
-              Duyệt
+              {{ t('pages.organizationRoomModeration.approve') }}
             </Button>
 
             <Button
@@ -405,7 +449,7 @@ const applyStatus = (
               @click="applyStatus('rejected')"
             >
               <XCircle class="mr-2 h-4 w-4" />
-              Từ chối
+              {{ t('pages.organizationRoomModeration.reject') }}
             </Button>
 
             <Button
@@ -414,7 +458,7 @@ const applyStatus = (
               @click="applyStatus('hidden')"
             >
               <EyeOff class="mr-2 h-4 w-4" />
-              Ẩn tin
+              {{ t('pages.organizationRoomModeration.hideListing') }}
             </Button>
 
             <Button
@@ -423,7 +467,7 @@ const applyStatus = (
               @click="applyStatus('pending')"
             >
               <Clock3 class="mr-2 h-4 w-4" />
-              Về pending
+              {{ t('pages.organizationRoomModeration.moveToPending') }}
             </Button>
           </div>
 
@@ -434,13 +478,13 @@ const applyStatus = (
             @click="roomsQuery.refetch()"
           >
             <RefreshCcw class="mr-2 h-4 w-4" />
-            Tải lại dữ liệu
+            {{ t('pages.organizationRoomModeration.reloadData') }}
           </Button>
         </CardContent>
 
         <CardContent v-else>
           <div class="py-10 text-center text-sm text-muted-foreground">
-            Chọn một tin đăng bên trái để xem chi tiết.
+            {{ t('pages.organizationRoomModeration.selectListingPrompt') }}
           </div>
         </CardContent>
       </Card>

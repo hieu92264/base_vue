@@ -1,17 +1,26 @@
+import i18n from '@/configs/i18n.config'
 import { z } from 'zod'
+
+const t = (key: string) => (i18n.global as any).t(key) as string
 
 export const permissionFormSchema = z.object({
   id: z.number().optional(),
-  code: z.string().min(1, 'Mã quyền là bắt buộc'),
-  name: z.string().min(1, 'Tên quyền là bắt buộc'),
-  url: z.string().min(1, 'Đường dẫn là bắt buộc'),
+  code: z
+    .string()
+    .min(1, t('pages.organizationPermissions.validation.codeRequired')),
+  name: z
+    .string()
+    .min(1, t('pages.organizationPermissions.validation.nameRequired')),
+  url: z
+    .string()
+    .min(1, t('pages.organizationPermissions.validation.urlRequired')),
   parent_id: z
     .union([z.string(), z.number()])
     .optional()
-    .transform((v) => {
-      if (v === '' || v === undefined || v === null) return null
-      const n = Number(v)
-      return Number.isNaN(n) ? null : n
+    .transform((value) => {
+      if (value === '' || value === undefined || value === null) return null
+      const numberValue = Number(value)
+      return Number.isNaN(numberValue) ? null : numberValue
     }),
 })
 

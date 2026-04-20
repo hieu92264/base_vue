@@ -1,14 +1,8 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
-import { toast } from 'vue-sonner'
-import { Search, MessageSquareText, Star } from 'lucide-vue-next'
-
-import { ReviewService } from '@/services/review.service'
 import type { IComment } from '@/common/types/entities'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -17,10 +11,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { ReviewService } from '@/services/review.service'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { MessageSquareText, Search, Star } from 'lucide-vue-next'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { toast } from 'vue-sonner'
 
 type ReviewStatusFilter = 'all' | 'pending' | 'visible' | 'hidden'
 type ReviewModerationStatus = 'pending' | 'visible' | 'hidden'
 
+const { t } = useI18n()
 const queryClient = useQueryClient()
 
 const filters = ref({
@@ -71,9 +72,9 @@ const summary = computed(() => {
     rows.value.filter((item) => item.status === target).length
 
   return [
-    { label: 'Chờ duyệt', value: count('pending') },
-    { label: 'Hiển thị', value: count('visible') },
-    { label: 'Đã ẩn', value: count('hidden') },
+    { label: t('status.review.pending'), value: count('pending') },
+    { label: t('status.review.visible'), value: count('visible') },
+    { label: t('status.review.hidden'), value: count('hidden') },
   ]
 })
 
@@ -86,22 +87,22 @@ const updateMutation = useMutation({
     status: ReviewModerationStatus
   }) => ReviewService.updateModerationStatus(id, { status }),
   onSuccess: () => {
-    toast.success('Cập nhật review thành công')
+    toast.success(t('pages.organizationReviews.messages.updateSuccess'))
     queryClient.invalidateQueries({ queryKey: ['review_moderation_list_v2'] })
   },
   onError: () => {
-    toast.error('Cập nhật review thất bại')
+    toast.error(t('pages.organizationReviews.messages.updateError'))
   },
 })
 
 const statusLabel = (status?: string) => {
   switch (status) {
     case 'pending':
-      return 'Chờ duyệt'
+      return t('status.review.pending')
     case 'hidden':
-      return 'Đã ẩn'
+      return t('status.review.hidden')
     default:
-      return 'Hiển thị'
+      return t('status.review.visible')
   }
 }
 
@@ -138,11 +139,10 @@ const goNextPage = () => {
   <div class="space-y-5 px-4 py-4 md:px-6">
     <div>
       <h2 class="text-2xl font-bold tracking-tight">
-        Review / Comment moderation
+        {{ t('pages.organizationReviews.title') }}
       </h2>
       <p class="text-sm text-muted-foreground">
-        Duyệt, ẩn và theo dõi phản hồi review theo flow pending -> visible ->
-        hidden
+        {{ t('pages.organizationReviews.description') }}
       </p>
     </div>
 
@@ -161,7 +161,9 @@ const goNextPage = () => {
 
     <Card class="border-border/70">
       <CardHeader class="pb-4">
-        <CardTitle class="text-base">Bộ lọc</CardTitle>
+        <CardTitle class="text-base">
+          {{ t('pages.organizationReviews.filtersTitle') }}
+        </CardTitle>
       </CardHeader>
       <CardContent class="grid grid-cols-1 gap-3 xl:grid-cols-12">
         <div class="relative xl:col-span-8">
@@ -171,7 +173,7 @@ const goNextPage = () => {
           <Input
             v-model="filters.keyword"
             class="pl-9"
-            placeholder="Tìm theo nội dung review, phòng, người dùng..."
+            :placeholder="t('pages.organizationReviews.keywordPlaceholder')"
             @keyup.enter="applyFilters"
           />
         </div>
@@ -184,13 +186,13 @@ const goNextPage = () => {
             "
           >
             <SelectTrigger class="w-full">
-              <SelectValue placeholder="Trạng thái" />
+              <SelectValue :placeholder="t('pages.organizationReviews.statusPlaceholder')" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Tất cả</SelectItem>
-              <SelectItem value="pending">Chờ duyệt</SelectItem>
-              <SelectItem value="visible">Hiển thị</SelectItem>
-              <SelectItem value="hidden">Đã ẩn</SelectItem>
+              <SelectItem value="all">{{ t('common.all') }}</SelectItem>
+              <SelectItem value="pending">{{ t('status.review.pending') }}</SelectItem>
+              <SelectItem value="visible">{{ t('status.review.visible') }}</SelectItem>
+              <SelectItem value="hidden">{{ t('status.review.hidden') }}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -200,30 +202,32 @@ const goNextPage = () => {
             class="w-full"
             @click="applyFilters"
           >
-            Lọc dữ liệu
+            {{ t('pages.organizationReviews.applyFilters') }}
           </Button>
         </div>
       </CardContent>
     </Card>
 
     <div class="grid grid-cols-1 gap-4 2xl:grid-cols-12">
-      <Card class="2xl:col-span-5 border-border/70">
+      <Card class="border-border/70 2xl:col-span-5">
         <CardHeader class="pb-4">
-          <CardTitle class="text-base">Danh sách review</CardTitle>
+          <CardTitle class="text-base">
+            {{ t('pages.organizationReviews.listTitle') }}
+          </CardTitle>
         </CardHeader>
         <CardContent class="space-y-3">
           <div
             v-if="reviewsQuery.isLoading.value"
             class="py-10 text-center text-sm text-muted-foreground"
           >
-            Đang tải dữ liệu...
+            {{ t('pages.organizationReviews.loadingData') }}
           </div>
 
           <div
             v-else-if="rows.length === 0"
             class="py-10 text-center text-sm text-muted-foreground"
           >
-            Chưa có review phù hợp bộ lọc.
+            {{ t('pages.organizationReviews.emptyData') }}
           </div>
 
           <button
@@ -236,7 +240,7 @@ const goNextPage = () => {
           >
             <div class="flex items-start justify-between gap-3">
               <div class="font-semibold">
-                {{ item.user_name || 'Người dùng' }}
+                {{ item.user_name || t('pages.organizationReviews.userFallback') }}
               </div>
               <Badge :variant="statusVariant(item.status) as any">
                 {{ statusLabel(item.status) }}
@@ -257,7 +261,8 @@ const goNextPage = () => {
             </div>
 
             <div class="mt-3 text-xs text-muted-foreground">
-              Phòng: {{ item.room_title || '---' }}
+              {{ t('pages.organizationReviews.roomLabel') }}:
+              {{ item.room_title || t('common.notAvailable') }}
             </div>
           </button>
 
@@ -270,25 +275,32 @@ const goNextPage = () => {
               :disabled="filters.page <= 1"
               @click="goPrevPage"
             >
-              Trang trước
+              {{ t('pages.organizationReviews.previousPage') }}
             </Button>
             <div class="text-sm text-muted-foreground">
-              Trang {{ meta?.current_page || 1 }} / {{ meta?.last_page || 1 }}
+              {{
+                t('pages.organizationReviews.pageText', {
+                  current: meta?.current_page || 1,
+                  last: meta?.last_page || 1,
+                })
+              }}
             </div>
             <Button
               variant="outline"
               :disabled="!meta || filters.page >= meta.last_page"
               @click="goNextPage"
             >
-              Trang sau
+              {{ t('pages.organizationReviews.nextPage') }}
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      <Card class="2xl:col-span-7 border-border/70">
+      <Card class="border-border/70 2xl:col-span-7">
         <CardHeader class="pb-4">
-          <CardTitle class="text-base">Chi tiết review</CardTitle>
+          <CardTitle class="text-base">
+            {{ t('pages.organizationReviews.detailsTitle') }}
+          </CardTitle>
         </CardHeader>
 
         <CardContent
@@ -299,10 +311,13 @@ const goNextPage = () => {
             <div class="mb-3 flex items-start justify-between gap-3">
               <div>
                 <div class="font-semibold">
-                  {{ selectedReview.user_name || 'Người dùng' }}
+                  {{
+                    selectedReview.user_name ||
+                    t('pages.organizationReviews.userFallback')
+                  }}
                 </div>
                 <div class="text-sm text-muted-foreground">
-                  {{ selectedReview.room_title || '---' }}
+                  {{ selectedReview.room_title || t('common.notAvailable') }}
                 </div>
               </div>
 
@@ -330,7 +345,7 @@ const goNextPage = () => {
           <div class="rounded-xl border p-4">
             <div class="mb-3 flex items-center gap-2 font-medium">
               <MessageSquareText class="h-4 w-4" />
-              Replies
+              {{ t('pages.organizationReviews.repliesTitle') }}
             </div>
 
             <div
@@ -339,7 +354,7 @@ const goNextPage = () => {
               "
               class="text-sm text-muted-foreground"
             >
-              Chưa có phản hồi.
+              {{ t('pages.organizationReviews.noReplies') }}
             </div>
 
             <div
@@ -352,7 +367,10 @@ const goNextPage = () => {
                 class="rounded-lg border bg-muted/30 p-3"
               >
                 <div class="text-sm font-medium">
-                  {{ reply.user_name || 'Người phản hồi' }}
+                  {{
+                    reply.user_name ||
+                    t('pages.organizationReviews.replyUserFallback')
+                  }}
                 </div>
                 <div class="mt-1 text-sm text-muted-foreground">
                   {{ reply.content }}
@@ -372,7 +390,7 @@ const goNextPage = () => {
                 })
               "
             >
-              Chuyển về chờ duyệt
+              {{ t('pages.organizationReviews.moveToPending') }}
             </Button>
 
             <Button
@@ -384,7 +402,7 @@ const goNextPage = () => {
                 })
               "
             >
-              Duyệt hiển thị
+              {{ t('pages.organizationReviews.approveVisible') }}
             </Button>
 
             <Button
@@ -397,7 +415,7 @@ const goNextPage = () => {
                 })
               "
             >
-              Ẩn review
+              {{ t('pages.organizationReviews.hideReview') }}
             </Button>
           </div>
         </CardContent>
@@ -406,7 +424,7 @@ const goNextPage = () => {
           v-else
           class="py-10 text-center text-sm text-muted-foreground"
         >
-          Chọn một review để xem chi tiết
+          {{ t('pages.organizationReviews.selectReviewPrompt') }}
         </CardContent>
       </Card>
     </div>

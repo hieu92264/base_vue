@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { IPermission } from '@/common/types/entities'
-import { has } from 'lodash-es'
 import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 type TreeNode = IPermission & { children?: TreeNode[] }
 
@@ -14,13 +14,14 @@ const props = defineProps<{
   collectIds: (node: TreeNode) => number[]
 }>()
 
+const { t } = useI18n()
 const checkboxRef = ref<HTMLInputElement | null>(null)
 
 const hasChildren = computed(() => (props.node.children?.length ?? 0) > 0)
 
 const allChildIds = computed(() => {
   if (!hasChildren.value) return []
-  return props.node.children!.flatMap((c) => props.collectIds(c))
+  return props.node.children!.flatMap((child) => props.collectIds(child))
 })
 
 const isChecked = computed(() => {
@@ -38,16 +39,16 @@ const isIndeterminate = computed(() => {
   if (!hasChildren.value) return false
   const ids = allChildIds.value
   if (ids.length === 0) return false
-  const cnt = ids.filter((id) => props.selected.has(id)).length
-  return cnt > 0 && cnt < ids.length
+  const count = ids.filter((id) => props.selected.has(id)).length
+  return count > 0 && count < ids.length
 })
 
 const isExpanded = computed(() => props.expanded.has(props.node.id))
 
 watch(
   isIndeterminate,
-  (v) => {
-    if (checkboxRef.value) checkboxRef.value.indeterminate = v
+  (value) => {
+    if (checkboxRef.value) checkboxRef.value.indeterminate = value
   },
   {
     immediate: true,
@@ -58,8 +59,8 @@ onMounted(() => {
   if (checkboxRef.value) checkboxRef.value.indeterminate = isIndeterminate.value
 })
 
-const toggle = (e: Event) => {
-  const checked = (e.target as HTMLInputElement).checked
+const toggle = (event: Event) => {
+  const checked = (event.target as HTMLInputElement).checked
   props.onToggle(props.node, checked)
 }
 </script>
@@ -70,9 +71,9 @@ const toggle = (e: Event) => {
       <button
         v-if="hasChildren"
         type="button"
-        class="w-6 h-6 flex items-center justify-center rounded hover:bg-muted"
+        class="flex h-6 w-6 items-center justify-center rounded hover:bg-muted"
+        :aria-label="isExpanded ? t('common.collapse') : t('common.expand')"
         @click="onToggleExpand(node.id)"
-        :aria-label="isExpanded ? 'Collapse' : 'Expand'"
       >
         <span class="text-sm">{{ isExpanded ? '▾' : '▸' }}</span>
       </button>
@@ -96,7 +97,7 @@ const toggle = (e: Event) => {
     </div>
     <div
       v-if="hasChildren && isExpanded"
-      class="pl-6 border-l border-muted ml-3"
+      class="ml-3 border-l border-muted pl-6"
     >
       <PermissionTreeNode
         v-for="child in node.children"
@@ -104,9 +105,9 @@ const toggle = (e: Event) => {
         :node="child"
         :selected="selected"
         :expanded="expanded"
-        :onToggle="onToggle"
-        :onToggleExpand="onToggleExpand"
-        :collectIds="collectIds"
+        :on-toggle="onToggle"
+        :on-toggle-expand="onToggleExpand"
+        :collect-ids="collectIds"
       />
     </div>
   </div>
