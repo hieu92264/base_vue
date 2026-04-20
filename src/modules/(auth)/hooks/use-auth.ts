@@ -1,4 +1,5 @@
 import { Language } from '@/common/constants/enums'
+import i18n from '@/configs/i18n.config'
 import type { ForgotPasswordFormValue } from '@/modules/(auth)/forgot-password/-schemas/forgot-password.schema'
 import type { RegisterFormValue } from '@/modules/(auth)/register/-schemas/register.schema'
 import type { ResetPasswordFormValue } from '@/modules/(auth)/reset-password/-schemas/reset-password.schema'
@@ -17,6 +18,8 @@ export type TLoginData = {
   password: string
 }
 
+const translate = (key: string) => (i18n.global as any).t(key) as string
+
 export const useDoRegisterMutation = () => {
   const router = useRouter()
   const route = useRoute()
@@ -26,9 +29,7 @@ export const useDoRegisterMutation = () => {
       return await AuthService.register(data)
     },
     onSuccess: () => {
-      toast.success(
-        'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
-      )
+      toast.success(translate('auth.messages.registerSuccess'))
       router.replace({
         name: 'auth.login',
         query: route.query.redirect
@@ -38,7 +39,7 @@ export const useDoRegisterMutation = () => {
     },
     onError: (error: any) => {
       console.error('Register error:', error)
-      toast.error(error?.message || 'Đăng ký thất bại')
+      toast.error(error?.message || translate('auth.messages.registerError'))
     },
   })
 }
@@ -73,14 +74,14 @@ export const useDoLoginMutation = () => {
           (profileRes.data.user?.locale || Language.ENGLISH) as Language,
         )
 
-        toast.success('Đăng nhập thành công!')
+        toast.success(translate('auth.messages.loginSuccess'))
 
         const redirectPath = route.query.redirect as string
         router.replace(redirectPath || { name: 'dashboard' })
       } else {
         authStore.clearSession()
         userStore.clearProfile()
-        toast.error('Không thể lấy thông tin người dùng')
+        toast.error(translate('auth.messages.profileFetchError'))
       }
     },
 
@@ -88,7 +89,9 @@ export const useDoLoginMutation = () => {
       authStore.clearSession()
       userStore.clearProfile()
       console.error('Login error:', error)
-      toast.error(error?.response?.data?.message || 'Đăng nhập thất bại')
+      toast.error(
+        error?.response?.data?.message || translate('auth.messages.loginError'),
+      )
     },
   })
 }
@@ -106,13 +109,15 @@ export const useDoLogoutMutation = () => {
     onSuccess: async () => {
       authStore.clearSession()
       userStore.clearProfile()
-      toast.success('Đăng xuất thành công!')
+      toast.success(translate('auth.messages.logoutSuccess'))
       router.replace({ name: 'auth.login' })
     },
 
     onError: (error: any) => {
       console.error('Logout error:', error)
-      toast.error(error?.response?.data?.message || 'Đăng xuất thất bại')
+      toast.error(
+        error?.response?.data?.message || translate('auth.messages.logoutError'),
+      )
     },
   })
 }
@@ -122,12 +127,12 @@ export const useForgotPasswordMutation = () => {
     mutationFn: (payload: ForgotPasswordFormValue) =>
       AuthService.forgotPassword(payload.email),
     onSuccess: () => {
-      toast.success(
-        'Nếu email tồn tại, chúng tôi đã gửi liên kết đặt lại mật khẩu.',
-      )
+      toast.success(translate('auth.messages.forgotPasswordSuccess'))
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Thao tác thất bại')
+      toast.error(
+        error?.response?.data?.message || translate('auth.messages.actionFailed'),
+      )
     },
   })
 }
@@ -141,15 +146,16 @@ export const useResetPasswordMutation = () => {
     },
 
     onSuccess: () => {
-      toast.success(
-        'Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.',
-      )
+      toast.success(translate('auth.messages.resetPasswordSuccess'))
       router.replace({ name: 'auth.login' })
     },
 
     onError: (error: any) => {
       console.error('Reset password error:', error)
-      toast.error(error?.response?.data?.message || 'Đặt lại mật khẩu thất bại')
+      toast.error(
+        error?.response?.data?.message ||
+          translate('auth.messages.resetPasswordError'),
+      )
     },
   })
 }

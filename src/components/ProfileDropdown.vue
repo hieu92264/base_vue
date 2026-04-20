@@ -22,8 +22,15 @@ const { t } = useI18n()
 const route = useRoute()
 const userStore = useUserStore()
 const { mutate, isPending } = useDoLogoutMutation()
+
 const labels = computed(() => ({
+  login: t('common.login'),
+  register: t('common.register'),
   logout: t('common.logout'),
+  profile: t('layout.profile'),
+  settings: t('layout.settings'),
+  unknownUser: t('common.unknownUser'),
+  noEmail: t('common.noEmail'),
 }))
 
 const authLinks = computed(() => ({
@@ -48,13 +55,13 @@ const authLinks = computed(() => ({
       variant="outline"
       class="rounded-xl"
     >
-      <RouterLink :to="authLinks.login">Đăng nhập</RouterLink>
+      <RouterLink :to="authLinks.login">{{ labels.login }}</RouterLink>
     </Button>
     <Button
       as-child
       class="rounded-xl"
     >
-      <RouterLink :to="authLinks.register">Đăng ký</RouterLink>
+      <RouterLink :to="authLinks.register">{{ labels.register }}</RouterLink>
     </Button>
   </div>
 
@@ -86,10 +93,10 @@ const authLinks = computed(() => ({
       <DropdownMenuLabel class="font-normal">
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">
-            {{ userStore.user?.username || 'Tên người dùng' }}
+            {{ userStore.user?.username || labels.unknownUser }}
           </p>
           <p class="text-xs leading-none text-muted-foreground">
-            {{ userStore.user?.email || 'Chưa có email' }}
+            {{ userStore.user?.email || labels.noEmail }}
           </p>
         </div>
       </DropdownMenuLabel>
@@ -99,11 +106,11 @@ const authLinks = computed(() => ({
       <DropdownMenuGroup>
         <DropdownMenuItem class="cursor-pointer">
           <User class="mr-2 h-4 w-4" />
-          <span>Hồ sơ cá nhân</span>
+          <span>{{ labels.profile }}</span>
         </DropdownMenuItem>
         <DropdownMenuItem class="cursor-pointer">
           <Settings class="mr-2 h-4 w-4" />
-          <span>Cài đặt</span>
+          <span>{{ labels.settings }}</span>
         </DropdownMenuItem>
       </DropdownMenuGroup>
 

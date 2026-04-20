@@ -1,3 +1,4 @@
+import i18n from '@/configs/i18n.config'
 import { useUserStore } from '@/stores/user.store'
 import {
   Calendar,
@@ -34,6 +35,7 @@ interface NavGroup {
 
 export const getSidebarData = () => {
   const userStore = useUserStore()
+  const t = (key: string) => (i18n.global as any).t(key) as string
 
   const canSee = (code?: string) => {
     if (!code) return true
@@ -66,64 +68,64 @@ export const getSidebarData = () => {
     ...(isAdmin
       ? [
           {
-            title: 'Quản trị hệ thống',
+            title: t('layout.sidebar.admin'),
             items: [
               {
-                title: 'Dashboard admin',
+                title: t('layout.sidebar.dashboardAdmin'),
                 url: '/organizations/dashboard',
                 icon: LayoutDashboard,
                 code: 'org.dashboard',
               },
               {
-                title: 'Quyền hạn',
+                title: t('layout.sidebar.permissions'),
                 url: '/organizations/permissions',
                 icon: Lock,
                 code: 'org.permissions',
               },
               {
-                title: 'Danh mục',
+                title: t('layout.sidebar.categories'),
                 url: '/organizations/categories',
                 icon: Tag,
                 code: 'org.categories',
               },
               {
-                title: 'Người dùng',
+                title: t('layout.sidebar.users'),
                 url: '/organizations/user',
                 icon: UserCog,
                 code: 'org.users',
               },
               {
-                title: 'Gán quyền user',
+                title: t('layout.sidebar.userPermissions'),
                 url: '/organizations/user-permissions',
                 icon: ShieldCheck,
                 code: 'org.user-permissions',
               },
               {
-                title: 'Slider',
+                title: t('layout.sidebar.sliders'),
                 url: '/organizations/sliders',
                 icon: Calendar,
                 code: 'org.sliders',
               },
               {
-                title: 'Duyệt tin đăng',
+                title: t('layout.sidebar.roomModeration'),
                 url: '/organizations/room-moderation',
                 icon: FileCheck,
                 code: 'org.room-moderation',
               },
               {
-                title: 'Contact / Lead',
+                title: t('layout.sidebar.contacts'),
                 url: '/organizations/contacts',
                 icon: MessagesSquare,
                 code: 'org.contacts',
               },
               {
-                title: 'Deal / Booking',
+                title: t('layout.sidebar.deals'),
                 url: '/organizations/deals',
                 icon: Handshake,
                 code: 'org.bookings',
               },
               {
-                title: 'Review / Comment',
+                title: t('layout.sidebar.reviews'),
                 url: '/organizations/reviews',
                 icon: Star,
                 code: 'org.reviews',
@@ -135,25 +137,25 @@ export const getSidebarData = () => {
     ...(isLandlord
       ? [
           {
-            title: 'Chủ nhà',
+            title: t('layout.sidebar.landlord'),
             items: [
               {
-                title: 'Dashboard chủ nhà',
+                title: t('layout.sidebar.landlordDashboard'),
                 url: '/landlord/dashboard',
                 icon: House,
               },
               {
-                title: 'Danh sách tin của tôi',
+                title: t('layout.sidebar.myRooms'),
                 url: '/landlord/my-rooms',
                 icon: ClipboardList,
               },
               {
-                title: 'Lead của tôi',
+                title: t('layout.sidebar.myLeads'),
                 url: '/landlord/contacts',
                 icon: MessagesSquare,
               },
               {
-                title: 'Deal của tôi',
+                title: t('layout.sidebar.myDeals'),
                 url: '/landlord/deals',
                 icon: Handshake,
               },
@@ -164,20 +166,20 @@ export const getSidebarData = () => {
     ...(isTenant
       ? [
           {
-            title: 'Người thuê',
+            title: t('layout.sidebar.tenant'),
             items: [
               {
-                title: 'Trang chủ',
+                title: t('layout.sidebar.home'),
                 url: '/home',
                 icon: Home,
               },
             ],
           },
           {
-            title: 'Phòng đã liên hệ',
+            title: t('layout.sidebar.tenantRooms'),
             items: [
               {
-                title: 'Dashboard',
+                title: t('layout.sidebar.dashboard'),
                 url: '/tenant/dashboard',
                 icon: Handshake,
               },
@@ -189,17 +191,29 @@ export const getSidebarData = () => {
 
   const sharedGroups: NavGroup[] = [
     {
-      title: 'Hệ thống',
+      title: t('layout.sidebar.system'),
       items: [
         {
-          title: 'Cài đặt',
+          title: t('layout.sidebar.settings'),
           icon: Settings,
           children: [
-            { title: 'Hồ sơ', url: '/settings/profile', icon: UserCog },
-            { title: 'Giao diện', url: '/settings/appearance', icon: Palette },
+            {
+              title: t('layout.sidebar.profile'),
+              url: '/settings/profile',
+              icon: UserCog,
+            },
+            {
+              title: t('layout.sidebar.appearance'),
+              url: '/settings/appearance',
+              icon: Palette,
+            },
           ],
         },
-        { title: 'Trung tâm hỗ trợ', url: '/help', icon: HelpCircle },
+        {
+          title: t('layout.sidebar.helpCenter'),
+          url: '/help',
+          icon: HelpCircle,
+        },
       ],
     },
   ]

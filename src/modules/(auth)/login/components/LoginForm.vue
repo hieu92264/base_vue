@@ -11,10 +11,10 @@
     <FieldGroup>
       <div class="flex flex-col items-center gap-1 text-center">
         <h1 class="text-2xl font-bold text-zinc-950 dark:text-zinc-50">
-          Đăng nhập tài khoản
+          {{ t('auth.login.title') }}
         </h1>
         <p class="text-muted-foreground text-sm text-balance">
-          Nhập thông tin bên dưới để đăng nhập vào tài khoản của bạn.
+          {{ t('auth.login.description') }}
         </p>
       </div>
 
@@ -23,7 +23,7 @@
           for="username"
           class="dark:text-zinc-300"
         >
-          Tên đăng nhập
+          {{ t('auth.login.username') }}
         </FieldLabel>
         <Input
           id="username"
@@ -42,13 +42,13 @@
             for="password"
             class="dark:text-zinc-300"
           >
-            Mật khẩu
+            {{ t('auth.login.password') }}
           </FieldLabel>
           <RouterLink
             to="/forgot-password"
             class="text-sm text-emerald-600 hover:underline dark:text-emerald-400"
           >
-            Quên mật khẩu?
+            {{ t('auth.login.forgotPassword') }}
           </RouterLink>
         </div>
         <PasswordInput
@@ -70,16 +70,16 @@
           v-if="isPending"
           class="mr-2 h-4 w-4 animate-spin"
         />
-        {{ isPending ? 'Vui lòng chờ...' : 'Đăng nhập' }}
+        {{ isPending ? t('auth.login.pending') : t('auth.login.submit') }}
       </Button>
 
       <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">
-        Chưa có tài khoản?
+        {{ t('auth.login.noAccount') }}
         <RouterLink
           :to="registerTarget"
           class="font-medium text-emerald-600 hover:underline dark:text-emerald-400"
         >
-          Đăng ký
+          {{ t('common.register') }}
         </RouterLink>
       </div>
     </FieldGroup>
@@ -96,6 +96,7 @@ import { useDoLoginMutation } from '@/modules/(auth)/hooks/use-auth'
 import { Loader2 } from 'lucide-vue-next'
 import { computed, ref, type HTMLAttributes } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
@@ -104,6 +105,7 @@ const props = defineProps<{
 const username = ref('')
 const password = ref('')
 const route = useRoute()
+const { t } = useI18n()
 
 const registerTarget = computed(() => ({
   path: '/register',

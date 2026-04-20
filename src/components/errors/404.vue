@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 </script>
 
 <template>
@@ -11,21 +13,20 @@ const router = useRouter()
       class="m-auto flex h-full w-full flex-col items-center justify-center gap-2"
     >
       <h1 class="text-[7rem] leading-tight font-bold">404</h1>
-      <span class="font-medium">Không tìm thấy trang</span>
+      <span class="font-medium">{{ t('errors.404.title') }}</span>
       <p class="text-center text-muted-foreground">
-        Có vẻ trang bạn đang tìm kiếm <br />
-        không tồn tại hoặc đã bị xóa.
+        {{ t('errors.404.description') }}
       </p>
       <div class="mt-6 flex gap-4">
         <Button
           variant="outline"
           @click="router.back()"
         >
-          Quay lại
+          {{ t('common.back') }}
         </Button>
-        <Button @click="router.push({ name: 'dashboard' })"
-          >Về trang chủ</Button
-        >
+        <Button @click="router.push({ name: 'dashboard' })">
+          {{ t('common.home') }}
+        </Button>
       </div>
     </div>
   </div>

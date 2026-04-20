@@ -9,13 +9,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, SquarePen, Trash2, Eye } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
 
-const props = defineProps<{
+defineProps<{
   row: any
   onUpdate?: (data: any) => void
   onDelete?: (data: any) => void
   onView?: (data: any) => void
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -36,7 +39,7 @@ const props = defineProps<{
       <DropdownMenuLabel
         class="text-xs font-normal text-muted-foreground text-center"
       >
-        Actions
+        {{ t('table.rowActions') }}
       </DropdownMenuLabel>
 
       <DropdownMenuSeparator />
@@ -45,14 +48,14 @@ const props = defineProps<{
         v-if="onView"
         @select="onView(row)"
       >
-        <Eye class="mr-2 h-4 w-4" /> View Details
+        <Eye class="mr-2 h-4 w-4" /> {{ t('table.viewDetails') }}
       </DropdownMenuItem>
 
       <DropdownMenuItem
         v-if="onUpdate"
         @select="onUpdate(row)"
       >
-        <SquarePen class="mr-2 h-4 w-4" /> Update
+        <SquarePen class="mr-2 h-4 w-4" /> {{ t('table.update') }}
       </DropdownMenuItem>
 
       <template v-if="onDelete">
@@ -61,7 +64,7 @@ const props = defineProps<{
           @select="onDelete(row)"
           class="text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950"
         >
-          <Trash2 class="mr-2 h-4 w-4" /> Delete
+          <Trash2 class="mr-2 h-4 w-4" /> {{ t('table.delete') }}
         </DropdownMenuItem>
       </template>
     </DropdownMenuContent>

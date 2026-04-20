@@ -9,16 +9,17 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useI18nStore } from '@/stores/i18n.store'
 import { Globe } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
 
 export interface LanguageProps {
   className?: string
 }
 
 const i18nStore = useI18nStore()
+const { t } = useI18n()
 
 const handleLanguageChange = (locale: Language) => {
   i18nStore.setLocale(locale)
-  console.log('Language changed to: ', locale)
 }
 </script>
 
@@ -41,7 +42,7 @@ const handleLanguageChange = (locale: Language) => {
         :key="locale"
         @select="handleLanguageChange(locale)"
       >
-        {{ locale.toUpperCase() }}
+        {{ t(`locales.${locale}`) }}
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>

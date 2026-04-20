@@ -17,12 +17,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useI18n } from 'vue-i18n'
 
 const filters = ref({
   keyword: '',
   page: 1,
   per_page: 10,
 })
+
+const { t, locale } = useI18n()
 
 const params = computed(() => ({
   keyword: filters.value.keyword || undefined,
@@ -46,23 +49,37 @@ const contacts = computed<IContact[]>(
 const deals = computed<IDeal[]>(() => dealsQuery.data.value?.data ?? [])
 
 const statusLabel = (value?: string) => {
-  const map: Record<string, string> = {
-    new: 'Mới gửi',
-    contacted: 'Đã liên hệ',
-    viewing_scheduled: 'Đã hẹn xem',
-    viewed: 'Đã xem phòng',
-    negotiating: 'Đang thương lượng',
-    waiting_decision: 'Chờ quyết định',
-    won: 'Đã chốt',
-    lost: 'Không thành công',
-    cancelled: 'Đã hủy',
-    draft: 'Nháp',
-    reserved: 'Giữ chỗ',
-    confirmed: 'Đã xác nhận',
-    completed: 'Hoàn tất',
+  const status = String(value ?? '')
+
+  if (
+    [
+      'draft',
+      'reserved',
+      'confirmed',
+      'cancelled',
+      'completed',
+    ].includes(status)
+  ) {
+    return t(`status.deal.${status}` as any)
   }
 
-  return map[String(value ?? '')] ?? (value || 'Không xác định')
+  if (
+    [
+      'new',
+      'contacted',
+      'viewing_scheduled',
+      'viewed',
+      'negotiating',
+      'waiting_decision',
+      'won',
+      'lost',
+      'cancelled',
+    ].includes(status)
+  ) {
+    return t(`status.lead.${status}` as any)
+  }
+
+  return value || t('status.unknown')
 }
 
 const badgeVariant = (value?: string) => {
@@ -75,16 +92,28 @@ const badgeVariant = (value?: string) => {
 }
 
 const roomAvailabilityLabel = (value?: string) => {
-  const map: Record<string, string> = {
-    available: 'Còn trống',
-    reserved: 'Đã giữ chỗ',
-    occupied: 'Đã có người thuê',
-    hidden: 'Tạm ẩn',
-    pending: 'Đang xử lý',
-    confirmed: 'Đã xác nhận',
+  const status = String(value ?? '')
+
+  if (
+    ['available', 'reserved', 'occupied', 'hidden', 'pending', 'confirmed'].includes(
+      status,
+    )
+  ) {
+    return t(`status.room.${status}` as any)
   }
 
-  return map[String(value ?? '')] ?? (value || 'Chưa rõ')
+  return value || t('status.unknownShort')
+}
+
+const formatDateTime = (value?: string | null) => {
+  if (!value) return t('pages.tenantDashboard.emptyValue')
+  const dateLocale = locale.value === 'vi' ? 'vi-VN' : 'en-US'
+  return new Date(value).toLocaleString(dateLocale)
+}
+
+const formatCurrency = (value?: string | number) => {
+  const numberLocale = locale.value === 'vi' ? 'vi-VN' : 'en-US'
+  return new Intl.NumberFormat(numberLocale).format(Number(value ?? 0))
 }
 
 const applyFilters = () => {
@@ -97,10 +126,11 @@ const applyFilters = () => {
 <template>
   <div class="space-y-6 px-4 py-4 md:px-6">
     <div>
-      <h2 class="text-2xl font-bold tracking-tight">Phòng tôi đã liên hệ</h2>
+      <h2 class="text-2xl font-bold tracking-tight">
+        {{ t('pages.tenantDashboard.title') }}
+      </h2>
       <p class="text-sm text-muted-foreground">
-        Theo dõi các phòng bạn đã gửi form liên hệ, trạng thái xử lý và tình
-        trạng còn trống/đã thuê.
+        {{ t('pages.tenantDashboard.description') }}
       </p>
     </div>
 
@@ -113,14 +143,14 @@ const applyFilters = () => {
           <Input
             v-model="filters.keyword"
             class="pl-9"
-            placeholder="Tìm theo tên phòng, địa chỉ, chủ nhà..."
+            :placeholder="t('pages.tenantDashboard.searchPlaceholder')"
             @keyup.enter="applyFilters"
           />
         </div>
         <Button
           class="rounded-xl"
           @click="applyFilters"
-          >Tìm kiếm</Button
+          >{{ t('common.search') }}</Button
         >
       </CardContent>
     </Card>
@@ -130,7 +160,7 @@ const applyFilters = () => {
         <CardHeader>
           <CardTitle class="flex items-center gap-2 text-base">
             <Mail class="h-4 w-4" />
-            Yêu cầu liên hệ đã gửi
+            {{ t('pages.tenantDashboard.sentContacts') }}
           </CardTitle>
         </CardHeader>
         <CardContent class="space-y-4">
@@ -138,13 +168,13 @@ const applyFilters = () => {
             v-if="contactsQuery.isLoading.value"
             class="text-sm text-muted-foreground"
           >
-            Đang tải danh sách liên hệ...
+            {{ t('pages.tenantDashboard.loadingContacts') }}
           </div>
           <div
             v-else-if="!contacts.length"
             class="text-sm text-muted-foreground"
           >
-            Bạn chưa gửi yêu cầu liên hệ nào.
+            {{ t('pages.tenantDashboard.emptyContacts') }}
           </div>
           <div
             v-for="contact in contacts"
@@ -158,20 +188,29 @@ const applyFilters = () => {
                 <div class="flex items-center gap-2">
                   <Home class="h-4 w-4 text-muted-foreground" />
                   <div class="font-semibold">
-                    {{ contact.room_title || 'Phòng đang cập nhật' }}
+                    {{
+                      contact.room_title || t('pages.tenantDashboard.roomUpdating')
+                    }}
                   </div>
                 </div>
                 <div class="text-sm text-muted-foreground">
-                  {{ contact.room_address || 'Chưa có địa chỉ' }}
+                  {{ contact.room_address || t('pages.tenantDashboard.noAddress') }}
                 </div>
                 <div class="flex flex-wrap gap-3 text-sm text-muted-foreground">
                   <span class="inline-flex items-center gap-1"
                     ><Phone class="h-3.5 w-3.5" />
-                    {{ contact.owner_phone || 'Chưa có SĐT chủ nhà' }}</span
+                    {{
+                      contact.owner_phone ||
+                      t('pages.tenantDashboard.noOwnerPhone')
+                    }}</span
                   >
                   <span class="inline-flex items-center gap-1"
-                    ><CalendarDays class="h-3.5 w-3.5" /> Dọn vào:
-                    {{ contact.move_in_date || 'Chưa chọn' }}</span
+                    ><CalendarDays class="h-3.5 w-3.5" />
+                    {{ t('pages.tenantDashboard.moveInDate') }}:
+                    {{
+                      contact.move_in_date ||
+                      t('pages.tenantDashboard.notSelected')
+                    }}</span
                   >
                 </div>
               </div>
@@ -180,12 +219,8 @@ const applyFilters = () => {
                   statusLabel(contact.status)
                 }}</Badge>
                 <div class="text-xs text-muted-foreground">
-                  Gửi lúc:
-                  {{
-                    contact.created_at
-                      ? new Date(contact.created_at).toLocaleString('vi-VN')
-                      : '—'
-                  }}
+                  {{ t('pages.tenantDashboard.sentAt') }}:
+                  {{ formatDateTime(contact.created_at) }}
                 </div>
               </div>
             </div>
@@ -197,7 +232,7 @@ const applyFilters = () => {
         <CardHeader>
           <CardTitle class="flex items-center gap-2 text-base">
             <Handshake class="h-4 w-4" />
-            Trạng thái thuê phòng
+            {{ t('pages.tenantDashboard.rentalStatus') }}
           </CardTitle>
         </CardHeader>
         <CardContent class="space-y-4">
@@ -205,13 +240,13 @@ const applyFilters = () => {
             v-if="dealsQuery.isLoading.value"
             class="text-sm text-muted-foreground"
           >
-            Đang tải trạng thái thuê phòng...
+            {{ t('pages.tenantDashboard.loadingDeals') }}
           </div>
           <div
             v-else-if="!deals.length"
             class="text-sm text-muted-foreground"
           >
-            Chưa có phòng nào chuyển sang deal dưới tài khoản của bạn.
+            {{ t('pages.tenantDashboard.emptyDeals') }}
           </div>
           <div
             v-for="deal in deals"
@@ -223,18 +258,18 @@ const applyFilters = () => {
             >
               <div class="space-y-2">
                 <div class="font-semibold">
-                  {{ deal.room_title || 'Phòng đang cập nhật' }}
+                  {{ deal.room_title || t('pages.tenantDashboard.roomUpdating') }}
                 </div>
                 <div class="text-sm text-muted-foreground">
-                  {{ deal.room_address || 'Chưa có địa chỉ' }}
+                  {{ deal.room_address || t('pages.tenantDashboard.noAddress') }}
                 </div>
                 <div class="text-sm text-muted-foreground">
-                  Giá thỏa thuận:
-                  {{ Number(deal.agreed_price || 0).toLocaleString('vi-VN') }}
-                  {{ deal.currency || 'VND' }}
+                  {{ t('pages.tenantDashboard.agreedPrice') }}:
+                  {{ formatCurrency(deal.agreed_price) }}
+                  {{ deal.currency || t('pages.tenantDashboard.currency') }}
                 </div>
                 <div class="text-sm text-muted-foreground">
-                  Tình trạng phòng:
+                  {{ t('pages.tenantDashboard.roomStatus') }}:
                   <span class="font-medium text-foreground">{{
                     roomAvailabilityLabel(
                       deal.room_availability_status ?? undefined,
@@ -243,11 +278,12 @@ const applyFilters = () => {
                 </div>
               </div>
               <div class="flex flex-col items-start gap-2 md:items-end">
-                <Badge :variant="badgeVariant(deal.status) as any">{{
-                  statusLabel(deal.status)
+                <Badge :variant="badgeVariant(deal.status ?? undefined) as any">{{
+                  statusLabel(deal.status ?? undefined)
                 }}</Badge>
                 <div class="text-xs text-muted-foreground">
-                  Bắt đầu thuê: {{ deal.start_date || 'Chưa chốt' }}
+                  {{ t('pages.tenantDashboard.rentalStart') }}:
+                  {{ deal.start_date || t('pages.tenantDashboard.notFinalized') }}
                 </div>
               </div>
             </div>

@@ -31,6 +31,7 @@ import {
   RefreshCcw,
 } from 'lucide-vue-next'
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   columns: ColumnDef<TData, TValue>[]
@@ -43,14 +44,12 @@ const props = defineProps<{
   deleteRow?: (row: TData) => void
 }>()
 
+const { t } = useI18n()
+
 const sorting = ref<SortingState>([])
-
 const columnFilters = ref<ColumnFiltersState>([])
-
 const columnSizing = ref<ColumnSizingState>({})
-
 const columnVisibility = ref({})
-
 const columnPinning = ref<ColumnPinningState>({
   left:
     props.columns
@@ -67,62 +66,49 @@ const table = useVueTable({
     updateRow: props.updateRow || undefined,
     deleteRow: props.deleteRow || undefined,
   },
-
   columnResizeMode: 'onChange',
-
   autoResetPageIndex: false,
-
   get data() {
     return props.data
   },
-
   get columns() {
     return props.columns
   },
-
   state: {
     get sorting() {
       return sorting.value
     },
-
     get columnFilters() {
       return columnFilters.value
     },
-
     get columnSizing() {
       return columnSizing.value
     },
-
     get columnVisibility() {
       return columnVisibility.value
     },
-
     get columnPinning() {
       return columnPinning.value
     },
   },
-
   onSortingChange: (updaterOrValue) => {
     sorting.value =
       typeof updaterOrValue === 'function'
         ? updaterOrValue(sorting.value)
         : updaterOrValue
   },
-
   onColumnFiltersChange: (updaterOrValue) => {
     columnFilters.value =
       typeof updaterOrValue === 'function'
         ? updaterOrValue(columnFilters.value)
         : updaterOrValue
   },
-
   onColumnSizingChange: (updaterOrValue) => {
     columnSizing.value =
       typeof updaterOrValue === 'function'
         ? updaterOrValue(columnSizing.value)
         : updaterOrValue
   },
-
   onColumnVisibilityChange: (updaterOrValue) => {
     const nextState =
       typeof updaterOrValue === 'function'
@@ -130,20 +116,15 @@ const table = useVueTable({
         : updaterOrValue
     columnVisibility.value = nextState
   },
-
   onColumnPinningChange: (updaterOrValue) => {
     columnPinning.value =
       typeof updaterOrValue === 'function'
         ? updaterOrValue(columnPinning.value)
         : updaterOrValue
   },
-
   getCoreRowModel: getCoreRowModel(),
-
   getPaginationRowModel: getPaginationRowModel(),
-
   getSortedRowModel: getSortedRowModel(),
-
   getFilteredRowModel: getFilteredRowModel(),
 })
 
@@ -162,6 +143,7 @@ const getStickyClass = (column: any) => {
     const isFirstPinned = column.getIsFirstColumn('right')
     return `${baseClass} ${isFirstPinned ? 'sticky-first-right' : ''}`
   }
+
   return ''
 }
 </script>
@@ -174,14 +156,8 @@ const getStickyClass = (column: any) => {
       v-if="props.showToolbar"
       class="p-3 border-b flex items-center justify-between gap-2 bg-background/50"
     >
-      <!-- <slot
-        name="toolbar"
-        :table="table"
-      >
-      </slot> -->
       <div class="flex items-center justify-between w-full gap-4">
         <div class="relative w-full">
-          <!-- left -->
           <slot
             name="toolbar_left"
             :table="table"
@@ -190,14 +166,13 @@ const getStickyClass = (column: any) => {
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- right -->
           <ColumnToggle :table="table" />
 
           <Button
             variant="outline"
             size="icon"
             class="w-9 h-9"
-            title="Refresh Data"
+            :title="t('table.refreshData')"
             :class="{ hidden: !props.refetchData }"
             @click="props.refetchData ? props.refetchData() : null"
           >
@@ -206,16 +181,6 @@ const getStickyClass = (column: any) => {
               :class="{ 'animate-spin': isFetching }"
             />
           </Button>
-
-          <!-- <Button
-            variant="outline"
-            size="icon"
-            class="w-9 h-9"
-            title="Export Data"
-            :disabled="isFetching || employeeData.length === 0"
-          >
-            <Download class="w-4 h-4" />
-          </Button> -->
 
           <div class="w-px h-6 bg-border mx-1"></div>
 
@@ -344,7 +309,7 @@ const getStickyClass = (column: any) => {
                     ($event.target as HTMLInputElement).value,
                   )
                 "
-                placeholder="Find..."
+                :placeholder="t('table.filterPlaceholder')"
                 class="w-full px-2 py-1 text-xs font-normal border rounded bg-background focus:outline-none focus:ring-1 focus:ring-primary h-8"
               />
             </div>
@@ -429,10 +394,8 @@ const getStickyClass = (column: any) => {
               class="h-32 text-center text-muted-foreground"
             >
               <div class="flex flex-col items-center justify-center gap-1">
-                <p class="text-sm font-medium">Không tìm thấy kết quả</p>
-                <p class="text-xs">
-                  Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.
-                </p>
+                <p class="text-sm font-medium">{{ t('table.noResultsTitle') }}</p>
+                <p class="text-xs">{{ t('table.noResultsDescription') }}</p>
               </div>
             </TableCell>
           </TableRow>

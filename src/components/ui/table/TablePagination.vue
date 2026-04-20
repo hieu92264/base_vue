@@ -18,10 +18,13 @@ import {
 } from '@/components/ui/select'
 import SelectValue from '@/components/ui/select/SelectValue.vue'
 import type { Table } from '@tanstack/vue-table'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   table: Table<TData>
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -29,7 +32,7 @@ const props = defineProps<{
     class="flex items-center justify-between px-2 py-4 border-t bg-background"
   >
     <div class="flex-1 text-sm text-muted-foreground">
-      Total Rows:
+      {{ t('table.totalRows') }}:
       <span class="font-medium text-foreground">{{
         table.getFilteredRowModel().rows.length
       }}</span>

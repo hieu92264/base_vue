@@ -14,8 +14,6 @@ import { LandlordService } from '@/services/landlord.service'
 import { useQuery } from '@tanstack/vue-query'
 import {
   CircleCheckBig,
-  CircleDashed,
-  CircleOff,
   DollarSign,
   House,
   Home,
@@ -23,8 +21,10 @@ import {
 } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t, locale } = useI18n()
 
 const { data, isLoading, isFetching, refetch } = useQuery({
   queryKey: ['landlord_dashboard'],
@@ -50,25 +50,26 @@ const latestRooms = computed(() => data.value?.latest_rooms ?? [])
 const statusLabel = (status?: string) => {
   switch (status) {
     case 'available':
-      return 'Còn trống'
+      return t('status.room.available')
     case 'occupied':
-      return 'Đã thuê'
+      return t('status.room.occupied')
     case 'confirmed':
-      return 'Đã xác nhận'
+      return t('status.room.confirmed')
     default:
-      return 'Chờ xử lý'
+      return t('status.room.pending')
   }
 }
 
 const formatMoney = (value?: number) => {
-  return new Intl.NumberFormat('vi-VN').format(Number(value ?? 0))
+  const numberLocale = locale.value === 'vi' ? 'vi-VN' : 'en-US'
+  return new Intl.NumberFormat(numberLocale).format(Number(value ?? 0))
 }
 
 const roomImage = (room: any) => {
   return (
     room?.photos?.find((p: any) => p.is_cover)?.photo_url ||
     room?.photos?.[0]?.photo_url ||
-    'https://placehold.co/600x400?text=Khong+co+anh'
+    `https://placehold.co/600x400?text=${t('pages.landlordDashboard.roomImageFallback')}`
   )
 }
 </script>
@@ -77,9 +78,11 @@ const roomImage = (room: any) => {
   <div class="flex-1 space-y-4">
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-3xl font-bold tracking-tight">Dashboard chủ nhà</h2>
+        <h2 class="text-3xl font-bold tracking-tight">
+          {{ t('pages.landlordDashboard.title') }}
+        </h2>
         <p class="text-muted-foreground">
-          Tổng quan dữ liệu thực tế từ các tin đăng của bạn
+          {{ t('pages.landlordDashboard.description') }}
         </p>
       </div>
 
@@ -93,11 +96,11 @@ const roomImage = (room: any) => {
             class="mr-2 h-4 w-4"
             :class="{ 'animate-spin': isFetching }"
           />
-          Làm mới
+          {{ t('common.refresh') }}
         </Button>
 
         <Button @click="router.push({ name: 'landlord.my-rooms' })">
-          Quản lý tin đăng
+          {{ t('pages.landlordDashboard.manageRooms') }}
         </Button>
       </div>
     </div>
@@ -107,7 +110,9 @@ const roomImage = (room: any) => {
         <CardHeader
           class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
-          <CardTitle class="text-sm font-medium">Tổng số tin</CardTitle>
+          <CardTitle class="text-sm font-medium">{{
+            t('pages.landlordDashboard.totalRooms')
+          }}</CardTitle>
           <House class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -128,7 +133,9 @@ const roomImage = (room: any) => {
         <CardHeader
           class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
-          <CardTitle class="text-sm font-medium">Tin đang hoạt động</CardTitle>
+          <CardTitle class="text-sm font-medium">{{
+            t('pages.landlordDashboard.activeRooms')
+          }}</CardTitle>
           <CircleCheckBig class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -149,7 +156,9 @@ const roomImage = (room: any) => {
         <CardHeader
           class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
-          <CardTitle class="text-sm font-medium">Phòng còn trống</CardTitle>
+          <CardTitle class="text-sm font-medium">{{
+            t('pages.landlordDashboard.availableRooms')
+          }}</CardTitle>
           <Home class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -170,9 +179,9 @@ const roomImage = (room: any) => {
         <CardHeader
           class="flex flex-row items-center justify-between space-y-0 pb-2"
         >
-          <CardTitle class="text-sm font-medium"
-            >Tổng giá trị niêm yết</CardTitle
-          >
+          <CardTitle class="text-sm font-medium">{{
+            t('pages.landlordDashboard.totalValue')
+          }}</CardTitle>
           <DollarSign class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
@@ -184,7 +193,8 @@ const roomImage = (room: any) => {
             v-else
             class="text-2xl font-bold"
           >
-            {{ formatMoney(summary.total_value) }} đ
+            {{ formatMoney(summary.total_value) }}
+            {{ t('pages.landlordDashboard.currencySuffix') }}
           </div>
         </CardContent>
       </Card>
@@ -193,28 +203,40 @@ const roomImage = (room: any) => {
     <div class="grid gap-4 lg:grid-cols-3">
       <Card class="lg:col-span-1">
         <CardHeader>
-          <CardTitle>Thống kê nhanh</CardTitle>
-          <CardDescription>Trạng thái tin đăng của bạn</CardDescription>
+          <CardTitle>{{ t('pages.landlordDashboard.quickStats') }}</CardTitle>
+          <CardDescription>{{
+            t('pages.landlordDashboard.quickStatsDescription')
+          }}</CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">
           <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Đang hoạt động</span>
+            <span class="text-sm text-muted-foreground">{{
+              t('pages.landlordDashboard.activeRooms')
+            }}</span>
             <Badge>{{ summary.active_rooms }}</Badge>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Tạm ẩn</span>
+            <span class="text-sm text-muted-foreground">{{
+              t('pages.landlordDashboard.inactiveRooms')
+            }}</span>
             <Badge variant="secondary">{{ summary.inactive_rooms }}</Badge>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Còn trống</span>
+            <span class="text-sm text-muted-foreground">{{
+              t('pages.landlordDashboard.availableRooms')
+            }}</span>
             <Badge>{{ summary.available_rooms }}</Badge>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Đã thuê</span>
+            <span class="text-sm text-muted-foreground">{{
+              t('pages.landlordDashboard.occupiedRooms')
+            }}</span>
             <Badge>{{ summary.occupied_rooms }}</Badge>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-sm text-muted-foreground">Chờ xử lý</span>
+            <span class="text-sm text-muted-foreground">{{
+              t('pages.landlordDashboard.pendingRooms')
+            }}</span>
             <Badge variant="outline">{{ summary.pending_rooms }}</Badge>
           </div>
         </CardContent>
@@ -222,8 +244,10 @@ const roomImage = (room: any) => {
 
       <Card class="lg:col-span-2">
         <CardHeader>
-          <CardTitle>Tin đăng gần đây</CardTitle>
-          <CardDescription>5 tin mới nhất của bạn</CardDescription>
+          <CardTitle>{{ t('pages.landlordDashboard.recentRooms') }}</CardTitle>
+          <CardDescription>{{
+            t('pages.landlordDashboard.recentRoomsDescription')
+          }}</CardDescription>
         </CardHeader>
         <CardContent>
           <div
@@ -239,7 +263,7 @@ const roomImage = (room: any) => {
             v-else-if="latestRooms.length === 0"
             class="text-sm text-muted-foreground"
           >
-            Bạn chưa có tin đăng nào.
+            {{ t('pages.landlordDashboard.emptyRooms') }}
           </div>
 
           <div
@@ -262,7 +286,9 @@ const roomImage = (room: any) => {
                   <div class="min-w-0">
                     <h4 class="font-semibold line-clamp-1">{{ room.title }}</h4>
                     <p class="text-sm text-muted-foreground line-clamp-1">
-                      {{ room.address || 'Chưa cập nhật địa chỉ' }}
+                      {{
+                        room.address || t('pages.landlordDashboard.addressFallback')
+                      }}
                     </p>
                   </div>
                   <Badge variant="outline">{{
@@ -273,9 +299,19 @@ const roomImage = (room: any) => {
                 <Separator class="my-2" />
 
                 <div class="flex flex-wrap items-center gap-4 text-sm">
-                  <span><b>Giá:</b> {{ formatMoney(room.price) }} đ</span>
-                  <span><b>Diện tích:</b> {{ room.area || 0 }} m²</span>
-                  <span><b>Mã tin:</b> #{{ room.id }}</span>
+                  <span
+                    ><b>{{ t('pages.landlordDashboard.price') }}:</b>
+                    {{ formatMoney(room.price) }}
+                    {{ t('pages.landlordDashboard.currencySuffix') }}</span
+                  >
+                  <span
+                    ><b>{{ t('pages.landlordDashboard.area') }}:</b>
+                    {{ room.area || 0 }} m²</span
+                  >
+                  <span
+                    ><b>{{ t('pages.landlordDashboard.listingCode') }}:</b>
+                    #{{ room.id }}</span
+                  >
                 </div>
               </div>
             </div>

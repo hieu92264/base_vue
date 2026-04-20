@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 </script>
 
 <template>
@@ -11,20 +13,19 @@ const router = useRouter()
       class="m-auto flex h-full w-full flex-col items-center justify-center gap-2"
     >
       <h1 class="text-[7rem] leading-tight font-bold">401</h1>
-      <span class="font-medium">Truy cập không được phép</span>
+      <span class="font-medium">{{ t('errors.401.title') }}</span>
       <p class="text-center text-muted-foreground">
-        Vui lòng đăng nhập bằng tài khoản phù hợp <br />
-        để truy cập tài nguyên này.
+        {{ t('errors.401.description') }}
       </p>
       <div class="mt-6 flex gap-4">
         <Button
           variant="outline"
           @click="router.back()"
         >
-          Quay lại
+          {{ t('common.back') }}
         </Button>
         <Button @click="router.push({ name: 'dashboard' })">
-          Về trang chủ
+          {{ t('common.home') }}
         </Button>
       </div>
     </div>

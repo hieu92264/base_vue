@@ -1,5 +1,3 @@
-import common from '@/i18n/en/common'
+import messages from '@/i18n/en/common'
 
-export default {
-  common,
-}
+export default messages

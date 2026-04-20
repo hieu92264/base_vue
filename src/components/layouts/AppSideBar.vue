@@ -21,8 +21,10 @@ import {
 import { computed, ref, watchEffect } from 'vue'
 import { ChevronDown } from 'lucide-vue-next'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute()
+const { t } = useI18n()
 
 const normalizePath = (path = '') => path.replace(/\/+$/, '') || '/'
 
@@ -64,12 +66,10 @@ watchEffect(() => {
     style="--sidebar-width-icon: 3.5rem"
     class="border-r"
   >
-    <!-- Header -->
     <SidebarHeader>
       <GreenlandLogo />
     </SidebarHeader>
 
-    <!-- Content -->
     <SidebarContent class="overflow-x-hidden">
       <SidebarGroup
         v-for="group in sidebarData.navGroups"
@@ -85,9 +85,7 @@ watchEffect(() => {
               v-for="item in group.items"
               :key="item.title"
             >
-              <!-- ===== ITEM CÓ CHILDREN ===== -->
               <SidebarMenuItem v-if="item.children && item.children.length">
-                <!-- Parent -->
                 <SidebarMenuButton
                   :tooltip="item.title"
                   @click="openMenus[item.title] = !openMenus[item.title]"
@@ -104,7 +102,6 @@ watchEffect(() => {
                     {{ item.title }}
                   </span>
 
-                  <!-- Chevron -->
                   <ChevronDown
                     v-if="state !== 'collapsed'"
                     class="ml-auto size-4 transition-transform"
@@ -112,7 +109,6 @@ watchEffect(() => {
                   />
                 </SidebarMenuButton>
 
-                <!-- Children -->
                 <SidebarMenu
                   v-if="openMenus[item.title]"
                   :class="state === 'collapsed' ? 'hidden' : 'ml-6!'"
@@ -140,7 +136,6 @@ watchEffect(() => {
                 </SidebarMenu>
               </SidebarMenuItem>
 
-              <!-- ===== ITEM THƯỜNG ===== -->
               <SidebarMenuItem v-else>
                 <SidebarMenuButton
                   as-child
@@ -163,7 +158,6 @@ watchEffect(() => {
       </SidebarGroup>
     </SidebarContent>
 
-    <!-- Footer -->
     <SidebarFooter>
       <div
         :class="[
@@ -171,7 +165,7 @@ watchEffect(() => {
           state === 'collapsed' ? 'w-0 opacity-0' : 'w-auto opacity-100',
         ]"
       >
-        © 2026 Greenland Inc.
+        {{ t('layout.footer', { year: 2026 }) }}
       </div>
     </SidebarFooter>
 

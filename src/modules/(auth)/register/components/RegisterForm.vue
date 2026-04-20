@@ -16,12 +16,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
 }>()
 
 const route = useRoute()
+const { t } = useI18n()
 
 const form = reactive({
   username: '',
@@ -73,10 +75,10 @@ const loginTarget = computed(() => ({
     <FieldGroup>
       <div class="flex flex-col items-center gap-1 text-center">
         <h1 class="text-2xl font-bold text-zinc-950 dark:text-zinc-50">
-          Tạo tài khoản
+          {{ t('auth.register.title') }}
         </h1>
         <p class="text-muted-foreground text-sm text-balance">
-          Điền thông tin bên dưới để tạo tài khoản.
+          {{ t('auth.register.description') }}
         </p>
       </div>
 
@@ -85,7 +87,7 @@ const loginTarget = computed(() => ({
           for="username"
           class="dark:text-zinc-300"
         >
-          Tên đăng nhập
+          {{ t('auth.register.username') }}
         </FieldLabel>
         <Input
           id="username"
@@ -103,7 +105,7 @@ const loginTarget = computed(() => ({
           for="email"
           class="dark:text-zinc-300"
         >
-          Email
+          {{ t('auth.register.email') }}
         </FieldLabel>
         <Input
           id="email"
@@ -121,7 +123,7 @@ const loginTarget = computed(() => ({
           for="password"
           class="dark:text-zinc-300"
         >
-          Mật khẩu
+          {{ t('auth.register.password') }}
         </FieldLabel>
         <PasswordInput
           id="password"
@@ -137,7 +139,7 @@ const loginTarget = computed(() => ({
           for="verify_password"
           class="dark:text-zinc-300"
         >
-          Xác nhận mật khẩu
+          {{ t('auth.register.confirmPassword') }}
         </FieldLabel>
         <PasswordInput
           id="verify_password"
@@ -150,7 +152,7 @@ const loginTarget = computed(() => ({
           v-if="passwordMismatch"
           class="mt-1 text-xs text-red-500"
         >
-          Mật khẩu xác nhận không khớp.
+          {{ t('auth.register.confirmPasswordMismatch') }}
         </p>
       </Field>
 
@@ -159,7 +161,7 @@ const loginTarget = computed(() => ({
           for="user_type"
           class="dark:text-zinc-300"
         >
-          Bạn đăng ký với vai trò
+          {{ t('auth.register.roleLabel') }}
         </FieldLabel>
 
         <Select
@@ -170,12 +172,12 @@ const loginTarget = computed(() => ({
             id="user_type"
             class="w-full"
           >
-            <SelectValue placeholder="Chọn vai trò" />
+            <SelectValue :placeholder="t('auth.register.rolePlaceholder')" />
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="tenant">Người thuê</SelectItem>
-            <SelectItem value="landlord">Chủ nhà</SelectItem>
+            <SelectItem value="tenant">{{ t('auth.register.tenant') }}</SelectItem>
+            <SelectItem value="landlord">{{ t('auth.register.landlord') }}</SelectItem>
           </SelectContent>
         </Select>
       </Field>
@@ -190,16 +192,16 @@ const loginTarget = computed(() => ({
           v-if="isPending"
           class="mr-2 h-4 w-4 animate-spin"
         />
-        {{ isPending ? 'Vui lòng chờ...' : 'Đăng ký' }}
+        {{ isPending ? t('auth.register.pending') : t('auth.register.submit') }}
       </Button>
 
       <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">
-        Đã có tài khoản?
+        {{ t('auth.register.hasAccount') }}
         <RouterLink
           :to="loginTarget"
           class="font-medium text-emerald-600 hover:underline dark:text-emerald-400"
         >
-          Đăng nhập
+          {{ t('common.login') }}
         </RouterLink>
       </div>
     </FieldGroup>

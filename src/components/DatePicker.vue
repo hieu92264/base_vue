@@ -10,9 +10,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { CalendarRangeIcon, XIcon } from 'lucide-vue-next'
 import { Calendar } from '@/components/ui/calendar'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
-  modelValue?: string | undefined // yyyy-MM-dd | ''
+  modelValue?: string | undefined
   placeholder?: string
   name?: string
   onBlur?: (e: FocusEvent) => void
@@ -20,9 +21,10 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', v: string): void // luôn string
+  (e: 'update:modelValue', v: string): void
 }>()
 
+const { t } = useI18n()
 const isOpen = ref(false)
 const inputValue = ref('')
 const isTyping = ref(false)
@@ -53,7 +55,6 @@ function commitDDMMYYYY(masked: string) {
 }
 
 function commitYYYYMMDD(raw: string) {
-  // accept: 2026-03-02
   if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) return false
   const parsed = parse(raw, 'yyyy-MM-dd', new Date())
   if (!isValid(parsed)) return false
@@ -82,7 +83,6 @@ const handleModelUpdate = (payload: string | number) => {
   isTyping.value = true
   const raw = String(payload).trim()
 
-  // ✅ cho phép paste yyyy-MM-dd
   if (commitYYYYMMDD(raw)) {
     const d = parse(raw, 'yyyy-MM-dd', new Date())
     inputValue.value = isValid(d) ? format(d, 'dd/MM/yyyy') : ''
@@ -130,7 +130,7 @@ const handleKeydown = (e: KeyboardEvent) => {
 
 const clearValue = () => {
   inputValue.value = ''
-  emit('update:modelValue', '') // like input type=date
+  emit('update:modelValue', '')
   isOpen.value = false
   isTyping.value = false
 }
@@ -167,7 +167,6 @@ const showClear = computed(() => !!props.modelValue && !props.disabled)
 
 <template>
   <div class="relative w-full">
-    <!-- giống input type=date: submit sẽ là yyyy-MM-dd hoặc '' -->
     <input
       type="hidden"
       :name="name"
@@ -197,7 +196,7 @@ const showClear = computed(() => !!props.modelValue && !props.disabled)
             class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             :disabled="disabled"
             @click.stop="isOpen = true"
-            aria-label="Open calendar"
+            :aria-label="t('common.openCalendar')"
           >
             <CalendarRangeIcon class="h-4 w-4" />
           </button>
@@ -207,7 +206,7 @@ const showClear = computed(() => !!props.modelValue && !props.disabled)
             type="button"
             class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             @click.stop="clearValue"
-            aria-label="Clear date"
+            :aria-label="t('common.clearDate')"
           >
             <XIcon class="h-4 w-4" />
           </button>

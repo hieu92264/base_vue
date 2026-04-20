@@ -28,7 +28,6 @@ export enum RequestHeader {
 export enum Language {
   VIETNAMESE = 'vi',
   ENGLISH = 'en',
-  CHINESE = 'cn',
 }
 
 export enum CommonActions {
@@ -62,7 +61,6 @@ export enum WorkStatus {
 export const DateFormatterLocale: Record<Language, string> = {
   [Language.VIETNAMESE]: 'vi-VN',
   [Language.ENGLISH]: 'en-US',
-  [Language.CHINESE]: 'zh-CN',
 }
 
 export enum BookingStatus {

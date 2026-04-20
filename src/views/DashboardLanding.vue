@@ -2,9 +2,11 @@
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user.store'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const userStore = useUserStore()
+const { t } = useI18n()
 
 onMounted(() => {
   const role = userStore.user?.profile?.user_type
@@ -29,5 +31,5 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6 text-sm text-muted-foreground">Đang chuyển hướng...</div>
+  <div class="p-6 text-sm text-muted-foreground">{{ t('common.redirecting') }}</div>
 </template>

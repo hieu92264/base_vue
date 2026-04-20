@@ -9,6 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   isOpenConfirm: boolean
@@ -16,9 +17,9 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:isOpenConfirm'])
+const { t } = useI18n()
 
 const handleCancel = () => {
-  // Emit event to close the dialog
   emit('update:isOpenConfirm', false)
 }
 </script>
@@ -30,16 +31,15 @@ const handleCancel = () => {
   >
     <AlertDialogContent>
       <AlertDialogHeader>
-        <AlertDialogTitle>Xác nhận xóa dòng này?</AlertDialogTitle>
+        <AlertDialogTitle>{{ t('table.deleteDialog.title') }}</AlertDialogTitle>
 
         <AlertDialogDescription>
-          Hành động này không thể hoàn tác. Dữ liệu sẽ bị xóa vĩnh viễn khỏi hệ
-          thống.
+          {{ t('table.deleteDialog.description') }}
         </AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel @click="handleCancel">Hủy</AlertDialogCancel>
-        <AlertDialogAction @click="onConfirmDelete">Xác nhận</AlertDialogAction>
+        <AlertDialogCancel @click="handleCancel">{{ t('common.cancel') }}</AlertDialogCancel>
+        <AlertDialogAction @click="onConfirmDelete">{{ t('common.confirm') }}</AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>
