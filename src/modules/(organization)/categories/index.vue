@@ -5,9 +5,10 @@ import DeleteConfirmDialog from '@/components/ui/DeleteConfirmDialog.vue'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { CategoryFormValues } from './-schemas/category.schema'
 import CategoryModal from './components/CategoryModal.vue'
-import { columns } from './data/columns'
+import { getColumns } from './data/columns'
 import {
   useCreateCategoryMutation,
   useDeleteCategoryMutation,
@@ -15,6 +16,7 @@ import {
   useUpdateCategoryMutation,
 } from './hooks/use-category'
 
+const { t } = useI18n()
 const { data, isLoading, isFetching, refetch } = useGetCategoriesQuery()
 
 const isConfirmDelete = ref(false)
@@ -27,6 +29,8 @@ const { mutate: updateCategory, isPending: isUpdating } =
   useUpdateCategoryMutation()
 const { mutate: deleteCategory, isPending: isDeleting } =
   useDeleteCategoryMutation()
+
+const columns = computed(() => getColumns())
 
 const categoryData = computed(() => {
   if (!data.value) return []
@@ -96,7 +100,7 @@ const handleSubmitCategory = (payload: CategoryFormValues) => {
           @click="openCreateModal"
         >
           <Plus class="w-4 h-4" />
-          Add Category
+          {{ t('pages.organizationCategories.addCategory') }}
         </Button>
       </template>
     </DataTable>

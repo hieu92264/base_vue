@@ -1,3 +1,4 @@
+import i18n from '@/configs/i18n.config'
 import type { CategoryFormValues } from '@/modules/(organization)/categories/-schemas/category.schema'
 import { CategoryService } from '@/services/category.service'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
@@ -6,6 +7,8 @@ import { toast } from 'vue-sonner'
 export enum CategoryQueryKey {
   GET_CATEGORIES = 'get_categories',
 }
+
+const t = (key: string) => (i18n.global as any).t(key) as string
 
 export const useGetCategoriesQuery = () => {
   return useQuery({
@@ -22,11 +25,11 @@ export const useCreateCategoryMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [CategoryQueryKey.GET_CATEGORIES],
       })
-      toast.success('Tạo danh mục thành công')
+      toast.success(t('pages.organizationCategories.messages.createSuccess'))
     },
     onError: (error) => {
       console.error('Error creating category:', error)
-      toast.error('Tạo danh mục thất bại')
+      toast.error(t('pages.organizationCategories.messages.createError'))
     },
   })
 }
@@ -45,11 +48,11 @@ export const useUpdateCategoryMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [CategoryQueryKey.GET_CATEGORIES],
       })
-      toast.success('Cập nhật danh mục thành công')
+      toast.success(t('pages.organizationCategories.messages.updateSuccess'))
     },
     onError: (error) => {
       console.error('Error updating category:', error)
-      toast.error('Cập nhật danh mục thất bại')
+      toast.error(t('pages.organizationCategories.messages.updateError'))
     },
   })
 }
@@ -76,11 +79,11 @@ export const useDeleteCategoryMutation = () => {
           return updated
         },
       )
-      toast.success('Xóa danh mục thành công')
+      toast.success(t('pages.organizationCategories.messages.deleteSuccess'))
     },
     onError: (error) => {
       console.error('Error deleting category:', error)
-      toast.error('Xóa danh mục thất bại')
+      toast.error(t('pages.organizationCategories.messages.deleteError'))
     },
   })
 }

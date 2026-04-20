@@ -28,6 +28,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   categoryFormSchema,
   type CategoryFormValues,
@@ -40,9 +41,11 @@ const props = defineProps<{
   handleSubmit: (data: CategoryFormValues) => void
 }>()
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'update:open', value: boolean): void
 }>()
+
+const { t } = useI18n()
 
 const form = useForm({
   validationSchema: toTypedSchema(categoryFormSchema),
@@ -60,8 +63,6 @@ const form = useForm({
 const onSubmit = form.handleSubmit((values) => {
   props.handleSubmit(values)
 })
-
-const closeModal = () => emit('update:open', false)
 
 watch(
   () => props.initialData,
@@ -92,10 +93,14 @@ watch(
     <DialogContent class="sm:max-w-lg">
       <DialogHeader>
         <DialogTitle>
-          {{ initialData ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới' }}
+          {{
+            initialData
+              ? t('pages.organizationCategories.editCategory')
+              : t('pages.organizationCategories.createCategory')
+          }}
         </DialogTitle>
         <DialogDescription>
-          Điền thông tin danh mục rồi bấm Lưu để hoàn tất.
+          {{ t('pages.organizationCategories.modalDescription') }}
         </DialogDescription>
       </DialogHeader>
 
@@ -110,11 +115,11 @@ watch(
               name="code"
             >
               <FormItem>
-                <FormLabel>Mã danh mục</FormLabel>
+                <FormLabel>{{ t('pages.organizationCategories.code') }}</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
-                    placeholder="Nhập mã danh mục"
+                    :placeholder="t('pages.organizationCategories.codePlaceholder')"
                   />
                 </FormControl>
               </FormItem>
@@ -125,19 +130,19 @@ watch(
               name="isactive"
             >
               <FormItem>
-                <FormLabel>Trạng thái</FormLabel>
+                <FormLabel>{{ t('pages.organizationCategories.status') }}</FormLabel>
                 <FormControl>
                   <Select v-bind="componentField">
                     <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Chọn trạng thái" />
+                      <SelectValue :placeholder="t('pages.organizationCategories.selectStatus')" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem :value="RecordStatus.ACTIVE"
-                        >Hoạt động</SelectItem
-                      >
-                      <SelectItem :value="RecordStatus.INACTIVE"
-                        >Ngưng hoạt động</SelectItem
-                      >
+                      <SelectItem :value="RecordStatus.ACTIVE">
+                        {{ t('pages.organizationCategories.active') }}
+                      </SelectItem>
+                      <SelectItem :value="RecordStatus.INACTIVE">
+                        {{ t('pages.organizationCategories.inactive') }}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -150,11 +155,11 @@ watch(
             name="name"
           >
             <FormItem>
-              <FormLabel>Tên danh mục</FormLabel>
+              <FormLabel>{{ t('pages.organizationCategories.name') }}</FormLabel>
               <FormControl>
                 <Input
                   v-bind="componentField"
-                  placeholder="Nhập tên danh mục"
+                  :placeholder="t('pages.organizationCategories.namePlaceholder')"
                 />
               </FormControl>
             </FormItem>
@@ -166,11 +171,11 @@ watch(
               name="slug"
             >
               <FormItem>
-                <FormLabel>Slug</FormLabel>
+                <FormLabel>{{ t('pages.organizationCategories.slug') }}</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
-                    placeholder="Nhập slug"
+                    :placeholder="t('pages.organizationCategories.slugPlaceholder')"
                   />
                 </FormControl>
               </FormItem>
@@ -181,7 +186,7 @@ watch(
               name="sort_order"
             >
               <FormItem>
-                <FormLabel>Thứ tự hiển thị</FormLabel>
+                <FormLabel>{{ t('pages.organizationCategories.sortOrder') }}</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
@@ -198,11 +203,11 @@ watch(
             name="remark"
           >
             <FormItem>
-              <FormLabel>Ghi chú</FormLabel>
+              <FormLabel>{{ t('pages.organizationCategories.remark') }}</FormLabel>
               <FormControl>
                 <Textarea
                   v-bind="componentField"
-                  placeholder="Nhập ghi chú"
+                  :placeholder="t('pages.organizationCategories.remarkPlaceholder')"
                   rows="4"
                 />
               </FormControl>
@@ -214,15 +219,19 @@ watch(
           <Button
             type="button"
             variant="outline"
-            @click="closeModal"
+            @click="$emit('update:open', false)"
           >
-            Hủy
+            {{ t('common.cancel') }}
           </Button>
           <Button
             type="submit"
             :disabled="isPending"
           >
-            {{ isPending ? 'Đang lưu...' : 'Lưu' }}
+            {{
+              isPending
+                ? t('pages.organizationCategories.savePending')
+                : t('common.save')
+            }}
           </Button>
         </DialogFooter>
       </form>
