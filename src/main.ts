@@ -25,12 +25,13 @@ const queryClient = new QueryClient({
 pinia.use(piniaPluginPersistedstate)
 
 app.use(pinia)
-app.use(router)
-app.use(VueQueryPlugin, { queryClient })
 app.use(i18n)
 
 const i18nStore = useI18nStore()
 i18nStore.setLocale(i18nStore.locale)
+
+app.use(router)
+app.use(VueQueryPlugin, { queryClient })
 
 router.getRoutes().forEach((route) => {
   console.log('Registered Path:', route.path)
