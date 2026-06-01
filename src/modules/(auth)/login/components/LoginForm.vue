@@ -11,10 +11,10 @@
     <FieldGroup>
       <div class="flex flex-col items-center gap-1 text-center">
         <h1 class="text-2xl font-bold text-zinc-950 dark:text-zinc-50">
-          Login to account
+          {{ t('auth.login.title') }}
         </h1>
         <p class="text-muted-foreground text-sm text-balance">
-          Enter your username below to login to your account.
+          {{ t('auth.login.description') }}
         </p>
       </div>
 
@@ -22,8 +22,9 @@
         <FieldLabel
           for="username"
           class="dark:text-zinc-300"
-          >User name</FieldLabel
         >
+          {{ t('auth.login.username') }}
+        </FieldLabel>
         <Input
           id="username"
           v-model="username"
@@ -40,13 +41,14 @@
           <FieldLabel
             for="password"
             class="dark:text-zinc-300"
-            >Password</FieldLabel
           >
+            {{ t('auth.login.password') }}
+          </FieldLabel>
           <RouterLink
             to="/forgot-password"
             class="text-sm text-emerald-600 hover:underline dark:text-emerald-400"
           >
-            Forgot your password?
+            {{ t('auth.login.forgotPassword') }}
           </RouterLink>
         </div>
         <PasswordInput
@@ -68,16 +70,16 @@
           v-if="isPending"
           class="mr-2 h-4 w-4 animate-spin"
         />
-        {{ isPending ? 'Please wait...' : 'Login' }}
+        {{ isPending ? t('auth.login.pending') : t('auth.login.submit') }}
       </Button>
 
       <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">
-        Chưa có tài khoản?
+        {{ t('auth.login.noAccount') }}
         <RouterLink
-          to="/register"
+          :to="registerTarget"
           class="font-medium text-emerald-600 hover:underline dark:text-emerald-400"
         >
-          Đăng ký
+          {{ t('common.register') }}
         </RouterLink>
       </div>
     </FieldGroup>
@@ -92,8 +94,9 @@ import PasswordInput from '@/components/ui/password-input.vue'
 import { cn } from '@/lib/utils'
 import { useDoLoginMutation } from '@/modules/(auth)/hooks/use-auth'
 import { Loader2 } from 'lucide-vue-next'
-import { ref, type HTMLAttributes } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, ref, type HTMLAttributes } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
@@ -101,13 +104,19 @@ const props = defineProps<{
 
 const username = ref('')
 const password = ref('')
+const route = useRoute()
+const { t } = useI18n()
+
+const registerTarget = computed(() => ({
+  path: '/register',
+  query: route.query.redirect ? { redirect: String(route.query.redirect) } : {},
+}))
 
 const { mutate, isPending } = useDoLoginMutation()
 
 const handleSubmit = (event: Event) => {
   event.preventDefault()
 
-  console.log(username.value, password.value)
   mutate({
     username: username.value,
     password: password.value,

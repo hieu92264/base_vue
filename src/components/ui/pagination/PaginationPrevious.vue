@@ -1,22 +1,29 @@
 <script setup lang="ts">
-import type { PaginationPrevProps } from "reka-ui"
-import type { HTMLAttributes } from "vue"
+import type { PaginationPrevProps } from 'reka-ui'
+import type { HTMLAttributes } from 'vue'
 import type { ButtonVariants } from '@/components/ui/button'
-import { reactiveOmit } from "@vueuse/core"
-import { ChevronLeftIcon } from "lucide-vue-next"
-import { PaginationPrev, useForwardProps } from "reka-ui"
-import { cn } from "@/lib/utils"
+import { reactiveOmit } from '@vueuse/core'
+import { ChevronLeftIcon } from 'lucide-vue-next'
+import { PaginationPrev, useForwardProps } from 'reka-ui'
+import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
+import { useI18n } from 'vue-i18n'
 
-const props = withDefaults(defineProps<PaginationPrevProps & {
-  size?: ButtonVariants["size"]
-  class?: HTMLAttributes["class"]
-}>(), {
-  size: "default",
-})
+const props = withDefaults(
+  defineProps<
+    PaginationPrevProps & {
+      size?: ButtonVariants['size']
+      class?: HTMLAttributes['class']
+    }
+  >(),
+  {
+    size: 'default',
+  },
+)
 
-const delegatedProps = reactiveOmit(props, "class", "size")
+const delegatedProps = reactiveOmit(props, 'class', 'size')
 const forwarded = useForwardProps(delegatedProps)
+const { t } = useI18n()
 </script>
 
 <template>
@@ -27,7 +34,7 @@ const forwarded = useForwardProps(delegatedProps)
   >
     <slot>
       <ChevronLeftIcon />
-      <span class="hidden sm:block">Previous</span>
+      <span class="hidden sm:block">{{ t('table.pagination.previous') }}</span>
     </slot>
   </PaginationPrev>
 </template>

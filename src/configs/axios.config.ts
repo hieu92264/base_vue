@@ -1,8 +1,9 @@
-import { RequestHeader } from '@/common/constants/enums'
+import { Language, RequestHeader } from '@/common/constants/enums'
 import { env } from '@/common/utils/env.util'
 import { AppConfigs } from '@/configs/app.config'
+import i18n from '@/configs/i18n.config'
 import router from '@/router'
-import { AuthService, StorageService } from '@/services'
+import { AuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUserStore } from '@/stores/user.store'
 import axios, { AxiosError, HttpStatusCode, type AxiosInstance } from 'axios'
@@ -12,6 +13,24 @@ import { toast } from 'vue-sonner'
 type PromiseExecutor<T = unknown> = {
   resolve: (value: T) => void
   reject: (reason?: unknown) => void
+}
+
+const SUPPORTED_LANGUAGES = new Set<Language>(Object.values(Language))
+
+const getRequestLocale = (): Language => {
+  const localeSource = i18n.global.locale as unknown
+  const locale =
+    typeof localeSource === 'string'
+      ? localeSource
+      : typeof localeSource === 'object' &&
+          localeSource !== null &&
+          'value' in localeSource
+        ? localeSource.value
+        : null
+
+  return SUPPORTED_LANGUAGES.has(locale as Language)
+    ? (locale as Language)
+    : Language.VIETNAMESE
 }
 
 export class AxiosClient {
@@ -49,12 +68,15 @@ export class AxiosClient {
       (config) => {
         const authStore = useAuthStore()
         const accessToken = authStore.access_token
-        const locale = StorageService.getLocale()
+        const locale = getRequestLocale()
         config.headers[RequestHeader.AUTHORIZATION] =
           config.headers[RequestHeader.AUTHORIZATION] ??
           (accessToken ? `Bearer ${accessToken}` : '')
         // config.headers[RequestHeader.USER_COMPANY] = user?.company_code
-        config.headers[RequestHeader.ACCEPT_LANGUAGE] = locale
+        config.headers[RequestHeader.ACCEPT_LANGUAGE] =
+          config.headers[RequestHeader.ACCEPT_LANGUAGE] ?? locale
+        config.headers[RequestHeader.LOCALE] =
+          config.headers[RequestHeader.LOCALE] ?? locale
 
         return config
       },
@@ -75,7 +97,7 @@ export class AxiosClient {
           error.code === AxiosError.ETIMEDOUT ||
           error.code === AxiosError.ECONNABORTED
         ) {
-          toast.error('Request timeout')
+          toast.error('Yêu cầu đã hết thời gian chờ')
           return Promise.reject(error)
         }
 
@@ -85,7 +107,7 @@ export class AxiosClient {
           let message = response?.data?.message
 
           if (isLoginPath && errorStatus === HttpStatusCode.Unauthorized) {
-            message = 'Invalid username or password'
+            message = 'Tên đăng nhập hoặc mật khẩu không đúng'
           }
 
           toast.error(message || 'Đã có lỗi xảy ra', {
@@ -160,7 +182,7 @@ export class AxiosClient {
             authStore.clearSession()
             userStore.clearProfile()
 
-            toast.error('Session expired. Please log in again.')
+            toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
 
             router.push({ name: 'auth.login' })
 

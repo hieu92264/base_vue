@@ -6,19 +6,75 @@ const organizationRoutes: RouteRecordRaw[] = [
     path: '/organizations/permissions',
     name: 'organizations.permission',
     component: () => import('@/modules/(organization)/permission/index.vue'),
-    meta: { layouts: BaseLayout },
+    meta: { layouts: BaseLayout, permissionCodes: 'org.permissions' },
   },
   {
     path: '/organizations/user',
     name: 'organizations.user',
     component: () => import('@/modules/(organization)/user/index.vue'),
-    meta: { layouts: BaseLayout },
+    meta: { layouts: BaseLayout, permissionCodes: 'org.users' },
   },
   {
     path: '/organizations/employees',
     name: 'organizations.employees',
     component: () => import('@/modules/(organization)/employee/index.vue'),
-    meta: { layouts: BaseLayout },
+    meta: { layouts: BaseLayout, permissionCodes: 'org.employees' },
+  },
+  {
+    path: '/organizations/user-permissions',
+    name: 'organizations.user-permissions',
+    component: () =>
+      import('@/modules/(organization)/user_permissions/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.user-permissions' },
+  },
+  {
+    path: '/organizations/categories',
+    name: 'organizations.categories',
+    component: () => import('@/modules/(organization)/categories/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.categories' },
+  },
+  {
+    path: '/organizations/sliders',
+    name: 'organizations.sliders',
+    component: () => import('@/modules/(organization)/slider/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.sliders' },
+  },
+  {
+    path: '/organizations/room-moderation',
+    name: 'organizations.room-moderation',
+    component: () =>
+      import('@/modules/(organization)/room-moderation/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.room-moderation' },
+  },
+  {
+    path: '/organizations/contacts',
+    name: 'organizations.contacts',
+    component: () => import('@/modules/(organization)/contacts/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.contacts' },
+  },
+  {
+    path: '/organizations/deals',
+    name: 'organizations.deals',
+    component: () => import('@/modules/(organization)/deals/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.bookings' },
+  },
+  {
+    path: '/organizations/reviews',
+    name: 'organizations.reviews',
+    component: () => import('@/modules/(organization)/reviews/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.reviews' },
+  },
+  {
+    path: '/organizations/dashboard',
+    name: 'organizations.dashboard',
+    component: () => import('@/modules/(organization)/dashboard/index.vue'),
+    meta: { layouts: BaseLayout, permissionCodes: 'org.dashboard' },
+  },
+  {
+    path: '/settings/profile',
+    name: 'settings.profile',
+    component: () => import('@/modules/(settings)/profile/index.vue'),
+    meta: { layouts: BaseLayout, authOnly: true },
   },
 ]
 

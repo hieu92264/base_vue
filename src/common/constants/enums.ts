@@ -18,6 +18,7 @@ export enum RequestMethod {
 export enum RequestHeader {
   AUTHORIZATION = 'Authorization',
   ACCEPT_LANGUAGE = 'Accept-Language',
+  LOCALE = 'X-Locale',
   API_VERSION = 'X-Api-Version',
   CONTENT_TYPE = 'Content-Type',
   TENANT_ID = 'X-Tenant-Id',
@@ -28,7 +29,6 @@ export enum RequestHeader {
 export enum Language {
   VIETNAMESE = 'vi',
   ENGLISH = 'en',
-  CHINESE = 'cn',
 }
 
 export enum CommonActions {
@@ -62,5 +62,43 @@ export enum WorkStatus {
 export const DateFormatterLocale: Record<Language, string> = {
   [Language.VIETNAMESE]: 'vi-VN',
   [Language.ENGLISH]: 'en-US',
-  [Language.CHINESE]: 'zh-CN',
 }
+
+export enum BookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  AVAILABLE = 'available',
+  OCCUPIED = 'occupied',
+}
+
+export enum UserType {
+  ADMIN = 'admin',
+  TENANT = 'tenant',
+  LANDLORD = 'landlord',
+}
+
+export const leadStatuses = [
+  'new',
+  'contacted',
+  'viewing_scheduled',
+  'viewed',
+  'negotiating',
+  'waiting_decision',
+  'won',
+  'lost',
+  'cancelled',
+] as const
+
+export const dealStatuses = [
+  'draft',
+  'reserved',
+  'confirmed',
+  'cancelled',
+  'completed',
+] as const
+
+export const reviewModerationStatuses = [
+  'pending',
+  'visible',
+  'hidden',
+] as const

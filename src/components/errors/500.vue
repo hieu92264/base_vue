@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { useI18n } from 'vue-i18n'
 
 interface GeneralErrorProps {
   className?: string
@@ -13,6 +14,7 @@ const props = withDefaults(defineProps<GeneralErrorProps>(), {
 })
 
 const router = useRouter()
+const { t } = useI18n()
 
 const goBack = () => {
   router.back()
@@ -35,11 +37,10 @@ const goHome = () => {
         500
       </h1>
 
-      <span class="font-medium"> Oops! Something went wrong :') </span>
+      <span class="font-medium">{{ t('errors.500.title') }}</span>
 
       <p class="text-center text-muted-foreground">
-        We apologize for the inconvenience. <br />
-        Please try again later.
+        {{ t('errors.500.description') }}
       </p>
 
       <div
@@ -50,9 +51,9 @@ const goHome = () => {
           variant="outline"
           @click="goBack"
         >
-          Go Back
+          {{ t('common.back') }}
         </Button>
-        <Button @click="goHome"> Back to Home </Button>
+        <Button @click="goHome">{{ t('common.home') }}</Button>
       </div>
     </div>
   </div>

@@ -11,10 +11,13 @@ import {
 import type { Column, Table } from '@tanstack/vue-table'
 import { Funnel } from 'lucide-vue-next'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   table: Table<any>
 }>()
+
+const { t } = useI18n()
 
 const getLabel = (column: Column<any>) => {
   const header = column.columnDef.header
@@ -36,7 +39,7 @@ const columns = computed(() => {
         variant="outline"
         size="icon"
         class="w-9 h-9"
-        title="Ẩn/Hiện cột"
+        :title="t('table.toggleColumns')"
       >
         <Funnel class="w-4 h-4" />
       </Button>
@@ -46,7 +49,7 @@ const columns = computed(() => {
       align="end"
       class="w-56"
     >
-      <DropdownMenuLabel>Hiển thị cột</DropdownMenuLabel>
+      <DropdownMenuLabel>{{ t('table.visibleColumns') }}</DropdownMenuLabel>
       <DropdownMenuSeparator />
 
       <DropdownMenuCheckboxItem

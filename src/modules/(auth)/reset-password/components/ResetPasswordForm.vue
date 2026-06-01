@@ -11,10 +11,10 @@
     <FieldGroup>
       <div class="flex flex-col items-center gap-1 text-center">
         <h1 class="text-2xl font-bold text-zinc-950 dark:text-zinc-50">
-          Reset password
+          {{ t('auth.resetPassword.title') }}
         </h1>
         <p class="text-muted-foreground text-sm text-balance">
-          Enter your new password below.
+          {{ t('auth.resetPassword.description') }}
         </p>
       </div>
 
@@ -22,15 +22,14 @@
         v-if="!token || !email"
         class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
       >
-        Link không hợp lệ hoặc thiếu thông tin (token/email). Vui lòng kiểm tra
-        lại email reset mật khẩu.
+        {{ t('auth.resetPassword.invalidLink') }}
       </div>
 
       <Field>
         <FieldLabel
           for="email"
           class="dark:text-zinc-300"
-          >Email</FieldLabel
+          >{{ t('auth.register.email') }}</FieldLabel
         >
         <Input
           id="email"
@@ -45,7 +44,7 @@
         <FieldLabel
           for="password"
           class="dark:text-zinc-300"
-          >New password</FieldLabel
+          >{{ t('auth.resetPassword.newPassword') }}</FieldLabel
         >
         <PasswordInput
           id="password"
@@ -61,7 +60,7 @@
           for="password_confirmation"
           class="dark:text-zinc-300"
         >
-          Confirm password
+          {{ t('auth.resetPassword.confirmPassword') }}
         </FieldLabel>
         <PasswordInput
           id="password_confirmation"
@@ -74,7 +73,7 @@
           v-if="passwordMismatch"
           class="text-xs text-red-500 mt-1"
         >
-          Mật khẩu xác nhận không khớp.
+          {{ t('auth.resetPassword.confirmPasswordMismatch') }}
         </p>
       </Field>
 
@@ -88,7 +87,11 @@
           v-if="isPending"
           class="mr-2 h-4 w-4 animate-spin"
         />
-        {{ isPending ? 'Please wait...' : 'Update password' }}
+        {{
+          isPending
+            ? t('auth.resetPassword.pending')
+            : t('auth.resetPassword.submit')
+        }}
       </Button>
 
       <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">
@@ -96,7 +99,7 @@
           to="/login"
           class="font-medium text-emerald-600 hover:underline dark:text-emerald-400"
         >
-          Back to login
+          {{ t('auth.resetPassword.backToLogin') }}
         </RouterLink>
       </div>
     </FieldGroup>
@@ -115,6 +118,7 @@ import PasswordInput from '@/components/ui/password-input.vue'
 import { cn } from '@/lib/utils'
 
 import { useResetPasswordMutation } from '@/modules/(auth)/hooks/use-auth'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
@@ -122,6 +126,7 @@ const props = defineProps<{
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 
 const token = computed(() => String(route.query.token || ''))
 const email = computed(() => String(route.query.email || ''))

@@ -33,7 +33,7 @@ export declare global {
     prevPage: number | null
   }
 
-  type Locale = 'vi' | 'en' | 'cn'
+  type Locale = 'vi' | 'en'
 
   type DeepStringify<T> = {
     [K in keyof T]: T[K] extends object ? DeepStringify<T[K]> : string

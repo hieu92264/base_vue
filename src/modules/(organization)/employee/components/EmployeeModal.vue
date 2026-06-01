@@ -1,17 +1,22 @@
 <script setup lang="ts">
 import { WorkStatus } from '@/common/constants/enums'
 import type { IEmployee } from '@/common/types/entities'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -19,31 +24,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { watch } from 'vue'
-import DatePicker from '@/components/DatePicker.vue'
 import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
+import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
-import { formSchema } from '@/modules/(organization)/employee/-schemas/employee.schema'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from '@/components/ui/form'
-
-export type EmployeeFormValues = Pick<
-  IEmployee,
-  | 'user_id'
-  | 'full_name'
-  | 'status'
-  | 'join_date'
-  | 'email'
-  | 'dob'
-  | 'phone'
-  | 'terminate_date'
-  | 'remark'
->
+  employeeFormSchema,
+  type EmployeeFormValues,
+} from '@/modules/(organization)/employee/-schemas/employee.schema'
 
 const props = defineProps<{
   open: boolean
@@ -53,19 +42,24 @@ const props = defineProps<{
   handleSubmit: (data: EmployeeFormValues) => void
 }>()
 
-watch(
-  () => props.userOptions,
-  (newVal) => {
-    console.log('Dữ liệu userOptions mới nhận được:', newVal)
-  },
-  { immediate: true },
-)
-
 const emit = defineEmits(['update:open', 'submit'])
 
+const { t } = useI18n()
+const userSearch = ref('')
+
+const filteredUserOptions = computed(() => {
+  const q = userSearch.value.trim().toLowerCase()
+  if (!q) return props.userOptions ?? []
+
+  return (props.userOptions ?? []).filter((option) =>
+    option.text.toLowerCase().includes(q),
+  )
+})
+
 const form = useForm({
-  validationSchema: formSchema,
+  validationSchema: toTypedSchema(employeeFormSchema),
   initialValues: {
+    id: undefined,
     user_id: undefined,
     full_name: '',
     status: WorkStatus.OFFICIAL,
@@ -78,15 +72,28 @@ const form = useForm({
   },
 })
 
-const workStatusOptions = Object.entries(WorkStatus).map(([key, value]) => {
-  return {
-    text: key.charAt(0) + key.slice(1).toLowerCase().replace('_', ' '),
-    value: value,
-  }
-})
+const workStatusOptions = computed(() =>
+  Object.values(WorkStatus).map((value) => ({
+    text: t(`status.work.${value}`),
+    value,
+  })),
+)
+
+const toDateInputValue = (value?: string | null) => {
+  if (!value) return ''
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  const yyyy = date.getFullYear()
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
 
 const onSubmit = form.handleSubmit((values) => {
-  console.log('Form submitted with values:', values)
+  props.handleSubmit(values)
 })
 
 watch(
@@ -94,15 +101,15 @@ watch(
   (newData) => {
     if (newData) {
       form.setValues({
+        id: newData.id,
         user_id: newData.user_id ? String(newData.user_id) : undefined,
-
         full_name: newData.full_name ?? '',
         status: newData.status ?? WorkStatus.OFFICIAL,
         email: newData.email ?? '',
-        join_date: newData.join_date ?? '',
-        dob: newData.dob ?? '',
+        join_date: toDateInputValue(newData.join_date) ?? '',
+        dob: toDateInputValue(newData.dob) ?? '',
         phone: newData.phone ?? '',
-        terminate_date: newData.terminate_date ?? '',
+        terminate_date: toDateInputValue(newData.terminate_date) ?? '',
         remark: newData.remark ?? '',
       })
     } else {
@@ -115,64 +122,88 @@ watch(
 
 <template>
   <Dialog
-    :open="false"
+    :open="open"
     @update:open="$emit('update:open', $event)"
   >
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle>
-          {{ initialData ? 'Edit Employee' : 'Add New Employee' }}
+          {{
+            initialData
+              ? t('pages.organizationEmployees.editEmployee')
+              : t('pages.organizationEmployees.createEmployee')
+          }}
         </DialogTitle>
 
         <DialogDescription>
-          Fill in employee information, then click Submit to save.
+          {{ t('pages.organizationEmployees.modalDescription') }}
         </DialogDescription>
       </DialogHeader>
 
       <form
         class="space-y-6"
-        @submit="onSubmit"
+        @submit.prevent="onSubmit"
       >
         <div class="grid gap-4">
           <FormField
             v-slot="{ componentField }"
             name="user_id"
           >
-            <!-- user account -->
             <FormItem>
-              <FormLabel>User Account</FormLabel>
+              <FormLabel>
+                {{ t('pages.organizationEmployees.userAccount') }}
+              </FormLabel>
               <FormControl>
                 <Select v-bind="componentField">
                   <SelectTrigger class="w-full">
-                    <SelectValue placeholder="Select a user" />
+                    <SelectValue
+                      :placeholder="t('pages.organizationEmployees.selectUser')"
+                    />
                   </SelectTrigger>
-                  <SelectContent>
+
+                  <SelectContent class="max-h-60 overflow-y-auto">
+                    <div class="sticky top-0 z-10 bg-background p-2">
+                      <Input
+                        v-model="userSearch"
+                        :placeholder="t('pages.organizationEmployees.searchUser')"
+                        @keydown.stop
+                      />
+                    </div>
+
                     <SelectItem
-                      v-for="option in userOptions"
+                      v-for="option in filteredUserOptions"
                       :key="option.value"
                       :value="option.value.toString()"
                     >
                       {{ option.text }}
                     </SelectItem>
+
+                    <div
+                      v-if="filteredUserOptions.length === 0"
+                      class="px-3 py-2 text-sm text-muted-foreground"
+                    >
+                      {{ t('pages.organizationEmployees.noUserResult') }}
+                    </div>
                   </SelectContent>
                 </Select>
               </FormControl>
             </FormItem>
           </FormField>
 
-          <!-- full name and work status -->
           <div class="grid grid-cols-2 gap-4">
             <FormField
               v-slot="{ componentField }"
               name="full_name"
             >
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>{{ t('pages.organizationEmployees.fullName') }}</FormLabel>
                 <FormControl>
                   <Input
-                    type="text"
                     v-bind="componentField"
-                    placeholder="Enter full name"
+                    type="text"
+                    :placeholder="
+                      t('pages.organizationEmployees.fullNamePlaceholder')
+                    "
                   />
                 </FormControl>
               </FormItem>
@@ -183,11 +214,17 @@ watch(
               name="status"
             >
               <FormItem>
-                <FormLabel>Work Status</FormLabel>
+                <FormLabel>
+                  {{ t('pages.organizationEmployees.workStatus') }}
+                </FormLabel>
                 <FormControl>
                   <Select v-bind="componentField">
                     <SelectTrigger class="w-full">
-                      <SelectValue placeholder="Select a status work" />
+                      <SelectValue
+                        :placeholder="
+                          t('pages.organizationEmployees.selectWorkStatus')
+                        "
+                      />
                     </SelectTrigger>
 
                     <SelectContent>
@@ -205,37 +242,35 @@ watch(
             </FormField>
           </div>
 
-          <!-- email -->
           <div class="grid grid-cols-1 gap-4">
             <FormField
               v-slot="{ componentField }"
               name="email"
             >
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{{ t('pages.organizationEmployees.email') }}</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
                     type="email"
-                    placeholder="Enter email"
+                    :placeholder="t('pages.organizationEmployees.emailPlaceholder')"
                   />
                 </FormControl>
               </FormItem>
             </FormField>
           </div>
 
-          <!-- join_date and dob -->
           <div class="grid grid-cols-2 gap-4">
             <FormField
               v-slot="{ componentField }"
               name="join_date"
             >
               <FormItem>
-                <FormLabel>Join Date</FormLabel>
+                <FormLabel>{{ t('pages.organizationEmployees.joinDate') }}</FormLabel>
                 <FormControl>
-                  <DatePicker
+                  <Input
                     v-bind="componentField"
-                    placeholder="Pick join date"
+                    type="date"
                   />
                 </FormControl>
               </FormItem>
@@ -246,29 +281,28 @@ watch(
               name="dob"
             >
               <FormItem>
-                <FormLabel>Date Of Birth</FormLabel>
+                <FormLabel>{{ t('pages.organizationEmployees.dob') }}</FormLabel>
                 <FormControl>
-                  <DatePicker
+                  <Input
                     v-bind="componentField"
-                    placeholder="Pick date of birth"
+                    type="date"
                   />
                 </FormControl>
               </FormItem>
             </FormField>
           </div>
 
-          <!-- phone and terminate date -->
           <div class="grid grid-cols-2 gap-4">
             <FormField
               v-slot="{ componentField }"
               name="phone"
             >
               <FormItem>
-                <FormLabel>Phone</FormLabel>
+                <FormLabel>{{ t('pages.organizationEmployees.phone') }}</FormLabel>
                 <FormControl>
                   <Input
                     v-bind="componentField"
-                    placeholder="Enter phone number"
+                    :placeholder="t('pages.organizationEmployees.phonePlaceholder')"
                   />
                 </FormControl>
               </FormItem>
@@ -279,11 +313,13 @@ watch(
               name="terminate_date"
             >
               <FormItem>
-                <FormLabel>Terminate Date</FormLabel>
+                <FormLabel>
+                  {{ t('pages.organizationEmployees.terminateDate') }}
+                </FormLabel>
                 <FormControl>
-                  <DatePicker
+                  <Input
                     v-bind="componentField"
-                    placeholder="Pick terminate date"
+                    type="date"
                   />
                 </FormControl>
               </FormItem>
@@ -296,11 +332,11 @@ watch(
               name="remark"
             >
               <FormItem>
-                <FormLabel>Remark</FormLabel>
+                <FormLabel>{{ t('pages.organizationEmployees.remark') }}</FormLabel>
                 <FormControl>
                   <Textarea
                     v-bind="componentField"
-                    placeholder="Enter remark"
+                    :placeholder="t('pages.organizationEmployees.remarkPlaceholder')"
                   />
                 </FormControl>
               </FormItem>
@@ -309,18 +345,18 @@ watch(
         </div>
 
         <DialogFooter class="mt-4!">
-          <DialogClose as-child>
-            <Button
-              type="button"
-              variant="outline"
-              >Cancel</Button
-            >
-          </DialogClose>
+          <Button
+            type="button"
+            variant="outline"
+            @click="$emit('update:open', false)"
+          >
+            {{ t('common.cancel') }}
+          </Button>
           <Button
             type="submit"
             :disabled="isPending"
           >
-            {{ isPending ? 'Saving...' : 'Submit' }}
+            {{ isPending ? t('common.savePending') : t('common.save') }}
           </Button>
         </DialogFooter>
       </form>

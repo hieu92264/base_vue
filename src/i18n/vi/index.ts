@@ -1,5 +1,3 @@
-import common from '@/i18n/vi/common'
+import messages from '@/i18n/vi/common'
 
-export default {
-  common,
-}
+export default messages

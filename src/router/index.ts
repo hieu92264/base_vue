@@ -6,13 +6,12 @@ import { useUserStore } from '@/stores/user.store'
 import { AuthService } from '@/services'
 import BaseLayout from '@/components/layouts/BaseLayout.vue'
 import organizationRoutes from '@/router/organization.routes'
-import Dashboard from '@/views/Dashboard.vue'
 import NProgress from '@/configs/nprogress.config'
+import generalRoutes from '@/router/general.routes'
+import landlordRoutes from './landlord.routes'
+import tenantRoutes from './tenant.route'
 
-// export const layouts = {
-//   blank: () => import('@/components/layouts/BlankLayout.vue'),
-//   base: () => import('@/components/layouts/BaseLayout.vue'),
-// }
+const DashboardLanding = () => import('@/views/DashboardLanding.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,49 +19,86 @@ const router = createRouter({
     {
       path: '/',
       name: 'dashboard',
-      component: Dashboard,
-      meta: { layouts: BaseLayout },
+      component: DashboardLanding,
+      meta: { layouts: BaseLayout, public: true },
     },
     ...authRoutes,
     ...organizationRoutes,
+    ...landlordRoutes,
+    ...tenantRoutes,
+    ...generalRoutes,
     ...errorRoutes,
   ],
 })
 
 router.beforeEach(async (to, from, next) => {
   NProgress.start()
+
   const authStore = useAuthStore()
   const userStore = useUserStore()
+
+  const isGuestOnly = to.matched.some((r) => r.meta.guestOnly === true)
+  const isPublic = to.matched.some((r) => r.meta.public === true)
 
   if (authStore.access_token && !userStore.user) {
     try {
       const res = await AuthService.getCredentials()
       userStore.setProfile(res.data as any)
-      return next()
     } catch (e) {
       authStore.clearSession()
       userStore.clearProfile()
-      return next({ name: 'auth.login' })
+      return next({
+        name: 'auth.login',
+        query: {
+          redirect: to.fullPath,
+        },
+      })
     }
   }
 
-  const isGuestPage = to.meta.guestOnly
-
-  if (!authStore.access_token && !isGuestPage) {
-    return next({ name: 'auth.login' })
+  if (!authStore.access_token && !isGuestOnly && !isPublic) {
+    return next({
+      name: 'auth.login',
+      query: {
+        redirect: to.fullPath,
+      },
+    })
   }
 
-  if (authStore.access_token && isGuestPage) {
-    return next({ name: 'home' })
+  if (authStore.access_token && isGuestOnly) {
+    return next({ name: 'dashboard' })
   }
 
-  const accessDenied = to.matched.some((record) => {
-    const code = record.meta.permissionCodes as string
-    return code && !userStore.can(code)
-  })
+  const requiredCodes = to.matched
+    .map((r) => r.meta.permissionCodes as string | string[] | undefined)
+    .flat()
+    .filter(Boolean) as string[]
 
-  if (accessDenied) {
-    return next({ name: '403' })
+  if (requiredCodes.length > 0) {
+    const denied = requiredCodes.some((code) => !userStore.can(code))
+    if (denied) return next({ name: '403' })
+  }
+
+  const requiredUserTypes = to.matched
+    .map((r) => r.meta.userTypes as string[] | undefined)
+    .flat()
+    .filter(Boolean) as string[]
+
+  if (requiredUserTypes.length > 0) {
+    const actualType = userStore.user?.profile?.user_type
+    if (!actualType || !requiredUserTypes.includes(actualType)) {
+      return next({ name: '403' })
+    }
+  }
+
+  const needsAuth = to.matched.some((r) => r.meta.authOnly === true)
+  if (needsAuth && !authStore.access_token) {
+    return next({
+      name: 'auth.login',
+      query: {
+        redirect: to.fullPath,
+      },
+    })
   }
 
   return next()

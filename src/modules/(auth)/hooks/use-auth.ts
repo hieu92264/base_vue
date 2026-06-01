@@ -1,4 +1,5 @@
 import { Language } from '@/common/constants/enums'
+import i18n from '@/configs/i18n.config'
 import type { ForgotPasswordFormValue } from '@/modules/(auth)/forgot-password/-schemas/forgot-password.schema'
 import type { RegisterFormValue } from '@/modules/(auth)/register/-schemas/register.schema'
 import type { ResetPasswordFormValue } from '@/modules/(auth)/reset-password/-schemas/reset-password.schema'
@@ -6,35 +7,39 @@ import { AuthService } from '@/services'
 import { useAuthStore } from '@/stores/auth.store'
 import { useI18nStore } from '@/stores/i18n.store'
 import { useUserStore } from '@/stores/user.store'
-import { useMutation, useQueryClient } from '@tanstack/vue-query'
+import { useMutation } from '@tanstack/vue-query'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 
 export enum AuthQueryKeys {}
-
-type TQueryKey = readonly [typeof AuthQueryKeys, ...any[]]
 
 export type TLoginData = {
   username: string
   password: string
 }
 
+const translate = (key: string) => (i18n.global as any).t(key) as string
+
 export const useDoRegisterMutation = () => {
   const router = useRouter()
+  const route = useRoute()
 
   return useMutation({
     mutationFn: async (data: RegisterFormValue) => {
-      return AuthService.register(data)
+      return await AuthService.register(data)
     },
-    onSuccess: async (response) => {
-      toast.success(
-        'Register successfully! Please check your email to verify your account.',
-      )
-      router.replace({ name: 'auth.login' })
+    onSuccess: () => {
+      toast.success(translate('auth.messages.registerSuccess'))
+      router.replace({
+        name: 'auth.login',
+        query: route.query.redirect
+          ? { redirect: String(route.query.redirect) }
+          : undefined,
+      })
     },
     onError: (error: any) => {
       console.error('Register error:', error)
-      toast.error(error?.response?.data?.message || 'Register failed')
+      toast.error(error?.message || translate('auth.messages.registerError'))
     },
   })
 }
@@ -69,16 +74,14 @@ export const useDoLoginMutation = () => {
           (profileRes.data.user?.locale || Language.ENGLISH) as Language,
         )
 
-        console.log('locale: ', i18nStore.locale)
-
-        toast.success('Login successfully!')
+        toast.success(translate('auth.messages.loginSuccess'))
 
         const redirectPath = route.query.redirect as string
         router.replace(redirectPath || { name: 'dashboard' })
       } else {
         authStore.clearSession()
         userStore.clearProfile()
-        toast.error('Cannot get user profile')
+        toast.error(translate('auth.messages.profileFetchError'))
       }
     },
 
@@ -86,7 +89,9 @@ export const useDoLoginMutation = () => {
       authStore.clearSession()
       userStore.clearProfile()
       console.error('Login error:', error)
-      toast.error(error?.response?.data?.message || 'Login failed')
+      toast.error(
+        error?.response?.data?.message || translate('auth.messages.loginError'),
+      )
     },
   })
 }
@@ -101,16 +106,18 @@ export const useDoLogoutMutation = () => {
       return AuthService.logout()
     },
 
-    onSuccess: async (response) => {
+    onSuccess: async () => {
       authStore.clearSession()
       userStore.clearProfile()
-      toast.success('Logout successfully!')
+      toast.success(translate('auth.messages.logoutSuccess'))
       router.replace({ name: 'auth.login' })
     },
 
     onError: (error: any) => {
       console.error('Logout error:', error)
-      toast.error(error?.response?.data?.message || 'Logout failed')
+      toast.error(
+        error?.response?.data?.message || translate('auth.messages.logoutError'),
+      )
     },
   })
 }
@@ -120,12 +127,12 @@ export const useForgotPasswordMutation = () => {
     mutationFn: (payload: ForgotPasswordFormValue) =>
       AuthService.forgotPassword(payload.email),
     onSuccess: () => {
-      toast.success(
-        'Nếu email tồn tại, chúng tôi đã gửi liên kết đặt lại mật khẩu.',
-      )
+      toast.success(translate('auth.messages.forgotPasswordSuccess'))
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed')
+      toast.error(
+        error?.response?.data?.message || translate('auth.messages.actionFailed'),
+      )
     },
   })
 }
@@ -139,15 +146,16 @@ export const useResetPasswordMutation = () => {
     },
 
     onSuccess: () => {
-      toast.success(
-        'Reset password successfully! Please login with your new password.',
-      )
+      toast.success(translate('auth.messages.resetPasswordSuccess'))
       router.replace({ name: 'auth.login' })
     },
 
     onError: (error: any) => {
       console.error('Reset password error:', error)
-      toast.error(error?.response?.data?.message || 'Reset password failed')
+      toast.error(
+        error?.response?.data?.message ||
+          translate('auth.messages.resetPasswordError'),
+      )
     },
   })
 }

@@ -11,10 +11,10 @@
     <FieldGroup>
       <div class="flex flex-col items-center gap-1 text-center">
         <h1 class="text-2xl font-bold text-zinc-950 dark:text-zinc-50">
-          Forgot password
+          {{ t('auth.forgotPassword.title') }}
         </h1>
         <p class="text-muted-foreground text-sm text-balance">
-          Enter your email and we’ll send you a reset link.
+          {{ t('auth.forgotPassword.description') }}
         </p>
       </div>
 
@@ -22,7 +22,7 @@
         <FieldLabel
           for="email"
           class="dark:text-zinc-300"
-          >Email</FieldLabel
+          >{{ t('auth.register.email') }}</FieldLabel
         >
         <Input
           id="email"
@@ -45,16 +45,20 @@
           v-if="isPending"
           class="mr-2 h-4 w-4 animate-spin"
         />
-        {{ isPending ? 'Please wait...' : 'Send reset link' }}
+        {{
+          isPending
+            ? t('auth.forgotPassword.pending')
+            : t('auth.forgotPassword.submit')
+        }}
       </Button>
 
       <div class="text-center text-sm text-zinc-600 dark:text-zinc-400">
-        Remembered your password?
+        {{ t('auth.forgotPassword.remembered') }}
         <RouterLink
           to="/login"
           class="font-medium text-emerald-600 hover:underline dark:text-emerald-400"
         >
-          Back to login
+          {{ t('auth.forgotPassword.backToLogin') }}
         </RouterLink>
       </div>
     </FieldGroup>
@@ -70,16 +74,15 @@ import { Button } from '@/components/ui/button'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
-
-// Hook bạn tự tạo theo style useDoRegisterMutation
 import { useForgotPasswordMutation } from '@/modules/(auth)/hooks/use-auth'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
   class?: HTMLAttributes['class']
 }>()
 
+const { t } = useI18n()
 const email = ref('')
-
 const { mutate, isPending } = useForgotPasswordMutation()
 
 const handleSubmit = () => {

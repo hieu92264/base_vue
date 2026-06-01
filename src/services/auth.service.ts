@@ -36,7 +36,7 @@ export class AuthService {
   }
 
   static async register(data: RegisterFormValue): Promise<ResponseBody<any>> {
-    return await axiosInstance.post('/auth/register', data)
+    return await axiosInstance.post('/auth/register-account', data)
   }
 
   static async forgotPassword(email: string) {

@@ -3,6 +3,7 @@ export class FatalError extends Error {}
 export class UnauthorizedError extends Error {
   constructor(message: string) {
     super(message)
-    Object.setPrototypeOf(this)
+    this.name = 'UnauthorizedError'
+    Object.setPrototypeOf(this, UnauthorizedError.prototype)
   }
 }

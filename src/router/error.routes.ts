@@ -17,7 +17,7 @@ const errorRoutes: RouteRecordRaw[] = [
     path: '/404',
     name: '404',
     component: () => import('@/components/errors/404.vue'),
-    meta: { title: 'Page Not Found' },
+    meta: { title: 'Không tìm thấy trang' },
   },
   {
     path: '/500',

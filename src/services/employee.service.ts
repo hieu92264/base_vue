@@ -1,5 +1,6 @@
 import type { IEmployee } from '@/common/types/entities'
 import axiosInstance from '@/configs/axios.config'
+import type { EmployeeFormValues } from '@/modules/(organization)/employee/-schemas/employee.schema'
 
 export class EmployeeService {
   static async getEmployees(): Promise<ResponseBody<IEmployee>> {
@@ -33,5 +34,25 @@ export class EmployeeService {
     )
     console.log('User options response:', response)
     return response.data
+  }
+
+  static async createEmployee(employeeData: EmployeeFormValues): Promise<any> {
+    const response = await axiosInstance.post(
+      `/organizations/employees/create`,
+      employeeData,
+    )
+
+    console.log('Create employee response:', response)
+    return response.data
+  }
+
+  static async updateEmployee(
+    employeeId: number,
+    employeeData: EmployeeFormValues,
+  ): Promise<any> {
+    const response = await axiosInstance.patch(
+      `/organizations/employees/update/${employeeId}`,
+      employeeData,
+    )
   }
 }

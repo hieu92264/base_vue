@@ -15,18 +15,60 @@ import { useDoLogoutMutation } from '@/modules/(auth)/hooks/use-auth'
 import { useUserStore } from '@/stores/user.store'
 import { LogOut, Settings, User } from 'lucide-vue-next'
 import { computed } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
+const route = useRoute()
 const userStore = useUserStore()
 const { mutate, isPending } = useDoLogoutMutation()
+
 const labels = computed(() => ({
+  login: t('common.login'),
+  register: t('common.register'),
   logout: t('common.logout'),
+  profile: t('layout.profile'),
+  settings: t('layout.settings'),
+  unknownUser: t('common.unknownUser'),
+  noEmail: t('common.noEmail'),
+}))
+
+const authLinks = computed(() => ({
+  login: {
+    path: '/login',
+    query: route.path ? { redirect: route.fullPath } : {},
+  },
+  register: {
+    path: '/register',
+    query: route.path ? { redirect: route.fullPath } : {},
+  },
 }))
 </script>
 
 <template>
-  <DropdownMenu :modal="false">
+  <div
+    v-if="!userStore.user"
+    class="flex items-center gap-2"
+  >
+    <Button
+      as-child
+      variant="outline"
+      class="rounded-xl"
+    >
+      <RouterLink :to="authLinks.login">{{ labels.login }}</RouterLink>
+    </Button>
+    <Button
+      as-child
+      class="rounded-xl"
+    >
+      <RouterLink :to="authLinks.register">{{ labels.register }}</RouterLink>
+    </Button>
+  </div>
+
+  <DropdownMenu
+    v-else
+    :modal="false"
+  >
     <DropdownMenuTrigger as-child>
       <Button
         variant="ghost"
@@ -51,10 +93,10 @@ const labels = computed(() => ({
       <DropdownMenuLabel class="font-normal">
         <div class="flex flex-col space-y-1">
           <p class="text-sm font-medium leading-none">
-            {{ userStore.user?.username || 'Username' }}
+            {{ userStore.user?.username || labels.unknownUser }}
           </p>
           <p class="text-xs leading-none text-muted-foreground">
-            {{ userStore.user?.email || 'no email' }}
+            {{ userStore.user?.email || labels.noEmail }}
           </p>
         </div>
       </DropdownMenuLabel>
@@ -64,11 +106,11 @@ const labels = computed(() => ({
       <DropdownMenuGroup>
         <DropdownMenuItem class="cursor-pointer">
           <User class="mr-2 h-4 w-4" />
-          <span>Hồ sơ cá nhân</span>
+          <span>{{ labels.profile }}</span>
         </DropdownMenuItem>
         <DropdownMenuItem class="cursor-pointer">
           <Settings class="mr-2 h-4 w-4" />
-          <span>Cài đặt</span>
+          <span>{{ labels.settings }}</span>
         </DropdownMenuItem>
       </DropdownMenuGroup>
 

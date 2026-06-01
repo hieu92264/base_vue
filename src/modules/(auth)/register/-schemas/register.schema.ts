@@ -9,6 +9,8 @@ export const registerSchema = z
     verify_password: z
       .string()
       .refine((value) => !isEmpty(value), { message: '' }),
+
+    user_type: z.enum(['tenant', 'landlord']).default('tenant'),
   })
   .refine((data) => data.password === data.verify_password, {
     message: '',
